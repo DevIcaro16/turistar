@@ -1,10 +1,12 @@
 import express, { Router } from "express";
-import { driverLogin, driverRegistration } from "../../controllers/driver/auth.controller";
+import { driverRegistration, driverLogin, updateDriver, deleteDriver, getDriverById } from "../../controllers/driver/auth.controller";
 
 const driverRouter: Router = express.Router();
 
-driverRouter.post('/driver-registration', driverRegistration);
-
-driverRouter.post('/login-driver', driverLogin);
+driverRouter.post('/registration', driverRegistration);
+driverRouter.post('/login', driverLogin);
+driverRouter.put('/:driverId', updateDriver);
+driverRouter.delete('/:driverId', deleteDriver);
+driverRouter.get('/:driverId', getDriverById);
 
 export default driverRouter;

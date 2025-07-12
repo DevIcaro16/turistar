@@ -1,10 +1,9 @@
 import express from 'express';
 import cors from 'cors';
-import userRouter from './routes/user/router.js';
-import driverRouter from './routes/driver/router.js';
 import cookieParser from 'cookie-parser';
 import swaggerUi from "swagger-ui-express";
 import { errorMiddleware } from '../../../packages/error-handle/error-middleware.js';
+import allRoutes from './routes/router.js';
 const swaggerDocument = require("./swagger-output.js");
 
 
@@ -33,8 +32,7 @@ app.get("/docs-json", (req, res) => {
     res.json(swaggerDocument);
 });
 
-app.use("/api/", userRouter);
-app.use("/api/", driverRouter);
+app.use("/api/", allRoutes);
 
 app.use(errorMiddleware);
 

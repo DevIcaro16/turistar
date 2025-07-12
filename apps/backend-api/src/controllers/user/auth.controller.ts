@@ -3,16 +3,11 @@ import { ValidationError } from "../../../../../packages/error-handle";
 import { AuthService } from "../../services/user/auth.service";
 
 //Registro de um novo Usuário
-
 export const userRegistration = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { name, email, phone, password } = req.body;
 
-        if (!name || !email || !password) {
-            return next(new ValidationError("Todos os campos devem ser preenchidos!"));
-        }
-
-        await AuthService.register({ name, email, phone, password });
+        await AuthService.registerUser({ name, email, phone, password });
 
         res.status(201).json({
             success: true,
@@ -39,6 +34,85 @@ export const loginUser = async (req: Request, res: Response, next: NextFunction)
             success: true,
             message: 'Login realizado com Sucesso!',
             user: result.user
+        });
+
+    } catch (error) {
+        return next(error);
+    }
+};
+
+//Atualizar dados do usuário
+export const updateUser = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { userId } = req.params;
+        const { name, email, phone, password } = req.body;
+
+        // Validar se pelo menos um campo foi fornecido
+        if (!name && !email && !phone && !password) {
+            return next(new ValidationError("Pelo menos um campo deve ser fornecido para atualização!"));
+        }
+
+        // Validar formato do ID
+        if (typeof userId !== 'string' || userId.length !== 24) {
+            return next(new ValidationError("ID do usuário inválido!"));
+        }
+
+        const updateData: any = {};
+        if (name) updateData.name = name;
+        if (email) updateData.email = email;
+        if (phone) updateData.phone = phone;
+        if (password) updateData.password = password;
+
+        const updatedUser = await AuthService.updateUser(userId, updateData);
+
+        res.status(200).json({
+            success: true,
+            message: 'Usuário atualizado com Sucesso!',
+            user: updatedUser
+        });
+
+    } catch (error) {
+        return next(error);
+    }
+};
+
+//Deletar usuário
+export const deleteUser = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { userId } = req.params;
+
+        // Validar formato do ID
+        if (typeof userId !== 'string' || userId.length !== 24) {
+            return next(new ValidationError("ID do usuário inválido!"));
+        }
+
+        await AuthService.deleteUser(userId);
+
+        res.status(200).json({
+            success: true,
+            message: 'Usuário deletado com Sucesso!'
+        });
+
+    } catch (error) {
+        return next(error);
+    }
+};
+
+//Buscar usuário por ID
+export const getUserById = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { userId } = req.params;
+
+        // Validar formato do ID
+        if (typeof userId !== 'string' || userId.length !== 24) {
+            return next(new ValidationError("ID do usuário inválido!"));
+        }
+
+        const user = await AuthService.getUserById(userId);
+
+        res.status(200).json({
+            success: true,
+            user: user
         });
 
     } catch (error) {

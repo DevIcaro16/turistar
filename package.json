@@ -6,7 +6,7 @@
     "api": "npx nx serve apps/backend-api",
     "mobile": "npx expo start apps/mobile",
     "api-docs": "node apps/backend-api/src/swagger.js",
-    "test": ""
+    "e2e": "npx nx e2e backend-api"
   },
   "private": true,
   "devDependencies": {

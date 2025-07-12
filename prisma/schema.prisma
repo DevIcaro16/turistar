@@ -7,11 +7,12 @@ enum TransportType {
 enum TransactionType {
   DEBIT
   CREDIT
+  REVERSAL
 }
 
 generator client {
-  provider = "prisma-client-js"
-  // output   = "../generated/prisma"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
 datasource db {
@@ -43,11 +44,12 @@ model Driver {
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
   Transactions   Transactions[]
+  touristPoints  TouristPoint[]
 }
 
 model Car {
-  id       String @id @default(auto()) @map("_id") @db.ObjectId
-  type     String
+  id       String        @id @default(auto()) @map("_id") @db.ObjectId
+  type     TransportType
   model    String
   capacity Int
 
@@ -64,19 +66,27 @@ model TouristPoint {
   uf        String
   latitude  String?
   longitude String?
+
+  tourPackages TourPackage[]
+  Driver       Driver        @relation(fields: [driverId], references: [id])
+  driverId     String        @db.ObjectId
 }
 
 model TourPackage {
-  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  id             String    @id @default(auto()) @map("_id") @db.ObjectId
   origin_local   String
-  startDate      DateTime
-  endDate        DateTime
+  destiny_local  String
+  startDate      DateTime?
+  endDate        DateTime?
   price          Float
   seatsAvailable Int
   type           String
 
   carId String @unique @db.ObjectId
   car   Car    @relation(fields: [carId], references: [id])
+
+  touristPointId String       @db.ObjectId
+  touristPoint   TouristPoint @relation(fields: [touristPointId], references: [id])
 }
 
 model Transactions {

@@ -48,3 +48,83 @@ export const driverLogin = async (req: Request, res: Response, next: NextFunctio
         return next(error);
     }
 };
+
+//Atualizar dados do motorista
+export const updateDriver = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { driverId } = req.params;
+        const { name, email, phone, transportType, password } = req.body;
+
+        // Validar se pelo menos um campo foi fornecido
+        if (!name && !email && !phone && !transportType && !password) {
+            return next(new ValidationError("Pelo menos um campo deve ser fornecido para atualização!"));
+        }
+
+        // Validar formato do ID
+        if (typeof driverId !== 'string' || driverId.length !== 24) {
+            return next(new ValidationError("ID do motorista inválido!"));
+        }
+
+        const updateData: any = {};
+        if (name) updateData.name = name;
+        if (email) updateData.email = email;
+        if (phone) updateData.phone = phone;
+        if (transportType) updateData.transportType = transportType;
+        if (password) updateData.password = password;
+
+        const updatedDriver = await AuthService.updateDriver(driverId, updateData);
+
+        res.status(200).json({
+            success: true,
+            message: 'Motorista atualizado com Sucesso!',
+            driver: updatedDriver
+        });
+
+    } catch (error) {
+        return next(error);
+    }
+};
+
+//Deletar motorista
+export const deleteDriver = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { driverId } = req.params;
+
+        // Validar formato do ID
+        if (typeof driverId !== 'string' || driverId.length !== 24) {
+            return next(new ValidationError("ID do motorista inválido!"));
+        }
+
+        await AuthService.deleteDriver(driverId);
+
+        res.status(200).json({
+            success: true,
+            message: 'Motorista deletado com Sucesso!'
+        });
+
+    } catch (error) {
+        return next(error);
+    }
+};
+
+//Buscar motorista por ID
+export const getDriverById = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { driverId } = req.params;
+
+        // Validar formato do ID
+        if (typeof driverId !== 'string' || driverId.length !== 24) {
+            return next(new ValidationError("ID do motorista inválido!"));
+        }
+
+        const driver = await AuthService.getDriverById(driverId);
+
+        res.status(200).json({
+            success: true,
+            driver: driver
+        });
+
+    } catch (error) {
+        return next(error);
+    }
+};

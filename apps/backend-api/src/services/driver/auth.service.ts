@@ -1,4 +1,4 @@
-import { ValidationError, AuthError } from '../../../../../packages/error-handle';
+import { ValidationError, AuthError, NotFoundError } from '../../../../../packages/error-handle';
 import { NextFunction, Request, Response } from 'express';
 import prisma from "../../../../../packages/libs/prisma";
 import { TransportType } from "@prisma/client";
@@ -14,6 +14,14 @@ interface DriverRegistrationProps {
     password: string;
 };
 
+interface DriverUpdateProps {
+    name?: string;
+    email?: string;
+    phone?: string;
+    transportType?: TransportType;
+    password?: string;
+}
+
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export class AuthService {
@@ -22,7 +30,7 @@ export class AuthService {
 
         const { name, email, phone, transportType, password } = data;
 
-        if (!name || !email || !phone || !transportType || !password) {
+        if (!name || !email || !password) {
             throw new ValidationError("Todos os campos devem ser preenchidos!");
         }
 
@@ -30,9 +38,8 @@ export class AuthService {
             throw new ValidationError("Formato inválido de Email!");
         }
 
-        let transportTypeUpper = transportType.toUpperCase() as TransportType;
-
-        if (!Object.values(TransportType).includes(transportTypeUpper)) {
+        // Validando o objid do mongo
+        if (!Object.values(TransportType).includes(transportType as TransportType)) {
             throw new ValidationError("Tipo de transporte inválido!");
         }
 
@@ -45,7 +52,7 @@ export class AuthService {
                 name,
                 email,
                 phone: phone,
-                transport_type: transportTypeUpper,
+                transport_type: transportType.toUpperCase() as TransportType,
                 password: hashedPassword,
                 wallet: 0.0
             }
@@ -55,11 +62,10 @@ export class AuthService {
     }
 
     static async checkEmail(email: string) {
-
         const existing = await prisma.driver.findUnique({ where: { email } });
 
         if (existing) {
-            throw new ValidationError("Motorista já existente!");
+            throw new ValidationError("Usuário já existente!");
         }
 
         return true;
@@ -116,4 +122,104 @@ export class AuthService {
         };
     }
 
+    static async updateDriver(driverId: string, data: DriverUpdateProps) {
+        // Verificar se o motorista existe
+        const existingDriver = await prisma.driver.findUnique({
+            where: { id: driverId }
+        });
+
+        if (!existingDriver) {
+            throw new NotFoundError("Motorista não encontrado!");
+        }
+
+        // Se email está sendo atualizado, verificar se já existe
+        if (data.email && data.email !== existingDriver.email) {
+            const emailExists = await prisma.driver.findUnique({
+                where: { email: data.email }
+            });
+
+            if (emailExists) {
+                throw new ValidationError("Email já está em uso!");
+            }
+
+            if (!emailRegex.test(data.email)) {
+                throw new ValidationError("Formato inválido de Email!");
+            }
+        }
+
+        // Validar tipo de transporte se fornecido
+        if (data.transportType && !Object.values(TransportType).includes(data.transportType)) {
+            throw new ValidationError("Tipo de transporte inválido!");
+        }
+
+        // Preparar dados para atualização
+        const updateData: any = {};
+
+        if (data.name) updateData.name = data.name;
+        if (data.email) updateData.email = data.email;
+        if (data.phone) updateData.phone = data.phone;
+        if (data.transportType) updateData.transport_type = data.transportType.toUpperCase();
+
+        // Se senha está sendo atualizada, fazer hash
+        if (data.password) {
+            updateData.password = await bcrypt.hash(data.password, 10);
+        }
+
+        const updatedDriver = await prisma.driver.update({
+            where: { id: driverId },
+            data: updateData,
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                phone: true,
+                transport_type: true,
+                wallet: true,
+                createdAt: true,
+                updatedAt: true
+            }
+        });
+
+        return updatedDriver;
+    }
+
+    static async deleteDriver(driverId: string) {
+        // Verificar se o motorista existe
+        const existingDriver = await prisma.driver.findUnique({
+            where: { id: driverId }
+        });
+
+        if (!existingDriver) {
+            throw new NotFoundError("Motorista não encontrado!");
+        }
+
+        // Deletar o motorista
+        await prisma.driver.delete({
+            where: { id: driverId }
+        });
+
+        return { message: "Motorista deletado com sucesso!" };
+    }
+
+    static async getDriverById(driverId: string) {
+        const driver = await prisma.driver.findUnique({
+            where: { id: driverId },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                phone: true,
+                transport_type: true,
+                wallet: true,
+                createdAt: true,
+                updatedAt: true
+            }
+        });
+
+        if (!driver) {
+            throw new NotFoundError("Motorista não encontrado!");
+        }
+
+        return driver;
+    }
 }

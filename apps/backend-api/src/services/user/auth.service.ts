@@ -1,4 +1,4 @@
-import { ValidationError, AuthError } from '../../../../../packages/error-handle';
+import { ValidationError, AuthError, NotFoundError } from '../../../../../packages/error-handle';
 import { NextFunction, Request, Response } from 'express';
 import prisma from "../../../../../packages/libs/prisma";
 import bcrypt from "bcryptjs";
@@ -12,12 +12,17 @@ interface UserRegistrationProps {
     password: string;
 };
 
+interface UserUpdateProps {
+    name?: string;
+    email?: string;
+    phone?: string;
+    password?: string;
+}
+
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export class AuthService {
-
-    static async register(data: UserRegistrationProps) {
-
+    static async registerUser(data: UserRegistrationProps) {
         const { name, email, phone, password } = data;
 
         if (!name || !email || !password) {
@@ -105,4 +110,137 @@ export class AuthService {
         };
     }
 
+    static async updateUser(userId: string, data: UserUpdateProps) {
+        // Verificar se o usuário existe
+        const existingUser = await prisma.user.findUnique({
+            where: { id: userId }
+        });
+
+        if (!existingUser) {
+            throw new NotFoundError("Usuário não encontrado!");
+        }
+
+        // Se email está sendo atualizado, verificar se já existe
+        if (data.email && data.email !== existingUser.email) {
+            const emailExists = await prisma.user.findUnique({
+                where: { email: data.email }
+            });
+
+            if (emailExists) {
+                throw new ValidationError("Email já está em uso!");
+            }
+
+            if (!emailRegex.test(data.email)) {
+                throw new ValidationError("Formato inválido de Email!");
+            }
+        }
+
+        // Preparar dados para atualização
+        const updateData: any = {};
+
+        if (data.name) updateData.name = data.name;
+        if (data.email) updateData.email = data.email;
+        if (data.phone) updateData.phone = data.phone;
+
+        // Se senha está sendo atualizada, fazer hash
+        if (data.password) {
+            updateData.password = await bcrypt.hash(data.password, 10);
+        }
+
+        const updatedUser = await prisma.user.update({
+            where: { id: userId },
+            data: updateData,
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                phone: true,
+                wallet: true,
+                createdAt: true,
+                updatedAt: true
+            }
+        });
+
+        return updatedUser;
+    }
+
+    static async deleteUser(userId: string) {
+        // Verificar se o usuário existe
+        const existingUser = await prisma.user.findUnique({
+            where: { id: userId }
+        });
+
+        if (!existingUser) {
+            throw new NotFoundError("Usuário não encontrado!");
+        }
+
+        // Deletar o usuário
+        await prisma.user.delete({
+            where: { id: userId }
+        });
+
+        return { message: "Usuário deletado com sucesso!" };
+    }
+
+    static async getUserById(userId: string) {
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                phone: true,
+                wallet: true,
+                createdAt: true,
+                updatedAt: true
+            }
+        });
+
+        if (!user) {
+            throw new NotFoundError("Usuário não encontrado!");
+        }
+
+        return user;
+    }
+
+    static async resetPassword(email: string, newPassword: string) {
+        const user = await prisma.user.findUnique({ where: { email } });
+
+        if (!user) {
+            throw new AuthError("Usuário não existente!");
+        }
+
+        //Verificando se a nova senha não é igual a antiga
+        const isSamePassword = await bcrypt.compare(newPassword, user.password!);
+
+        if (isSamePassword) {
+            throw new AuthError("Nova senha não pode ser igual a antiga!");
+        }
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+        await prisma.user.update({
+            where: {
+                email: email
+            },
+            data: {
+                password: hashedPassword
+            }
+        });
+
+        return true;
+    }
+
+    static async forgotPassword(email: string) {
+        const user = await prisma.user.findUnique({ where: { email } });
+
+        if (!user) {
+            throw new ValidationError("Usuário não encontrado!");
+        }
+
+        // Aqui você implementaria a lógica de envio de email
+        // Por exemplo: await EmailService.sendPasswordResetEmail(email);
+
+        return true;
+    }
 }
