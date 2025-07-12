@@ -1,0 +1,94 @@
+enum TransportType {
+  BUGGY
+  LANCHA
+  FOUR_BY_FOUR
+}
+
+enum TransactionType {
+  DEBIT
+  CREDIT
+}
+
+generator client {
+  provider = "prisma-client-js"
+  // output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String         @id @default(auto()) @map("_id") @db.ObjectId
+  name         String
+  email        String         @unique
+  phone        String
+  password     String
+  wallet       Float
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  Transactions Transactions[]
+}
+
+model Driver {
+  id             String         @id @default(auto()) @map("_id") @db.ObjectId
+  name           String
+  email          String         @unique
+  phone          String
+  cars           Car[]
+  transport_type TransportType
+  password       String
+  wallet         Float
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  Transactions   Transactions[]
+}
+
+model Car {
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  type     String
+  model    String
+  capacity Int
+
+  driverId String @db.ObjectId
+  driver   Driver @relation(fields: [driverId], references: [id])
+
+  TourPackage TourPackage?
+}
+
+model TouristPoint {
+  id        String  @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  city      String
+  uf        String
+  latitude  String?
+  longitude String?
+}
+
+model TourPackage {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  origin_local   String
+  startDate      DateTime
+  endDate        DateTime
+  price          Float
+  seatsAvailable Int
+  type           String
+
+  carId String @unique @db.ObjectId
+  car   Car    @relation(fields: [carId], references: [id])
+}
+
+model Transactions {
+  id          String          @id @default(auto()) @map("_id") @db.ObjectId
+  amount      Float
+  type        TransactionType
+  description String?
+  createdAt   DateTime        @default(now())
+
+  userId String? @db.ObjectId
+  user   User?   @relation(fields: [userId], references: [id])
+
+  driverId String? @db.ObjectId
+  driver   Driver? @relation(fields: [driverId], references: [id])
+}
