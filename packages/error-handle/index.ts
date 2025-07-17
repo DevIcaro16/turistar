@@ -55,10 +55,3 @@ export class DatabaseError extends AppError {
     }
 };
 
-//RateLimit Error
-export class RateLimitErrorError extends AppError {
-    constructor(message = "Muitas requisições foram realizadas, por favor aguarde!", details?: any) {
-        super(message, 429);
-    }
-};
-

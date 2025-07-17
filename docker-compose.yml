@@ -16,6 +16,18 @@ services:
       - .env
     networks:
       - app-network
+  frontend:
+    build:
+      context: ./apps/frontend
+      dockerfile: Dockerfile
+    container_name: frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+    networks:
+      - app-network
 
 networks:
   app-network:

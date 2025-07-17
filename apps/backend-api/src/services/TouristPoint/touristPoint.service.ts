@@ -8,6 +8,7 @@ interface TouristPointServiceProps {
     driverId: string;
     latitude?: string;
     longitude?: string;
+    image?: string;
 };
 
 interface TouristPointUpdateProps {
@@ -16,13 +17,14 @@ interface TouristPointUpdateProps {
     uf?: string;
     latitude?: string;
     longitude?: string;
+    image?: string;
 }
 
 export class TouristPointService {
 
     static async register(data: TouristPointServiceProps) {
 
-        const { name, city, uf, driverId, latitude, longitude } = data;
+        const { name, city, uf, driverId, latitude, longitude, image } = data;
 
         if (!name || !city || !uf || !driverId) {
             throw new ValidationError("Todos os campos devem ser preenchidos!");
@@ -47,15 +49,18 @@ export class TouristPointService {
             }
         }
 
+        const createData: any = {
+            name,
+            city,
+            uf,
+            latitude,
+            longitude,
+            driverId
+        };
+        if (image) createData.image = image;
+
         const touristPoint = await prisma.touristPoint.create({
-            data: {
-                name,
-                city,
-                uf,
-                latitude,
-                longitude,
-                driverId
-            }
+            data: createData
         });
 
         return touristPoint;
@@ -98,6 +103,11 @@ export class TouristPointService {
                 throw new ValidationError("Longitude inválida. Deve estar entre -180 e 180.");
             }
             updateData.longitude = data.longitude;
+        }
+
+        // Adicionar imagem se fornecida
+        if (data.image) {
+            updateData.image = data.image;
         }
 
         const updatedTouristPoint = await prisma.touristPoint.update({

@@ -61,3 +61,7 @@ npm-debug.*
 web-build/
 cache/
 /generated/prisma
+
+# Next.js
+.next
+out

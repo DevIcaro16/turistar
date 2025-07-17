@@ -11,6 +11,12 @@
     },
     {
       "path": "./apps/mobile"
+    },
+    {
+      "path": "./apps/frontend-e2e"
+    },
+    {
+      "path": "./apps/frontend"
     }
   ]
 }

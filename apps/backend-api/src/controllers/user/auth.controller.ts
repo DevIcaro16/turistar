@@ -33,7 +33,9 @@ export const loginUser = async (req: Request, res: Response, next: NextFunction)
         res.status(200).json({
             success: true,
             message: 'Login realizado com Sucesso!',
-            user: result.user
+            user: result.user,
+            access_token: result.access_token,
+            refresh_token: result.refresh_token
         });
 
     } catch (error) {
@@ -161,3 +163,17 @@ export const getUserById = async (req: Request, res: Response, next: NextFunctio
 //         return next(error);
 //     }
 // };
+
+// Retorna dados do usuário autenticado
+export const meUser = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const userId = req.user?.id;
+        if (!userId) {
+            return res.status(401).json({ message: 'Não autenticado!' });
+        }
+        const user = await AuthService.getUserById(userId);
+        res.status(200).json({ success: true, user });
+    } catch (error) {
+        return next(error);
+    }
+};

@@ -5,9 +5,11 @@ import {
     deleteCar,
     getCarById,
     getCarsByDriver,
+    getCarsByAuthenticatedDriver,
     getAllCars
 } from "../../controllers/car/car.controller";
 import { authenticateDriver } from "../../utils/auth/auth.middleware";
+import { UploadedFile, FileArray } from 'express-fileupload';
 
 const carRouter: Router = express.Router();
 
@@ -15,6 +17,7 @@ const carRouter: Router = express.Router();
 carRouter.post('/registration', authenticateDriver, CarRegistration);
 carRouter.put('/:carId', authenticateDriver, updateCar);
 carRouter.delete('/:carId', authenticateDriver, deleteCar);
+carRouter.get('/driver', authenticateDriver, getCarsByAuthenticatedDriver);
 
 // Rotas públicas (apenas para visualização)
 carRouter.get('/:carId', getCarById);

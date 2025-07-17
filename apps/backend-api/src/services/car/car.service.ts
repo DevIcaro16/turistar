@@ -3,13 +3,15 @@ import { NotFoundError, ValidationError } from '../../../../../packages/error-ha
 import prisma from "../../../../../packages/libs/prisma";
 
 interface CarRegistrationProps {
+    image?: any;
     type: string;
     model: string;
-    capacity: number;
+    capacity: string;
     driverId: string;
 };
 
 interface CarUpdateProps {
+    image?: string;
     type?: string;
     model?: string;
     capacity?: number;
@@ -19,13 +21,15 @@ export class CarService {
 
     static async register(data: CarRegistrationProps) {
 
-        const { type, model, capacity, driverId } = data;
+        const { image, type, model, capacity, driverId } = data;
 
         if (!type || !model || !capacity || !driverId) {
             throw new ValidationError("Todos os campos devem ser preenchidos!");
         }
 
-        let typeUpper = type.toUpperCase() as TransportType;
+        let capacityInt = parseInt(capacity);
+
+        const typeUpper = type.toUpperCase() as TransportType;
 
         if (!Object.values(TransportType).includes(typeUpper)) {
             throw new ValidationError("Tipo de transporte inválido!");
@@ -41,13 +45,19 @@ export class CarService {
             throw new NotFoundError("Motorista não consta na base de dados!");
         }
 
+        const dataCreateCar: any = {
+            type: typeUpper,
+            model,
+            capacity: capacityInt,
+            driverId
+        };
+
+        if (image !== null) {
+            dataCreateCar.image = image;
+        }
+
         const car = await prisma.car.create({
-            data: {
-                type: typeUpper,
-                model,
-                capacity,
-                driverId
-            }
+            data: dataCreateCar
         });
 
         return car;
@@ -71,7 +81,7 @@ export class CarService {
 
         // Validar e converter tipo de transporte se fornecido
         if (data.type) {
-            let typeUpper = data.type.toUpperCase() as TransportType;
+            const typeUpper = data.type.toUpperCase() as TransportType;
             if (!Object.values(TransportType).includes(typeUpper)) {
                 throw new ValidationError("Tipo de transporte inválido!");
             }

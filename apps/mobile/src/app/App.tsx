@@ -1,48 +1,19 @@
-/* eslint-disable jsx-a11y/accessible-emoji */
-import React, { useRef, useState } from 'react';
-import {
-  SafeAreaView,
-  StyleSheet,
-  ScrollView,
-  View,
-  Text,
-  StatusBar,
-  TouchableOpacity,
-  Linking,
-} from 'react-native';
+import 'react-native-gesture-handler';
+import 'react-native-reanimated';
 
+import { NavigationContainer } from '@react-navigation/native';
+import React from 'react';
+import { View, StyleSheet, Text, StatusBar } from 'react-native';
+import Routes from '../routes/router';
+import AuthProvider from '../contexts/auth';
 
-export const App = () => {
-
+export default function App() {
   return (
-    <>
-      <StatusBar barStyle="dark-content" />
-      <SafeAreaView
-        style={{
-          flex: 1,
-        }}
-      >
-        <Text>OLÁ, MUNDO!</Text>
-      </SafeAreaView>
-    </>
+    <NavigationContainer>
+      <AuthProvider>
+        <StatusBar backgroundColor="#F0F4FF" barStyle="dark-content" />
+        <Routes />
+      </AuthProvider>
+    </NavigationContainer>
   );
-};
-const styles = StyleSheet.create({
-  scrollView: {
-    backgroundColor: '#ffffff',
-  },
-  codeBlock: {
-    backgroundColor: 'rgba(55, 65, 81, 1)',
-    marginVertical: 12,
-    padding: 12,
-    borderRadius: 4,
-  },
-  monospace: {
-    color: '#ffffff',
-    fontFamily: 'Courier New',
-    marginVertical: 4,
-  },
-
-});
-
-export default App;
+}

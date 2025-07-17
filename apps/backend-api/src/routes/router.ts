@@ -4,6 +4,7 @@ import driverRouter from "./driver/router";
 import carRouter from "./car/router";
 import TourPackageRouter from "./TourPackage/router";
 import TouristPointRouter from "./TouristPoint/router";
+import transactionRouter from "./Transaction/router";
 
 const allRoutes: Router = express.Router();
 
@@ -12,5 +13,6 @@ allRoutes.use("/driver", driverRouter);
 allRoutes.use("/car", carRouter);
 allRoutes.use("/TourPackage", TourPackageRouter);
 allRoutes.use("/TouristPoint", TouristPointRouter);
+allRoutes.use("/transaction", transactionRouter);
 
 export default allRoutes;

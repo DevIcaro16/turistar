@@ -100,14 +100,21 @@ export const authenticateToken = async (req: Request, res: Response, next: NextF
 // Middleware específico para motoristas
 export const authenticateDriver = async (req: Request, res: Response, next: NextFunction) => {
     try {
+        console.log('🔍 authenticateDriver - Iniciando validação');
+
         // Primeiro autenticar o token
         const authHeader = req.headers.authorization;
         const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+
+        console.log('🔍 Token do header:', token ? 'Presente' : 'Ausente');
 
         if (!token) {
             // Se não há token no header, verificar nos cookies
             const accessToken = req.cookies?.access_token;
             const refreshToken = req.cookies?.refresh_token;
+
+            console.log('🔍 Access token cookie:', accessToken ? 'Presente' : 'Ausente');
+            console.log('🔍 Refresh token cookie:', refreshToken ? 'Presente' : 'Ausente');
 
             if (!accessToken && !refreshToken) {
                 throw new AuthError('Token de acesso não fornecido!');
@@ -117,9 +124,11 @@ export const authenticateDriver = async (req: Request, res: Response, next: Next
             if (!accessToken && refreshToken) {
                 try {
                     const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET as string) as any;
+                    console.log('🔍 Decoded refresh token role:', decoded.role);
 
                     // Verificar se é um motorista
                     if (decoded.role !== 'driver') {
+                        console.log('❌ Acesso negado - Role não é driver:', decoded.role);
                         throw new AuthError('Acesso negado! Apenas motoristas podem acessar este recurso.');
                     }
 
@@ -148,6 +157,7 @@ export const authenticateDriver = async (req: Request, res: Response, next: Next
                         role: decoded.role
                     };
 
+                    console.log('✅ authenticateDriver - Acesso permitido para motorista');
                     return next();
                 } catch (error) {
                     throw new AuthError('Token de refresh inválido!');
@@ -157,10 +167,13 @@ export const authenticateDriver = async (req: Request, res: Response, next: Next
             // Se há access token nos cookies, verificar
             if (accessToken) {
                 try {
+                    console.log('🔍 Tentando verificar access token...');
                     const decoded = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET as string) as any;
+                    console.log('🔍 Decoded access token role:', decoded.role);
 
                     // Verificar se é um motorista
                     if (decoded.role !== 'driver') {
+                        console.log('❌ Acesso negado - Role não é driver:', decoded.role);
                         throw new AuthError('Acesso negado! Apenas motoristas podem acessar este recurso.');
                     }
 
@@ -169,18 +182,22 @@ export const authenticateDriver = async (req: Request, res: Response, next: Next
                         role: decoded.role
                     };
 
+                    console.log('✅ authenticateDriver - Acesso permitido para motorista');
                     return next();
                 } catch (error) {
-                    throw new AuthError('Token de acesso inválido!');
+                    // throw new AuthError('Token de acesso inválido!');
+                    return next(error);
                 }
             }
         } else {
             // Verificar token do header Authorization
             try {
                 const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET as string) as any;
+                console.log('🔍 Decoded header token role:', decoded.role);
 
                 // Verificar se é um motorista
                 if (decoded.role !== 'driver') {
+                    console.log('❌ Acesso negado - Role não é driver:', decoded.role);
                     throw new AuthError('Acesso negado! Apenas motoristas podem acessar este recurso.');
                 }
 
@@ -188,12 +205,14 @@ export const authenticateDriver = async (req: Request, res: Response, next: Next
                     id: decoded.id,
                     role: decoded.role
                 };
+                console.log('✅ authenticateDriver - Acesso permitido para motorista');
                 return next();
             } catch (error) {
                 throw new AuthError('Token de acesso inválido!');
             }
         }
     } catch (error) {
+        // console.log('❌ authenticateDriver - Erro:', (error as Error).message);
         return next(error);
     }
 };

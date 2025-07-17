@@ -8,6 +8,7 @@ enum TransactionType {
   DEBIT
   CREDIT
   REVERSAL
+  PENDANT
 }
 
 generator client {
@@ -20,22 +21,36 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Admin {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  email     String   @unique
+  image     String?
+  phone     String
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model User {
   id           String         @id @default(auto()) @map("_id") @db.ObjectId
   name         String
   email        String         @unique
+  image        String?
   phone        String
   password     String
   wallet       Float
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
   Transactions Transactions[]
+  Reservations Reservations[]
 }
 
 model Driver {
   id             String         @id @default(auto()) @map("_id") @db.ObjectId
   name           String
   email          String         @unique
+  image          String?
   phone          String
   cars           Car[]
   transport_type TransportType
@@ -45,12 +60,14 @@ model Driver {
   updatedAt      DateTime       @updatedAt
   Transactions   Transactions[]
   touristPoints  TouristPoint[]
+  TourPackage    TourPackage?
 }
 
 model Car {
   id       String        @id @default(auto()) @map("_id") @db.ObjectId
   type     TransportType
   model    String
+  image    String?
   capacity Int
 
   driverId String @db.ObjectId
@@ -64,6 +81,7 @@ model TouristPoint {
   name      String
   city      String
   uf        String
+  image     String?
   latitude  String?
   longitude String?
 
@@ -74,19 +92,46 @@ model TouristPoint {
 
 model TourPackage {
   id             String    @id @default(auto()) @map("_id") @db.ObjectId
+  title          String?
+  image          String?
   origin_local   String
   destiny_local  String
+  date_tour      DateTime
   startDate      DateTime?
   endDate        DateTime?
+  isRunning      Boolean   @default(false)
+  isFinalised    Boolean   @default(false)
   price          Float
   seatsAvailable Int
+  vacancies      Int
   type           String
 
   carId String @unique @db.ObjectId
   car   Car    @relation(fields: [carId], references: [id])
 
+  driverId String @unique @db.ObjectId
+  driver   Driver @relation(fields: [driverId], references: [id])
+
   touristPointId String       @db.ObjectId
   touristPoint   TouristPoint @relation(fields: [touristPointId], references: [id])
+
+  Reservations Reservations[]
+}
+
+model Reservations {
+  id                 String   @id @default(auto()) @map("_id") @db.ObjectId
+  amount             Float
+  vacancies_reserved Int
+  confirmed          Boolean  @default(false)
+  canceled           Boolean  @default(false)
+  createdAt          DateTime @default(now())
+
+  userId String @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id])
+
+  tourPackageId String         @db.ObjectId
+  tourPackage   TourPackage    @relation(fields: [tourPackageId], references: [id])
+  Transactions  Transactions[]
 }
 
 model Transactions {
@@ -101,4 +146,7 @@ model Transactions {
 
   driverId String? @db.ObjectId
   driver   Driver? @relation(fields: [driverId], references: [id])
+
+  ReservationId String       @db.ObjectId
+  Reservation   Reservations @relation(fields: [ReservationId], references: [id])
 }

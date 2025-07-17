@@ -67,5 +67,11 @@
         }
       }
     }
+  },
+  "dependencies": {
+    "express-fileupload": "^1.5.2"
+  },
+  "devDependencies": {
+    "@types/express-fileupload": "^1.5.1"
   }
 }

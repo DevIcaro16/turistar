@@ -12,6 +12,7 @@ interface DriverRegistrationProps {
     phone: string;
     transportType: TransportType;
     password: string;
+    image?: string;
 };
 
 interface DriverUpdateProps {
@@ -20,6 +21,7 @@ interface DriverUpdateProps {
     phone?: string;
     transportType?: TransportType;
     password?: string;
+    image?: string;
 }
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -28,7 +30,7 @@ export class AuthService {
 
     static async register(data: DriverRegistrationProps) {
 
-        const { name, email, phone, transportType, password } = data;
+        const { name, email, phone, transportType, password, image } = data;
 
         if (!name || !email || !password) {
             throw new ValidationError("Todos os campos devem ser preenchidos!");
@@ -54,7 +56,8 @@ export class AuthService {
                 phone: phone,
                 transport_type: transportType.toUpperCase() as TransportType,
                 password: hashedPassword,
-                wallet: 0.0
+                wallet: 0.0,
+                ...(image && { image })
             }
         });
 
@@ -116,9 +119,14 @@ export class AuthService {
         return {
             driver: {
                 id: driver.id,
-                email: driver.email,
                 name: driver.name,
-            }
+                email: driver.email,
+                phone: driver.phone,
+                transport_type: driver.transport_type,
+                role: 'driver'
+            },
+            access_token: accessToken,
+            refresh_token: refreshToken
         };
     }
 
@@ -159,6 +167,7 @@ export class AuthService {
         if (data.email) updateData.email = data.email;
         if (data.phone) updateData.phone = data.phone;
         if (data.transportType) updateData.transport_type = data.transportType.toUpperCase();
+        if (data.image) updateData.image = data.image;
 
         // Se senha está sendo atualizada, fazer hash
         if (data.password) {
@@ -208,6 +217,7 @@ export class AuthService {
                 id: true,
                 name: true,
                 email: true,
+                image: true,
                 phone: true,
                 transport_type: true,
                 wallet: true,

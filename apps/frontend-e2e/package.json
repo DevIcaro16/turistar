@@ -1,0 +1,10 @@
+{
+  "name": "@app-passeios-turisticos/frontend-e2e",
+  "version": "0.0.1",
+  "private": true,
+  "nx": {
+    "implicitDependencies": [
+      "@app-passeios-turisticos/frontend"
+    ]
+  }
+}

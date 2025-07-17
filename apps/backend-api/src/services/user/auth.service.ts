@@ -1,6 +1,6 @@
 import { ValidationError, AuthError, NotFoundError } from '../../../../../packages/error-handle';
-import { NextFunction, Request, Response } from 'express';
 import prisma from "../../../../../packages/libs/prisma";
+import { NextFunction, Request, Response } from 'express';
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { setCookie } from "../../utils/cookies/setCookie";
@@ -106,7 +106,10 @@ export class AuthService {
                 id: user.id,
                 email: user.email,
                 name: user.name,
-            }
+                role: 'user'
+            },
+            access_token: accessToken,
+            refresh_token: refreshToken
         };
     }
 
