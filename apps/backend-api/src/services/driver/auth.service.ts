@@ -97,7 +97,7 @@ export class AuthService {
             },
             process.env.ACCESS_TOKEN_SECRET as string,
             {
-                expiresIn: "15m",
+                expiresIn: "30m",
             }
         );
 
@@ -121,6 +121,7 @@ export class AuthService {
                 id: driver.id,
                 name: driver.name,
                 email: driver.email,
+                image: driver.image,
                 phone: driver.phone,
                 transport_type: driver.transport_type,
                 role: 'driver'
@@ -231,5 +232,30 @@ export class AuthService {
         }
 
         return driver;
+    }
+
+    static async refreshToken(refreshToken: string) {
+        try {
+            const payload = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET as string) as any;
+            if (payload.role !== 'driver') throw new AuthError("Token inválido!");
+
+            // Gere um novo access token
+            const accessToken = jwt.sign(
+                { id: payload.id, role: 'driver' },
+                process.env.ACCESS_TOKEN_SECRET as string,
+                { expiresIn: "30m" }
+            );
+
+            // Gere um novo refresh token (opcional, mas recomendado)
+            const newRefreshToken = jwt.sign(
+                { id: payload.id, role: 'driver' },
+                process.env.REFRESH_TOKEN_SECRET as string,
+                { expiresIn: "7d" }
+            );
+
+            return { access_token: accessToken, refresh_token: newRefreshToken };
+        } catch (err) {
+            throw new AuthError("Refresh token inválido ou expirado!");
+        }
     }
 }

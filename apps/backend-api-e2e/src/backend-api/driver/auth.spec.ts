@@ -3,6 +3,7 @@ import axios from 'axios';
 const BASE_URL = 'http://localhost:8000';
 
 describe('Driver Authentication E2E Tests', () => {
+
     const testDriver = {
         name: 'João Motorista',
         email: 'joao@motorista.com',

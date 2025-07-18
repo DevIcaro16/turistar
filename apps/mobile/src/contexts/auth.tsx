@@ -4,6 +4,7 @@ import { Alert } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import api from "../util/api/api";
 import AlertComponent from "../components/AlertComponent";
+import { AxiosInstance } from "axios";
 
 interface User {
     id: string;
@@ -25,6 +26,7 @@ interface AuthContextData {
     signIn: (email: string, password: string, role: TypeUser) => Promise<void>;
     signOut: () => Promise<void>;
     loadingAuth: boolean;
+    refreshAccessToken: () => Promise<AxiosInstance>
     loading: boolean;
 }
 
@@ -78,7 +80,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
                     }
 
                     if (storedRole === 'driver') {
-                        // console.log(response.data.driver);
+                        console.log(response.data.driver);
                         userData = response.data.driver;
                     }
 
@@ -206,8 +208,28 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
         }
     }
 
+    async function refreshAccessToken() {
+        const refreshToken = await AsyncStorage.getItem('@refreshToken');
+        if (!refreshToken) return null;
+
+        try {
+            const response = await api.post('/auth/refresh', { refresh_token: refreshToken });
+            const { access_token, refresh_token: newRefreshToken } = response.data;
+
+            await AsyncStorage.setItem('@accessToken', access_token);
+            await AsyncStorage.setItem('@refreshToken', newRefreshToken);
+
+            api.defaults.headers['Authorization'] = `Bearer ${access_token}`;
+            return access_token;
+        } catch (error) {
+            // Se falhar, deslogar
+            await signOut();
+            return null;
+        }
+    }
+
     return (
-        <AuthContext.Provider value={{ signed: !!user, user, userRole, signUp, signIn, signOut, loadingAuth, loading }}>
+        <AuthContext.Provider value={{ signed: !!user, user, userRole, signUp, signIn, signOut, refreshAccessToken, loadingAuth, loading }}>
             {children}
 
             {/* AlertComponent personalizado */}

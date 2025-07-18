@@ -98,6 +98,35 @@ export const getDriverTransactions = async (req: Request, res: Response, next: N
     }
 };
 
+// Buscar transações do motorista autenticado
+export const getDriverAllTransactions = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const driverId = req.user?.id;
+        if (req.user?.role !== 'driver') {
+            throw new AuthError("Acesso negado! Apenas motoristas podem acessar este recurso.");
+        }
+
+        if (!driverId) {
+            throw new ValidationError("Motorista não autenticado!");
+        }
+
+        const transactions = await TransactionService.getAllByDriver({
+            driverId
+        });
+
+        const totals = await TransactionService.getTotals({ driverId });
+
+        res.status(200).json({
+            success: true,
+            transactions: transactions,
+            totals: totals
+        });
+
+    } catch (error) {
+        return next(error);
+    }
+};
+
 // Buscar totalizadores do usuário autenticado
 export const getUserTransactionTotals = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -132,7 +161,7 @@ export const getDriverTransactionTotals = async (req: Request, res: Response, ne
 
         res.status(200).json({
             success: true,
-            data: totals
+            totals: totals
         });
 
     } catch (error) {

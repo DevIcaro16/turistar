@@ -1,5 +1,5 @@
 import express, { Router } from "express";
-import { loginUser, userRegistration, updateUser, deleteUser, getUserById, meUser } from "../../controllers/user/auth.controller";
+import { loginUser, userRegistration, updateUser, deleteUser, getUserById, meUser, refreshUserToken } from "../../controllers/user/auth.controller";
 import { authenticateUser } from "../../utils/auth/auth.middleware";
 import { ReserveCancellation, ReserveConfirmation, ReserveRegistration } from "../../controllers/user/reserve.controller";
 
@@ -7,6 +7,7 @@ const userRouter: Router = express.Router();
 
 userRouter.post('/registration', userRegistration);
 userRouter.post('/login', loginUser);
+userRouter.post('/refresh', refreshUserToken);
 userRouter.put('/:userId', authenticateUser, updateUser);
 userRouter.delete('/:userId', authenticateUser, deleteUser);
 userRouter.get('/:userId', authenticateUser, getUserById);

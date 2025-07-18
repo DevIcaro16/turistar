@@ -246,4 +246,30 @@ export class AuthService {
 
         return true;
     }
+
+
+    static async refreshToken(refreshToken: string) {
+        try {
+            const payload = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET as string) as any;
+            if (payload.role !== 'user') throw new AuthError("Token inválido!");
+
+            // Gere um novo access token
+            const accessToken = jwt.sign(
+                { id: payload.id, role: 'user' },
+                process.env.ACCESS_TOKEN_SECRET as string,
+                { expiresIn: "15m" }
+            );
+
+            // Gere um novo refresh token (opcional, mas recomendado)
+            const newRefreshToken = jwt.sign(
+                { id: payload.id, role: 'user' },
+                process.env.REFRESH_TOKEN_SECRET as string,
+                { expiresIn: "7d" }
+            );
+
+            return { access_token: accessToken, refresh_token: newRefreshToken };
+        } catch (err) {
+            throw new AuthError("Refresh token inválido ou expirado!");
+        }
+    }
 }

@@ -2,13 +2,14 @@ import { ValidationError, NotFoundError } from '../../../../../packages/error-ha
 import prisma from "../../../../../packages/libs/prisma";
 
 interface TourPackageServiceProps {
+    title: string;
     origin_local: string;
     destiny_local: string;
     date_tour: Date;
     startDate?: string | Date;
     endDate?: string | Date;
-    price: number;
-    seatsAvailable: number;
+    price: string;
+    seatsAvailable: string;
     type: string;
     carId: string;
     touristPointId: string;
@@ -20,8 +21,9 @@ interface TourPackageUpdateProps {
     origin_local?: string;
     destiny_local?: string;
     date_tour?: Date;
-    price?: number;
-    seatsAvailable?: number;
+    price?: string;
+    seatsAvailable?: string;
+    vacancies?: string;
     type?: string;
     image?: string;
 }
@@ -36,9 +38,9 @@ export class TourPackageService {
 
     static async register(data: TourPackageServiceProps) {
 
-        const { origin_local, destiny_local, date_tour, price, seatsAvailable, type, carId, touristPointId, driverId, image } = data;
+        const { title, origin_local, destiny_local, date_tour, price, seatsAvailable, type, carId, touristPointId, driverId, image } = data;
 
-        if (!origin_local || !destiny_local || !date_tour || !price || !seatsAvailable || !type || !carId || !touristPointId || !driverId) {
+        if (!title || !origin_local || !destiny_local || !date_tour || !price || !seatsAvailable || !type || !carId || !touristPointId || !driverId) {
             throw new ValidationError("Todos os campos obrigatórios devem ser preenchidos!");
         }
 
@@ -63,25 +65,28 @@ export class TourPackageService {
             throw new NotFoundError("Ponto turístico não encontrado!");
         }
 
-        if (price <= 0) {
+        if (parseFloat(price) <= 0) {
             throw new ValidationError("Preço deve ser maior que zero!");
         }
 
+
         // Validar os assentos disponíveis
-        if (seatsAvailable <= 0 || seatsAvailable > existingCar.capacity) {
+        if (parseFloat(seatsAvailable) <= 0 || parseFloat(seatsAvailable) > existingCar.capacity) {
             throw new ValidationError("Número de assentos disponíveis inválido!");
         }
 
         const tourPackageData: any = {
+            title,
             origin_local,
             destiny_local,
             date_tour,
-            price,
-            seatsAvailable,
-            vacancies: seatsAvailable,
+            price: parseFloat(price),
+            seatsAvailable: parseFloat(seatsAvailable),
+            vacancies: parseFloat(seatsAvailable),
             type,
             carId,
-            touristPointId
+            touristPointId,
+            driverId,
         };
 
         if (image) tourPackageData.image = image;
@@ -92,11 +97,7 @@ export class TourPackageService {
                 car: {
                     include: {
                         driver: {
-                            select: {
-                                id: true,
-                                name: true,
-                                email: true
-                            }
+                            select: { id: true, name: true, email: true }
                         }
                     }
                 },
@@ -131,18 +132,30 @@ export class TourPackageService {
         if (data.origin_local) updateData.origin_local = data.origin_local;
         if (data.destiny_local) updateData.destiny_local = data.destiny_local;
         if (data.date_tour) updateData.date_tour = data.date_tour;
-        if (data.price) {
-            if (data.price <= 0) {
-                throw new ValidationError("Preço deve ser maior que zero!");
+
+        if (data.price !== undefined) {
+            const priceFloat = parseFloat(data.price);
+            if (priceFloat) {
+                if (priceFloat <= 0) {
+                    throw new ValidationError("Preço deve ser maior que zero!");
+                }
+                updateData.price = priceFloat;
             }
-            updateData.price = data.price;
         }
-        if (data.seatsAvailable) {
-            if (data.seatsAvailable <= 0 || data.seatsAvailable > existingTourPackage.car.capacity) {
-                throw new ValidationError("Número de assentos disponíveis inválido!");
+
+        if (data.seatsAvailable !== undefined) {
+
+            const seatsAvailableFormat = parseFloat(data.seatsAvailable)
+            if (seatsAvailableFormat) {
+                if (seatsAvailableFormat <= 0 || seatsAvailableFormat > existingTourPackage.car.capacity) {
+                    throw new ValidationError("Número de assentos disponíveis inválido!");
+                }
+                updateData.seatsAvailable = seatsAvailableFormat;
+                updateData.vacancies = seatsAvailableFormat;
             }
-            updateData.seatsAvailable = data.seatsAvailable;
         }
+
+
         if (data.type) updateData.type = data.type;
         if (data.image) updateData.image = data.image;
 

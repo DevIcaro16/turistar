@@ -43,7 +43,7 @@ export const authenticateToken = async (req: Request, res: Response, next: NextF
                         },
                         process.env.ACCESS_TOKEN_SECRET as string,
                         {
-                            expiresIn: "15m",
+                            expiresIn: "30m",
                         }
                     );
 
@@ -140,7 +140,7 @@ export const authenticateDriver = async (req: Request, res: Response, next: Next
                         },
                         process.env.ACCESS_TOKEN_SECRET as string,
                         {
-                            expiresIn: "15m",
+                            expiresIn: "30m",
                         }
                     );
 
@@ -251,7 +251,7 @@ export const authenticateUser = async (req: Request, res: Response, next: NextFu
                         },
                         process.env.ACCESS_TOKEN_SECRET as string,
                         {
-                            expiresIn: "15m",
+                            expiresIn: "30m",
                         }
                     );
 

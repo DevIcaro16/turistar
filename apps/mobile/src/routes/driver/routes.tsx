@@ -7,6 +7,9 @@ import MonitorConexao from '../../components/MonitorConexao';
 import Perfil from '../../pages/driver/Perfil';
 import CarManagement from '../../pages/driver/Car';
 import TouristPointManagement from '../../pages/driver/TouristPoint';
+import TourPackageManagement from '../../pages/driver/TourPackage';
+import ToursManagement from '../../pages/driver/Tours';
+import DriverWallet from '../../pages/driver/Wallet';
 
 const Drawer = createDrawerNavigator();
 const Tab = createBottomTabNavigator();
@@ -65,6 +68,7 @@ function DriverDrawerNavigator() {
                     ),
                 }}
             />
+
             <Drawer.Screen
                 name="Profile"
                 component={Perfil}
@@ -75,6 +79,7 @@ function DriverDrawerNavigator() {
                     ),
                 }}
             />
+
             <Drawer.Screen
                 name="CarManagement"
                 component={CarManagement}
@@ -85,13 +90,47 @@ function DriverDrawerNavigator() {
                     ),
                 }}
             />
+
             <Drawer.Screen
                 name="TouristPointManagement"
                 component={TouristPointManagement}
                 options={{
-                    title: 'Meus Pontos Turisticos',
+                    title: 'Pontos Turisticos',
                     drawerIcon: ({ color, size }) => (
                         <MaterialIcons name="tour" size={size} color={color} />
+                    ),
+                }}
+            />
+
+            <Drawer.Screen
+                name="TourPackageManagement"
+                component={TourPackageManagement}
+                options={{
+                    title: 'Pacotes de Passeio',
+                    drawerIcon: ({ color, size }) => (
+                        <MaterialIcons name="money" size={size} color={color} />
+                    ),
+                }}
+            />
+
+            <Drawer.Screen
+                name="ToursManagement"
+                component={ToursManagement}
+                options={{
+                    title: 'Passeios',
+                    drawerIcon: ({ color, size }) => (
+                        <MaterialIcons name="directions-bus" size={size} color={color} />
+                    ),
+                }}
+            />
+
+            <Drawer.Screen
+                name="DriverWallet"
+                component={DriverWallet}
+                options={{
+                    title: 'Carteira',
+                    drawerIcon: ({ color, size }) => (
+                        <MaterialIcons name="wallet" size={size} color={color} />
                     ),
                 }}
             />

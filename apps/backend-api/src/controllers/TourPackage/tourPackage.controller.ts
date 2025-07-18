@@ -13,6 +13,7 @@ cloudinary.config({
 export const TourPackageRegistration = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const {
+            title,
             origin_local,
             destiny_local,
             date_tour,
@@ -41,6 +42,8 @@ export const TourPackageRegistration = async (req: Request, res: Response, next:
         if (typeof touristPointId !== 'string' || touristPointId.length !== 24) {
             throw new ValidationError("ID do ponto turístico inválido!");
         }
+
+
         // Validar data do tour
         if (date_tour) {
             const dateTourObj = new Date(date_tour);
@@ -60,9 +63,11 @@ export const TourPackageRegistration = async (req: Request, res: Response, next:
             image = resultFile.url !== null ? resultFile.url : '';
         }
         await TourPackageService.register({
+            title,
             origin_local,
             destiny_local,
-            date_tour: new Date(date_tour),
+            // date_tour: new Date(date_tour),
+            date_tour: date_tour,
             price,
             seatsAvailable,
             type,

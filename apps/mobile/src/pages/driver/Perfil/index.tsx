@@ -21,6 +21,7 @@ const validationSchema = Yup.object().shape({
 
 export default function Perfil() {
     const { user, signOut } = useContext(AuthContext);
+    console.log(user?.image);
     const [loading, setLoading] = useState(false);
 
     // Estado local para o AlertComponent

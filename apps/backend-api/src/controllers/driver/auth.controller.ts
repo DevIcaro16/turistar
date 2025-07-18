@@ -170,3 +170,15 @@ export const meuDriver = async (req: Request, res: Response, next: NextFunction)
         return next(error);
     }
 };
+
+export const refreshDriverToken = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { refresh_token } = req.body;
+        if (!refresh_token) throw new ValidationError("Refresh token é obrigatório!");
+
+        const tokens = await AuthService.refreshToken(refresh_token);
+        res.status(200).json(tokens);
+    } catch (error) {
+        next(error);
+    }
+};

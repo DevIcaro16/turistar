@@ -236,6 +236,55 @@ export class TransactionService {
         };
     }
 
+    static async getAllByDriver(data: TransactionServiceGetByDriverProps) {
+
+        const { driverId } = data;
+
+        if (typeof driverId !== 'string' || driverId.length !== 24) {
+            throw new ValidationError("ID do motorista inválido!");
+        }
+
+        const driverExisting = await prisma.driver.findFirst({
+            where: { id: driverId }
+        });
+
+        if (!driverExisting) {
+            throw new NotFoundError("Motorista não encontrado!");
+        }
+
+        const transactions = await prisma.transactions.findMany({
+            where: {
+                driverId: driverId
+            },
+            include: {
+                Reservation: {
+                    include: {
+                        tourPackage: {
+                            select: {
+                                title: true,
+                                origin_local: true,
+                                destiny_local: true,
+                                date_tour: true
+                            }
+                        },
+                        user: {
+                            select: {
+                                name: true,
+                                email: true
+                            }
+                        }
+                    }
+                }
+            },
+            orderBy: {
+                createdAt: 'desc'
+            }
+        });
+
+
+        return transactions;
+    }
+
     static async getTotals(data: TransactionServiceGetTotalsProps) {
         const { userId, driverId } = data;
 
