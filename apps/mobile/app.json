@@ -27,7 +27,8 @@
     },
     "web": {
       "favicon": "./assets/icon.png",
-      "bundler": "metro"
+      "bundler": "metro",
+      "output": "server"
     },
     "newArchEnabled": true,
     "plugins": [
@@ -42,6 +43,13 @@
             "./assets/notification_sound_other.wav"
           ],
           "enableBackgroundRemoteNotifications": false
+        }
+      ],
+      [
+        "@stripe/stripe-react-native",
+        {
+          "merchantIdentifier": "merchant.com.app_passeios_turisticos",
+          "publishableKey": "pk_test_51RmZNjCmMj907B9mfpZByFn1ehbdjr7gjJpBna5JZtgTblB1WdNdzbixrs7kM7sNyXfONCb6oEFqDcyn2x5sqlv000aoAnINZN"
         }
       ]
     ]

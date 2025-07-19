@@ -210,10 +210,35 @@ export const getTourPackagesByDriver = async (req: Request, res: Response, next:
     }
 };
 
+
 //Buscar todos os pacotes turísticos (público)
 export const getAllTourPackages = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const tourPackages = await TourPackageService.getAllTourPackages();
+
+        res.status(200).json({
+            success: true,
+            tourPackages: tourPackages
+        });
+
+    } catch (error) {
+        return next(error);
+    }
+};
+
+export const getTourPackagesByDriverAndDate = async (req: Request, res: Response, next: NextFunction) => {
+
+    try {
+
+        const { driverId } = req.params;
+
+        if (typeof driverId !== 'string' || driverId.length !== 24) {
+            return next(new ValidationError("ID do motorista inválido!"));
+        }
+
+        const { date } = req.body;
+
+        const tourPackages = await TourPackageService.getTourPackagesByDriverAndDate(driverId, date);
 
         res.status(200).json({
             success: true,

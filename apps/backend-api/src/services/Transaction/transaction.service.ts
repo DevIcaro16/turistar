@@ -324,7 +324,16 @@ export class TransactionService {
         transactions.forEach(transaction => {
             totals[transaction.type].amount += transaction.amount;
             totals[transaction.type].count += 1;
-            totals.total.amount += transaction.amount;
+            if (transaction.type === "DEBIT") {
+
+                totals.total.amount -= transaction.amount;
+            }
+            if (transaction.type === "CREDIT" || transaction.type === "REVERSAL") {
+
+                totals.total.amount += transaction.amount;
+            }
+
+
             totals.total.count += 1;
         });
 

@@ -10,6 +10,7 @@ interface UserRegistrationProps {
     email: string;
     phone: string;
     password: string;
+    image?: string;
 };
 
 interface UserUpdateProps {
@@ -23,7 +24,7 @@ const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export class AuthService {
     static async registerUser(data: UserRegistrationProps) {
-        const { name, email, phone, password } = data;
+        const { name, email, phone, password, image } = data;
 
         if (!name || !email || !password) {
             throw new ValidationError("Todos os campos devem ser preenchidos!");
@@ -43,7 +44,8 @@ export class AuthService {
                 email,
                 phone: phone,
                 password: hashedPassword,
-                wallet: 0.0
+                wallet: 0.0,
+                ...(image && { image })
             }
         });
 
@@ -104,8 +106,10 @@ export class AuthService {
         return {
             user: {
                 id: user.id,
-                email: user.email,
                 name: user.name,
+                email: user.email,
+                image: user.image,
+                phone: user.phone,
                 role: 'user'
             },
             access_token: accessToken,
@@ -113,43 +117,36 @@ export class AuthService {
         };
     }
 
-    static async updateUser(userId: string, data: UserUpdateProps) {
+    static async updateUser(userId: string, data: UserUpdateProps & { image?: string }) {
         // Verificar se o usuário existe
         const existingUser = await prisma.user.findUnique({
             where: { id: userId }
         });
-
         if (!existingUser) {
             throw new NotFoundError("Usuário não encontrado!");
         }
-
         // Se email está sendo atualizado, verificar se já existe
         if (data.email && data.email !== existingUser.email) {
             const emailExists = await prisma.user.findUnique({
                 where: { email: data.email }
             });
-
             if (emailExists) {
                 throw new ValidationError("Email já está em uso!");
             }
-
             if (!emailRegex.test(data.email)) {
                 throw new ValidationError("Formato inválido de Email!");
             }
         }
-
         // Preparar dados para atualização
         const updateData: any = {};
-
         if (data.name) updateData.name = data.name;
         if (data.email) updateData.email = data.email;
         if (data.phone) updateData.phone = data.phone;
-
+        if (data.image) updateData.image = data.image;
         // Se senha está sendo atualizada, fazer hash
         if (data.password) {
             updateData.password = await bcrypt.hash(data.password, 10);
         }
-
         const updatedUser = await prisma.user.update({
             where: { id: userId },
             data: updateData,
@@ -159,11 +156,11 @@ export class AuthService {
                 email: true,
                 phone: true,
                 wallet: true,
+                image: true,
                 createdAt: true,
                 updatedAt: true
             }
         });
-
         return updatedUser;
     }
 
@@ -192,6 +189,7 @@ export class AuthService {
                 id: true,
                 name: true,
                 email: true,
+                image: true,
                 phone: true,
                 wallet: true,
                 createdAt: true,

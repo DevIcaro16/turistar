@@ -285,4 +285,96 @@ export class ReserveService {
         });
 
     }
+
+    static async getReservationsByUser(userId: string) {
+
+        if (typeof userId !== 'string' || userId.length !== 24) {
+            throw new ValidationError("ID do usuário inválido!");
+        }
+
+        const userExisting = await prisma.user.findFirst({
+            where: {
+                id: userId
+            }
+        });
+
+        if (!userExisting) throw new NotFoundError("Usuário não existente!");
+
+        const reservations = await prisma.reservations.findMany({
+            where: {
+                userId: userId
+            },
+            include: {
+                tourPackage: {
+                    include: {
+                        car: {
+                            include: {
+                                driver: {
+                                    select: {
+                                        id: true,
+                                        name: true,
+                                        image: true
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            orderBy: {
+                createdAt: 'desc'
+            }
+        });
+
+        return reservations;
+    }
+
+    static async getReservationsByUserAndDate(userId: string) {
+
+        if (typeof userId !== 'string' || userId.length !== 24) {
+            throw new ValidationError("ID do usuário inválido!");
+        }
+
+        const userExisting = await prisma.user.findFirst({
+            where: {
+                id: userId
+            }
+        });
+
+        if (!userExisting) throw new NotFoundError("Usuário não existente!");
+
+        const reservations = await prisma.reservations.findMany({
+            where: {
+                userId: userId,
+                tourPackage: {
+                    date_tour: {
+                        gte: new Date()
+                    }
+                }
+            },
+            include: {
+                tourPackage: {
+                    include: {
+                        car: {
+                            include: {
+                                driver: {
+                                    select: {
+                                        id: true,
+                                        name: true,
+                                        image: true
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            orderBy: {
+                createdAt: 'desc'
+            }
+        });
+
+        return reservations;
+    }
+
 };

@@ -38,9 +38,9 @@ export class TourRegistrationService {
 
         if (!tourPackageExisting) throw new NotFoundError("Pacote de passeio não existente!");
 
-        if (tourPackageExisting.endDate !== null) {
-            throw new NotFoundError("O passeio já foi finalizado!");
-        }
+        // if (tourPackageExisting.endDate !== null) {
+        //     throw new NotFoundError("O passeio já foi finalizado!");
+        // }
 
         //UPDATE NO PACKAGE
         await prisma.tourPackage.update({

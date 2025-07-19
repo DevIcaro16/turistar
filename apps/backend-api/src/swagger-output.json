@@ -71,6 +71,30 @@
         }
       }
     },
+    "/user/refresh": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "refresh_token": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/user/{userId}": {
       "put": {
         "description": "",
@@ -212,6 +236,23 @@
         }
       }
     },
+    "/user/reservations": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/user/reserve-confirmation": {
       "post": {
         "description": "",
@@ -320,6 +361,30 @@
                   "example": "any"
                 },
                 "password": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/driver/refresh": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "refresh_token": {
                   "example": "any"
                 }
               }
@@ -673,6 +738,9 @@
             "schema": {
               "type": "object",
               "properties": {
+                "title": {
+                  "example": "any"
+                },
                 "origin_local": {
                   "example": "any"
                 },
@@ -1088,6 +1156,23 @@
           {
             "name": "type",
             "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/transaction/driver/all": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
             "type": "string"
           }
         ],

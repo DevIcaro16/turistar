@@ -81,3 +81,47 @@ export const ReserveCancellation = async (req: Request, res: Response, next: Nex
         return next(error);
     }
 };
+
+export const ReservationsByUser = async (req: Request, res: Response, next: NextFunction) => {
+
+    try {
+
+        const userId = req.user?.id;
+
+        if (!userId) {
+            throw new ValidationError("ID do Usuário não fornecido!");
+        }
+
+        const reservations = await ReserveService.getReservationsByUser(userId);
+
+        res.status(200).json({
+            success: true,
+            reservations: reservations
+        });
+
+    } catch (error) {
+        return next(error);
+    }
+};
+
+export const ReservationsByUserAndDate = async (req: Request, res: Response, next: NextFunction) => {
+
+    try {
+
+        const userId = req.user?.id;
+
+        if (!userId) {
+            throw new ValidationError("ID do Usuário não fornecido!");
+        }
+
+        const reservations = await ReserveService.getReservationsByUserAndDate(userId);
+
+        res.status(200).json({
+            success: true,
+            reservations: reservations
+        });
+
+    } catch (error) {
+        return next(error);
+    }
+};

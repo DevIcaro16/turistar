@@ -265,8 +265,37 @@ export class TourPackageService {
         return tourPackages;
     }
 
+
     static async getAllTourPackages() {
         const tourPackages = await prisma.tourPackage.findMany({
+            include: {
+                car: {
+                    include: {
+                        driver: {
+                            select: {
+                                id: true,
+                                name: true,
+                                email: true,
+                                image: true
+                            }
+                        }
+                    }
+                },
+                touristPoint: true
+            }
+        });
+
+        return tourPackages;
+    }
+
+    static async getTourPackagesByDriverAndDate(driverId: string, date: Date) {
+
+
+        const tourPackages = await prisma.tourPackage.findMany({
+            where: {
+                driverId: driverId,
+                date_tour: date
+            },
             include: {
                 car: {
                     include: {

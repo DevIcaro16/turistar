@@ -1,19 +1,42 @@
 import { NextFunction, Request, Response } from "express";
 import { ValidationError } from "../../../../../packages/error-handle";
 import { AuthService } from "../../services/user/auth.service";
+import { v2 as cloudinary, UploadApiResponse } from "cloudinary";
+import { UploadedFile } from "express-fileupload";
+
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_NAME,
+    api_key: process.env.CLOUDINARY_KEY,
+    api_secret: process.env.CLOUDINARY_SECRET
+});
 
 //Registro de um novo Usuário
 export const userRegistration = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { name, email, phone, password } = req.body;
-
-        await AuthService.registerUser({ name, email, phone, password });
-
+        const file = req.files?.['file'] as UploadedFile | undefined;
+        if (!name || !email || !password) {
+            return next(new ValidationError("Todos os campos devem ser preenchidos!"));
+        }
+        if (file && Array.isArray(file)) {
+            return next(new Error("Apenas um arquivo é permitido para upload."));
+        }
+        let image: string | undefined = undefined;
+        if (file) {
+            const resultFile: UploadApiResponse = await new Promise((resolve, reject) => {
+                cloudinary.uploader.upload_stream({}, function (error, result) {
+                    if (error) return reject(error);
+                    if (!result) return reject(new Error('Falha no upload da imagem'));
+                    resolve(result);
+                }).end(file.data);
+            });
+            image = resultFile.url !== null ? resultFile.url : undefined;
+        }
+        await AuthService.registerUser({ name, email, phone, password, ...(image && { image }) });
         res.status(201).json({
             success: true,
             message: 'Usuário cadastrado com Sucesso!'
         });
-
     } catch (error) {
         return next(error);
     }
@@ -48,31 +71,39 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
     try {
         const { userId } = req.params;
         const { name, email, phone, password } = req.body;
-
-        // Validar se pelo menos um campo foi fornecido
-        if (!name && !email && !phone && !password) {
+        const file = req.files?.['file'] as UploadedFile | undefined;
+        if (!name && !email && !phone && !password && !file) {
             return next(new ValidationError("Pelo menos um campo deve ser fornecido para atualização!"));
         }
-
-        // Validar formato do ID
         if (typeof userId !== 'string' || userId.length !== 24) {
             return next(new ValidationError("ID do usuário inválido!"));
         }
-
+        if (file && Array.isArray(file)) {
+            return next(new Error("Apenas um arquivo é permitido para upload."));
+        }
+        let image = '';
+        if (file) {
+            const resultFile: UploadApiResponse = await new Promise((resolve, reject) => {
+                cloudinary.uploader.upload_stream({}, function (error, result) {
+                    if (error) return reject(error);
+                    if (!result) return reject(new Error('Falha no upload da imagem'));
+                    resolve(result);
+                }).end(file.data);
+            });
+            image = resultFile.url !== null ? resultFile.url : '';
+        }
         const updateData: any = {};
         if (name) updateData.name = name;
         if (email) updateData.email = email;
         if (phone) updateData.phone = phone;
         if (password) updateData.password = password;
-
+        if (image) updateData.image = image;
         const updatedUser = await AuthService.updateUser(userId, updateData);
-
         res.status(200).json({
             success: true,
             message: 'Usuário atualizado com Sucesso!',
             user: updatedUser
         });
-
     } catch (error) {
         return next(error);
     }
@@ -102,8 +133,10 @@ export const deleteUser = async (req: Request, res: Response, next: NextFunction
 
 //Buscar usuário por ID
 export const getUserById = async (req: Request, res: Response, next: NextFunction) => {
+
     try {
-        const { userId } = req.params;
+
+        const userId = req.user?.id;
 
         // Validar formato do ID
         if (typeof userId !== 'string' || userId.length !== 24) {

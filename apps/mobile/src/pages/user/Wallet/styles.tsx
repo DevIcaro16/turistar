@@ -1,0 +1,111 @@
+import { StyleSheet } from 'react-native';
+
+export default StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: '#F2F2F7',
+        paddingHorizontal: 16,
+        paddingTop: 24,
+    },
+    title: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        color: '#1C1C1E',
+        marginBottom: 16,
+        textAlign: 'center',
+    },
+    balanceContainer: {
+        backgroundColor: '#fff',
+        borderRadius: 12,
+        padding: 20,
+        height: 280,
+        alignItems: 'center',
+        marginBottom: 16,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.08,
+        shadowRadius: 2,
+        elevation: 2,
+    },
+    balanceLabel: {
+        fontSize: 16,
+        color: '#8E8E93',
+        marginBottom: 4,
+    },
+    balanceValue: {
+        fontSize: 28,
+        fontWeight: 'bold',
+        color: '#007AFF',
+    },
+    tabsContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 16,
+        backgroundColor: '#E5E5EA',
+        borderRadius: 8,
+        padding: 4,
+    },
+    tabButton: {
+        flex: 1,
+        paddingVertical: 10,
+        borderRadius: 8,
+        alignItems: 'center',
+        marginHorizontal: 2,
+        backgroundColor: 'transparent',
+    },
+    tabButtonText: {
+        fontSize: 15,
+        color: '#333',
+    },
+    listContainer: {
+        paddingBottom: 16,
+    },
+    emptyList: {
+        flexGrow: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    transactionCard: {
+        backgroundColor: '#fff',
+        borderRadius: 12,
+        padding: 16,
+        marginBottom: 12,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.08,
+        shadowRadius: 2,
+        elevation: 2,
+    },
+    transactionType: {
+        fontSize: 14,
+        fontWeight: 'bold',
+        marginBottom: 2,
+    },
+    transactionDesc: {
+        fontSize: 15,
+        color: '#333',
+        marginBottom: 4,
+    },
+    transactionAmount: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#007AFF',
+        marginBottom: 2,
+    },
+    transactionDate: {
+        fontSize: 13,
+        color: '#8E8E93',
+    },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#F2F2F7',
+    },
+    emptyText: {
+        textAlign: 'center',
+        color: '#8E8E93',
+        fontSize: 16,
+        marginTop: 32,
+    },
+}); 

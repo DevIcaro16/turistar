@@ -65,13 +65,17 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
             const storedRole = await AsyncStorage.getItem('@userRole');
 
             if (accessToken) {
-                console.log(accessToken);
+                console.log('Token encontrado:', accessToken);
+                console.log('Role armazenado:', storedRole);
+
                 // Configurar header de autorização para todas as requisições
                 api.defaults.headers['Authorization'] = `Bearer ${accessToken}`;
 
                 try {
                     // Verificar se o token ainda é válido fazendo uma requisição
-                    const response = await api.get(`/${storedRole}/me`);
+                    console.log('Fazendo requisição para:', `${storedRole}/me`);
+                    const response = await api.get(`${storedRole}/me`);
+                    console.log('Resposta da API:', response.data);
 
                     let userData;
 
@@ -80,8 +84,12 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
                     }
 
                     if (storedRole === 'driver') {
-                        console.log(response.data.driver);
+                        console.log('Dados do driver:', response.data.driver);
                         userData = response.data.driver;
+                    }
+
+                    if (!userData) {
+                        throw new Error('Dados do usuário não encontrados na resposta');
                     }
 
                     setUser(userData);
@@ -94,6 +102,9 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
                     }
                 } catch (err: any) {
                     // Se o token expirou, limpar e redirecionar para login
+                    console.log('Erro na requisição /me:', err);
+                    console.log('Status do erro:', err.response?.status);
+                    console.log('Mensagem do erro:', err.response?.data);
                     console.log('Token expirado ou inválido');
                     await AsyncStorage.removeItem('@accessToken');
                     await AsyncStorage.removeItem('@refreshToken');
@@ -210,18 +221,23 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
 
     async function refreshAccessToken() {
         const refreshToken = await AsyncStorage.getItem('@refreshToken');
-        if (!refreshToken) return null;
+        const userRole = await AsyncStorage.getItem('@userRole');
+
+        if (!refreshToken || !userRole) return null;
 
         try {
-            const response = await api.post('/auth/refresh', { refresh_token: refreshToken });
+            console.log('Tentando refresh do token para role:', userRole);
+            const response = await api.post(`/${userRole}/refresh`, { refresh_token: refreshToken });
             const { access_token, refresh_token: newRefreshToken } = response.data;
 
             await AsyncStorage.setItem('@accessToken', access_token);
             await AsyncStorage.setItem('@refreshToken', newRefreshToken);
 
             api.defaults.headers['Authorization'] = `Bearer ${access_token}`;
+            console.log('Token renovado com sucesso');
             return access_token;
         } catch (error) {
+            console.log('Erro no refresh do token:', error);
             // Se falhar, deslogar
             await signOut();
             return null;

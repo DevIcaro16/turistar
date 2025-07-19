@@ -1,10 +1,12 @@
 import express, { Router } from "express";
 import { loginUser, userRegistration, updateUser, deleteUser, getUserById, meUser, refreshUserToken } from "../../controllers/user/auth.controller";
 import { authenticateUser } from "../../utils/auth/auth.middleware";
-import { ReserveCancellation, ReserveConfirmation, ReserveRegistration } from "../../controllers/user/reserve.controller";
+import { ReservationsByUser, ReservationsByUserAndDate, ReserveCancellation, ReserveConfirmation, ReserveRegistration } from "../../controllers/user/reserve.controller";
 
 const userRouter: Router = express.Router();
 
+userRouter.get('/reservations', authenticateUser, ReservationsByUser);
+userRouter.get('/reservations/today', authenticateUser, ReservationsByUserAndDate);
 userRouter.post('/registration', userRegistration);
 userRouter.post('/login', loginUser);
 userRouter.post('/refresh', refreshUserToken);

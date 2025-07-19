@@ -57,7 +57,7 @@ export default function SignUp() {
     }
 
     const handleSignUp = async (values: FormValues) => {
-
+        // Alert.alert('teste')
         setLoading(true);
 
         try {

@@ -6,14 +6,18 @@ import React from 'react';
 import { View, StyleSheet, Text, StatusBar } from 'react-native';
 import Routes from '../routes/router';
 import AuthProvider from '../contexts/auth';
+import { StripeProvider } from '@stripe/stripe-react-native';
+
 
 export default function App() {
   return (
-    <NavigationContainer>
-      <AuthProvider>
-        <StatusBar backgroundColor="#F0F4FF" barStyle="dark-content" />
-        <Routes />
-      </AuthProvider>
-    </NavigationContainer>
+    <StripeProvider>
+      <NavigationContainer>
+        <AuthProvider>
+          <StatusBar backgroundColor="#F0F4FF" barStyle="dark-content" />
+          <Routes />
+        </AuthProvider>
+      </NavigationContainer>
+    </StripeProvider>
   );
 }
