@@ -155,7 +155,8 @@ export const getCarById = async (req: Request, res: Response, next: NextFunction
 //Buscar todos os carros de um motorista
 export const getCarsByDriver = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { driverId } = req.params;
+
+        const driverId = req.user?.id;
 
         // Validar formato do ID
         if (typeof driverId !== 'string' || driverId.length !== 24) {

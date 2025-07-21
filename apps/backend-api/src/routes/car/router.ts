@@ -8,7 +8,7 @@ import {
     getCarsByAuthenticatedDriver,
     getAllCars
 } from "../../controllers/car/car.controller";
-import { authenticateDriver } from "../../utils/auth/auth.middleware";
+import { authenticateAdmin, authenticateDriver } from "../../utils/auth/auth.middleware";
 import { UploadedFile, FileArray } from 'express-fileupload';
 
 const carRouter: Router = express.Router();
@@ -21,7 +21,7 @@ carRouter.get('/driver', authenticateDriver, getCarsByAuthenticatedDriver);
 
 // Rotas públicas (apenas para visualização)
 carRouter.get('/:carId', getCarById);
-carRouter.get('/driver/:driverId', getCarsByDriver);
-carRouter.get('/', getAllCars);
+carRouter.get('/driver/:driverId', authenticateDriver, getCarsByDriver);
+carRouter.get('/', authenticateAdmin, getAllCars);
 
 export default carRouter;

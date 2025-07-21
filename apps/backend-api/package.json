@@ -69,9 +69,17 @@
     }
   },
   "dependencies": {
-    "express-fileupload": "^1.5.2"
+    "@logtail/node": "^0.5.5",
+    "cookie-parser": "^1.4.7",
+    "ejs": "^3.1.10",
+    "express-fileupload": "^1.5.2",
+    "ioredis": "^5.6.1",
+    "nodemailer": "^7.0.5",
+    "winston": "^3.17.0"
   },
   "devDependencies": {
-    "@types/express-fileupload": "^1.5.1"
+    "@types/ejs": "^3.1.5",
+    "@types/express-fileupload": "^1.5.1",
+    "@types/nodemailer": "^6.4.17"
   }
 }

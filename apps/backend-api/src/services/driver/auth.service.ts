@@ -28,6 +28,16 @@ const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export class AuthService {
 
+    static async checkEmail(email: string) {
+        const existing = await prisma.driver.findUnique({ where: { email } });
+
+        if (existing) {
+            throw new ValidationError("Usuário já existente!");
+        }
+
+        return true;
+    }
+
     static async register(data: DriverRegistrationProps) {
 
         const { name, email, phone, transportType, password, image } = data;
@@ -62,16 +72,6 @@ export class AuthService {
         });
 
         return driver;
-    }
-
-    static async checkEmail(email: string) {
-        const existing = await prisma.driver.findUnique({ where: { email } });
-
-        if (existing) {
-            throw new ValidationError("Usuário já existente!");
-        }
-
-        return true;
     }
 
     static async login(email: string, password: string, res: Response) {
@@ -234,7 +234,7 @@ export class AuthService {
         return driver;
     }
 
-    static async refreshToken(refreshToken: string) {
+    static async refreshToken(refreshToken: string, res: Response) {
         try {
             const payload = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET as string) as any;
             if (payload.role !== 'driver') throw new AuthError("Token inválido!");
@@ -253,9 +253,19 @@ export class AuthService {
                 { expiresIn: "7d" }
             );
 
+            //Gravando o refresh token e o access token em cookies (httpOnly secure)
+            setCookie(res, "refresh_token", refreshToken);
+            setCookie(res, "access_token", accessToken);
+
             return { access_token: accessToken, refresh_token: newRefreshToken };
         } catch (err) {
             throw new AuthError("Refresh token inválido ou expirado!");
         }
+    }
+
+    static async logoutDriver(res: Response) {
+        res.clearCookie('access_token', { path: '/' });
+        res.clearCookie('refresh_token', { path: '/' });
+        return { message: 'Logout realizado com sucesso!' };
     }
 }

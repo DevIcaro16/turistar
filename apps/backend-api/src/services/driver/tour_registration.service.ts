@@ -59,7 +59,9 @@ export class TourRegistrationService {
 
     static async end(data: TourRegistrationServiceProps) {
 
-        const tax = Number(process.env.TAX) ?? 0;
+        // const tax = Number(process.env.TAX) || 0;
+        const taxDB = await prisma.configurations.findFirst({ where: { key: 'tax' } });
+        const tax = Number(taxDB?.valueReference) || Number(process.env.TAX);
 
         const { driverId, tourPackageId } = data;
 
@@ -135,8 +137,8 @@ export class TourRegistrationService {
             select: { amount: true }
         });
         const totalCredit = creditTransactions.reduce((sum, t) => sum + t.amount, 0);
-
-        const totalCreditDesc = totalCredit - (totalCredit * tax); //Desconto da taxa da plataforma.
+        const descPlatform = (totalCredit * tax);
+        const totalCreditDesc = totalCredit - descPlatform; //Desconto da taxa da plataforma.
 
         // 4. Atualizar a wallet do driver
         await prisma.driver.update({
@@ -144,6 +146,16 @@ export class TourRegistrationService {
             data: {
                 wallet: {
                     increment: totalCreditDesc
+                }
+            }
+        });
+
+        //Atualizando o ganho da plataforma a partir da tax
+        await prisma.configurations.update({
+            where: { id: taxDB?.id },
+            data: {
+                value: {
+                    increment: descPlatform
                 }
             }
         });

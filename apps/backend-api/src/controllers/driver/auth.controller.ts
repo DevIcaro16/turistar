@@ -1,8 +1,11 @@
 import { NextFunction, Request, Response } from "express";
-import { ValidationError } from "../../../../../packages/error-handle";
+import { AuthError, ValidationError } from "../../../../../packages/error-handle";
 import { AuthService } from "../../services/driver/auth.service";
 import { v2 as cloudinary, UploadApiResponse } from "cloudinary";
 import { UploadedFile } from "express-fileupload";
+import bcrypt from "bcryptjs";
+import prisma from "../../../../../packages/libs/prisma";
+import { handleForgotPassword, verifyForgotPasswordOtp } from "../../utils/auth/auth.helper";
 
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_NAME,
@@ -165,7 +168,7 @@ export const meuDriver = async (req: Request, res: Response, next: NextFunction)
         }
         const driver = await AuthService.getDriverById(driverId);
         console.log(driver);
-        res.status(200).json({ success: true, driver });
+        res.status(200).json({ success: true, driver, role: 'driver' });
     } catch (error) {
         return next(error);
     }
@@ -176,8 +179,70 @@ export const refreshDriverToken = async (req: Request, res: Response, next: Next
         const { refresh_token } = req.body;
         if (!refresh_token) throw new ValidationError("Refresh token é obrigatório!");
 
-        const tokens = await AuthService.refreshToken(refresh_token);
+        const tokens = await AuthService.refreshToken(refresh_token, res);
         res.status(200).json(tokens);
+    } catch (error) {
+        next(error);
+    }
+};
+
+//Recuperação de senha
+export const userForgotPassword = async (req: Request, res: Response, next: NextFunction) => {
+    await handleForgotPassword(req, res, next, 'driver');
+};
+
+//Verificando código OTP da recuperação de senha
+export const verifyUserForgotPassword = async (req: Request, res: Response, next: NextFunction) => {
+    await verifyForgotPasswordOtp(req, res, next);
+};
+
+//resetando senha do Usuário
+export const resetUserPassword = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+
+        const { email, newPassword } = req.body;
+
+        if (!email || !newPassword) {
+            return next(new ValidationError("Todos os campos são Obrigatórios!"));
+        }
+
+        const user = await prisma.driver.findUnique({ where: { email } });
+
+        if (!user) return next(new AuthError("Usuário não encontrado!"));
+
+        //Verificando o hash da senha criptografada
+        const isSamePassword = await bcrypt.compare(newPassword, user.password!);
+
+        if (!isSamePassword) {
+            return next(new AuthError("Senha não pode ser igual a anterior!"));
+        }
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+        await prisma.driver.update({
+            where: {
+                email: email
+            },
+            data: {
+                password: hashedPassword
+            }
+        });
+
+
+        res.status(200).json({
+            success: true,
+            message: 'Senha alterada com Sucesso!'
+        });
+
+    } catch (error) {
+        return next(error);
+    }
+};
+
+export const logoutDriver = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const result = await AuthService.logoutDriver(res);
+        res.status(200).json(result);
     } catch (error) {
         next(error);
     }

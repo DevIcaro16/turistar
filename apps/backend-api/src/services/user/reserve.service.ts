@@ -221,6 +221,11 @@ export class ReserveService {
 
         if (!reserveIdExisting) throw new NotFoundError("Reserva não existente!");
 
+
+        if (reserveIdExisting.tourPackage.isFinalised) {
+            throw new ValidationError("O passeio o qual essa reserva está vinculada já foi finalizado!");
+        }
+
         if (reserveIdExisting.canceled) {
             throw new ValidationError("Não é possível cancelar uma reserva já cancelada!");
         }
