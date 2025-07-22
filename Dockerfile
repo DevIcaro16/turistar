@@ -20,7 +20,7 @@ RUN npx prisma generate
 COPY . .
 
 # Compila o backend (ajuste o comando se necessário)
-RUN cd apps/backend-api && npm install && npm run build
+RUN npx nx build backend-api
 
 # Comando para iniciar a aplicação
 CMD ["node", "apps/backend-api/dist/main.js"]

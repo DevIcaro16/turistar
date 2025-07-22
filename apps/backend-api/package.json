@@ -83,7 +83,6 @@
     "@types/nodemailer": "^6.4.17"
   },
   "scripts": {
-    "build": "npx nx build backend-api",
     "start": "node dist/main.js"
   }
 }
