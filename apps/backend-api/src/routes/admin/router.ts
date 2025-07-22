@@ -18,8 +18,11 @@ import {
     getAllReserves,
     getAllTouristPoints,
     getPlatformRevenue,
-    getAllMetrics
+    getAllMetrics,
+    updateConfig,
+    getTaxPlatform
 } from '../../controllers/admin/metrics.controller';
+import { getAllTransactions } from '../../controllers/Transaction/transaction.controller';
 
 const adminRouter = express.Router();
 
@@ -41,6 +44,9 @@ adminRouter.get('/metrics/tour-packages', authenticateAdmin, getAllTourPackages)
 adminRouter.get('/metrics/reserves', authenticateAdmin, getAllReserves);
 adminRouter.get('/metrics/tourist-points', authenticateAdmin, getAllTouristPoints);
 adminRouter.get('/metrics/platform-revenue', authenticateAdmin, getPlatformRevenue);
+adminRouter.get('/metrics/tax-platform', authenticateAdmin, getTaxPlatform);
+adminRouter.put('/metrics/configuration', authenticateAdmin, updateConfig);
+adminRouter.get('/metrics/transactions', authenticateAdmin, getAllTransactions);
 adminRouter.get('/metrics/all', authenticateAdmin, getAllMetrics);
 
 export default adminRouter;

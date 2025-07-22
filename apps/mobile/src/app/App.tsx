@@ -11,7 +11,7 @@ import { StripeProvider } from '@stripe/stripe-react-native';
 
 export default function App() {
   return (
-    <StripeProvider>
+    <StripeProvider publishableKey={process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY!}>
       <NavigationContainer>
         <AuthProvider>
           <StatusBar backgroundColor="#F0F4FF" barStyle="dark-content" />

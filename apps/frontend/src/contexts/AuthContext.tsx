@@ -1,12 +1,19 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, {
+    createContext,
+    useContext,
+    useState,
+    useEffect,
+    ReactNode,
+} from 'react';
 import api from '../util/api/api';
 import { useAlertContext } from '../components/AlertProvider';
 
 interface AuthContextType {
     isAuthenticated: boolean;
     user: any | null;
+    userRole: TypeUser | string;
     login: (email: string, password: string, role: TypeUser) => Promise<void>;
     logout: () => void;
     loading: boolean;
@@ -30,127 +37,110 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-
     const { showAlert } = useAlertContext();
 
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [user, setUser] = useState<any | null>(null);
-    const [token, setToken] = useState<string | null>(null);
-    const [userRole, setUserRole] = useState<string | null>(null);
+    const [userRole, setUserRole] = useState<TypeUser | string>('');
     const [loading, setLoading] = useState<boolean>(true);
     const [loadingAuth, setLoadingAuth] = useState<boolean>(false);
 
     useEffect(() => {
+        async function fetchMe() {
+            try {
 
-        async function loadStorage() {
+                const userRole = await localStorage.getItem('@userRole');
 
-            const accessToken = localStorage.getItem('@accessToken');
-            const storedRole = localStorage.getItem('@userRole');
+                const res = await api.get(`/${userRole}/me`, {
+                    withCredentials: true,
+                });
 
-            if (accessToken) {
+                const me = res.data?.admin || res.data?.driver;
+                const role = res.data?.role;
 
-                console.log(accessToken);
-
-                api.defaults.headers['Authorization'] = `Bearer ${accessToken}`;
-
-                try {
-
-                    const response = await api.get(`/${storedRole}/me`);
-
-                    let userData;
-
-                    if (storedRole === 'user') {
-                        userData = response.data.user;
-                    }
-
-                    if (storedRole === 'driver') {
-                        userData = response.data.driver;
-                    }
-
-                    setUser(userData);
-                    setToken(accessToken);
-                    setUserRole(userData.role || storedRole);
+                if (me) {
+                    setUser(me);
+                    setUserRole(role || '');
                     setIsAuthenticated(true);
-
-                    if (userData.role && userData.role !== storedRole) {
-                        await localStorage.setItem('@userRole', userData.role);
-                    }
-
-                } catch (err: any) {
-
-                    console.log('Token expirado ou inválido');
-                    await localStorage.removeItem('@accessToken');
-                    await localStorage.removeItem('@refreshToken');
-                    await localStorage.removeItem('@userRole');
-                    setUser(null);
-                    setUserRole(null);
+                } else {
+                    throw new Error('Usuário inválido');
                 }
+            } catch (err) {
+                setUser(null);
+                setIsAuthenticated(false);
+                showAlert('error', 'Acesso Inválido', 'Por favor, realize seu acesso novamente!');
+            } finally {
+                setLoading(false);
             }
-            setLoading(false);
         }
 
-        loadStorage();
+        fetchMe();
     }, []);
 
     const login = async (email: string, password: string, role: TypeUser) => {
-
+        setLoadingAuth(true);
         try {
+            const res = await api.post(
+                `/${role}/login`,
+                { email, password },
+                { withCredentials: true }
+            );
 
-            console.log(role);
-            const response = await api.post(`/${role}/login`, {
-                email: email,
-                password: password,
-            });
+            const me = res.data.user;
 
-            if (response.status >= 400 && response.status <= 500) {
-                console.log(response.status);
-                showAlert('error', 'Erro no Login', 'Houve um erro no login');
-            } else {
-
-                const { user, access_token, refresh_token } = response.data;
-
-                // Armazenar tokens e role no AsyncStorage
-                await localStorage.setItem('@accessToken', access_token);
-                await localStorage.setItem('@refreshToken', refresh_token);
-                await localStorage.setItem('@userRole', user.role);
-
-                // Configurar header de autorização para todas as requisições futuras
-                api.defaults.headers['Authorization'] = `Bearer ${access_token}`;
-
-                setUser(user);
-                setUserRole(user.role);
-                setLoadingAuth(false);
+            if (me) {
+                setUser(me);
+                setUserRole(role);
+                await localStorage.setItem('@userRole', role);
                 setIsAuthenticated(true);
                 showAlert('success', 'Login Realizado!', 'Login realizado com sucesso!');
+            } else {
+                throw new Error('Dados de login inválidos');
             }
-        } catch (error: any) {
+        } catch (err: any) {
+            showAlert(
+                'error',
+                'Erro no Login',
+                err.response?.data?.message || 'Erro ao realizar login'
+            );
+        } finally {
             setLoadingAuth(false);
-            console.log(error);
-            const message = error.response?.data?.message || 'Não foi possível realizar o Login!';
-            showAlert('error', 'Erro no Login', message);
         }
     };
 
-    const logout = () => {
-        localStorage.removeItem('@accessToken');
-        localStorage.removeItem('@refreshToken');
-        localStorage.removeItem('@userRole');
-        setIsAuthenticated(false);
-        setUser(null);
+    const logout = async () => {
+        try {
+            const userRole = await localStorage.getItem('@userRole') || "driver";
+            await api.post(`/${userRole}/logout`, {}, { withCredentials: true });
+            await localStorage.removeItem('@userRole');
+            showAlert(
+                'success',
+                'Logout',
+                'Logout Realizado com Sucesso!'
+            );
+        } catch (err: any) {
+            showAlert(
+                'error',
+                'Erro no Logout',
+                err.response?.data?.message || 'Erro ao realizar login'
+            );
+        } finally {
+            setUser(null);
+            setIsAuthenticated(false);
+        }
     };
 
     const value = {
         isAuthenticated,
         user,
+        userRole,
         login,
         logout,
         loading,
-        loadingAuth
+        loadingAuth,
     };
 
     return (
-        <AuthContext.Provider value={value}>
-            {children}
-        </AuthContext.Provider>
+        <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
     );
-}; 
+};

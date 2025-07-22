@@ -14,7 +14,7 @@ interface CarUpdateProps {
     image?: string;
     type?: string;
     model?: string;
-    capacity?: number;
+    capacity?: string;
 }
 
 export class CarService {
@@ -27,7 +27,7 @@ export class CarService {
             throw new ValidationError("Todos os campos devem ser preenchidos!");
         }
 
-        let capacityInt = parseInt(capacity);
+        const capacityInt = parseInt(capacity);
 
         const typeUpper = type.toUpperCase() as TransportType;
 
@@ -76,10 +76,9 @@ export class CarService {
             throw new NotFoundError("Carro não encontrado ou não pertence a este motorista!");
         }
 
-        // Preparar dados para atualização
         const updateData: any = {};
 
-        // Validar e converter tipo de transporte se fornecido
+
         if (data.type) {
             const typeUpper = data.type.toUpperCase() as TransportType;
             if (!Object.values(TransportType).includes(typeUpper)) {
@@ -94,10 +93,11 @@ export class CarService {
         }
 
         if (data.capacity) {
-            if (data.capacity <= 0 || data.capacity > 50) {
+            const capacityInt = parseInt(data.capacity);
+            if (capacityInt <= 0 || capacityInt > 50) {
                 throw new ValidationError("Capacidade deve ser entre 1 e 50!");
             }
-            updateData.capacity = data.capacity;
+            updateData.capacity = capacityInt;
         }
 
         const updatedCar = await prisma.car.update({

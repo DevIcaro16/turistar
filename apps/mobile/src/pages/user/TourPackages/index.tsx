@@ -64,6 +64,7 @@ export default function UserTourPackages() {
         setLoading(true);
         try {
             const response = await api.get('/TourPackage');
+            console.log(response);
             setTourPackages(response.data.tourPackages || response.data || []);
         } catch (error) {
             setTourPackages([]);

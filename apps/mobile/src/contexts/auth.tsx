@@ -28,6 +28,8 @@ interface AuthContextData {
     loadingAuth: boolean;
     refreshAccessToken: () => Promise<AxiosInstance>
     loading: boolean;
+    sendForgotPasswordCode: (email: string, activeTab: TypeUser) => Promise<{ success: boolean; message?: string }>;
+    verifyForgotPasswordCode: (email: string, otp: string, activeTab: TypeUser) => Promise<{ success: boolean; message?: string }>;
 }
 
 export const AuthContext = createContext<AuthContextData>({} as AuthContextData);
@@ -244,8 +246,50 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
         }
     }
 
+    async function sendForgotPasswordCode(email: string, activeTab: TypeUser) {
+        setLoadingAuth(true);
+        try {
+            const response = await api.post(`/${activeTab}/forgot-password-user`, { email });
+            if (response.status >= 400 && response.status <= 500) {
+                showAlert('error', 'Erro', 'Houve um erro ao enviar o código!');
+                return { success: false, message: 'Houve um erro ao enviar o código!' };
+            } else {
+                setLoadingAuth(false);
+                showAlert('success', 'Sucesso!', 'Verifique o código recebido em seu Email!');
+                setTimeout(() => {
+                    (navigation as any).navigate('ResetPassword', { email, activeTab });
+                }, 1000);
+                return { success: true };
+            }
+        } catch (error: any) {
+            showAlert('error', 'Erro', error.response?.data?.message || 'Erro ao enviar código!');
+            return { success: false, message: error.response?.data?.message || 'Erro ao enviar código!' };
+        } finally {
+            setLoadingAuth(false);
+        }
+    }
+
+    async function verifyForgotPasswordCode(email: string, otp: string, activeTab: TypeUser) {
+        setLoadingAuth(true);
+        try {
+            const response = await api.post(`/${activeTab}/verify-forgot-password-user`, { email, otp });
+            if (response.data.success) {
+                showAlert('success', 'Sucesso!', 'Código verificado. Agora você pode redefinir sua senha.');
+                return { success: true };
+            } else {
+                showAlert('error', 'Erro', response.data.message || 'Código inválido ou expirado.');
+                return { success: false, message: response.data.message || 'Código inválido ou expirado.' };
+            }
+        } catch (err: any) {
+            showAlert('error', 'Erro', err?.response?.data?.message || 'Erro ao verificar código.');
+            return { success: false, message: err?.response?.data?.message || 'Erro ao verificar código.' };
+        } finally {
+            setLoadingAuth(false);
+        }
+    }
+
     return (
-        <AuthContext.Provider value={{ signed: !!user, user, userRole, signUp, signIn, signOut, refreshAccessToken, loadingAuth, loading }}>
+        <AuthContext.Provider value={{ signed: !!user, user, userRole, signUp, signIn, signOut, refreshAccessToken, loadingAuth, loading, sendForgotPasswordCode, verifyForgotPasswordCode }}>
             {children}
 
             {/* AlertComponent personalizado */}

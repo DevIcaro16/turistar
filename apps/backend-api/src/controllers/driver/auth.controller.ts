@@ -213,7 +213,7 @@ export const resetUserPassword = async (req: Request, res: Response, next: NextF
         //Verificando o hash da senha criptografada
         const isSamePassword = await bcrypt.compare(newPassword, user.password!);
 
-        if (!isSamePassword) {
+        if (isSamePassword) {
             return next(new AuthError("Senha não pode ser igual a anterior!"));
         }
 

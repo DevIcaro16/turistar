@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import PublicRoute from '../../components/PublicRoute';
 import { useAuth } from '../../contexts/AuthContext';
 import Link from 'next/link';
@@ -9,30 +9,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/ca
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
-import { AlertCircle, Mail, Lock } from 'lucide-react';
+import { AlertCircle, Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { Formik, Form, Field, ErrorMessage } from 'formik';
+import { SignInSchema } from '../../schemas/schema-yup';
 
 const Login = () => {
-
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [role, setRole] = useState<'driver' | 'admin'>('admin');
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
     const { login, loadingAuth } = useAuth();
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setLoading(true);
-        setError('');
-
-        try {
-            await login(email, password, role);
-        } catch (error) {
-            setError('Erro ao fazer login. Tente novamente.');
-        } finally {
-            setLoading(false);
-        }
-    };
+    const [role, setRole] = React.useState<'driver' | 'admin'>('admin');
+    const [error, setError] = React.useState('');
+    const [showPassword, setShowPassword] = React.useState(false);
 
     return (
         <PublicRoute>
@@ -62,83 +47,106 @@ const Login = () => {
                                 </div>
                             )}
 
-                            <form onSubmit={handleSubmit} className="space-y-4">
-                                {/* Role Selector */}
-                                <div className="space-y-2">
-                                    <Label className="text-sm font-medium text-gray-200">
-                                        Tipo de conta
-                                    </Label>
-                                    <RoleSelector selectedRole={role} onRoleChange={setRole} />
-                                </div>
+                            <Formik
+                                initialValues={{ email: '', password: '' }}
+                                validationSchema={SignInSchema}
+                                onSubmit={async (values, { setSubmitting }) => {
+                                    setError('');
+                                    try {
+                                        await login(values.email, values.password, role);
+                                    } catch (err) {
+                                        setError('Erro ao fazer login. Tente novamente.');
+                                    } finally {
+                                        setSubmitting(false);
+                                    }
+                                }}
+                            >
+                                {({ isSubmitting }) => (
+                                    <Form className="space-y-4">
 
-                                {/* Email Input */}
-                                <div className="space-y-2">
-                                    <Label htmlFor="email" className="text-sm font-medium text-gray-200">
-                                        E-mail
-                                    </Label>
-                                    <div className="relative">
-                                        <Mail className="absolute left-3 top-1/3 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                                        <Input
-                                            id="email"
-                                            type="email"
-                                            placeholder="seu@email.com"
-                                            value={email}
-                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
-                                            className="pl-10 bg-[#181818] border-[#333] text-gray-100 placeholder:text-gray-500 focus:border-[#fefefe] focus:ring-[#fefefe]/20"
-                                            required
-                                        />
-                                    </div>
-                                </div>
-
-                                {/* Password Input */}
-                                <div className="space-y-2">
-                                    <Label htmlFor="password" className="text-sm font-medium text-gray-200">
-                                        Senha
-                                    </Label>
-                                    <div className="relative">
-                                        <Lock className="absolute left-3 top-1/3 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                                        <Input
-                                            id="password"
-                                            type="password"
-                                            placeholder="••••••••"
-                                            value={password}
-                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
-                                            className="pl-10 bg-[#181818] border-[#333] text-gray-100 placeholder:text-gray-500 focus:border-[#fefefe] focus:ring-[#fefefe]/20"
-                                            required
-                                        />
-                                    </div>
-                                </div>
-
-                                {/* Submit Button */}
-                                <Button
-                                    type="submit"
-                                    disabled={loading || loadingAuth}
-                                    className="w-full bg-[#fff] hover:bg-gray-400  text-[#181818] font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                                    size="lg"
-                                >
-                                    {loading || loadingAuth ? (
-                                        <div className="flex items-center justify-center gap-2">
-                                            <div className="w-4 h-4 border-2 border-[#181818] border-t-transparent rounded-full animate-spin"></div>
-                                            Entrando...
+                                        <div className="space-y-2">
+                                            <Label className="text-sm font-medium text-gray-200">
+                                                Tipo de conta
+                                            </Label>
+                                            <RoleSelector selectedRole={role} onRoleChange={setRole} />
                                         </div>
-                                    ) : (
-                                        'Entrar no sistema'
-                                    )}
-                                </Button>
-                            </form>
+
+                                        <div className="space-y-2">
+                                            <Label htmlFor="email" className="text-sm font-medium text-gray-200">
+                                                E-mail
+                                            </Label>
+                                            <div className="relative">
+                                                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                                                <Field
+                                                    as={Input}
+                                                    id="email"
+                                                    name="email"
+                                                    type="email"
+                                                    placeholder="seu@email.com"
+                                                    className="pl-10 bg-[#181818] border-[#333] text-gray-100 placeholder:text-gray-500 focus:border-[#fefefe] focus:ring-[#fefefe]/20"
+                                                />
+                                            </div>
+                                            <ErrorMessage name="email" component="div" className="text-red-400 text-xs mt-1" />
+                                        </div>
+
+                                        {/* Password Input */}
+                                        <div className="space-y-2">
+                                            <Label htmlFor="password" className="text-sm font-medium text-gray-200">
+                                                Senha
+                                            </Label>
+                                            <div className="relative">
+                                                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                                                <Field
+                                                    as={Input}
+                                                    id="password"
+                                                    name="password"
+                                                    type={showPassword ? 'text' : 'password'}
+                                                    placeholder="••••••••"
+                                                    className="pl-10 pr-10 bg-[#181818] border-[#333] text-gray-100 placeholder:text-gray-500 focus:border-[#fefefe] focus:ring-[#fefefe]/20"
+                                                />
+                                                <button
+                                                    type="button"
+                                                    tabIndex={-1}
+                                                    onClick={() => setShowPassword((v) => !v)}
+                                                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-200 focus:outline-none"
+                                                >
+                                                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                                </button>
+                                            </div>
+                                            <ErrorMessage name="password" component="div" className="text-red-400 text-xs mt-1" />
+                                        </div>
+
+                                        {/* Submit Button */}
+                                        <Button
+                                            type="submit"
+                                            disabled={isSubmitting || loadingAuth}
+                                            className="w-full bg-[#fff] hover:bg-gray-400  text-[#181818] font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                            size="lg"
+                                        >
+                                            {isSubmitting || loadingAuth ? (
+                                                <div className="flex items-center justify-center gap-2">
+                                                    <div className="w-4 h-4 border-2 border-[#181818] border-t-transparent rounded-full animate-spin"></div>
+                                                    Entrando...
+                                                </div>
+                                            ) : (
+                                                'Entrar no sistema'
+                                            )}
+                                        </Button>
+                                    </Form>
+                                )}
+                            </Formik>
 
                             {/* Footer Links */}
                             <div className="space-y-4 pt-4 border-t border-[#333]">
-
                                 <div className="text-center">
                                     <p className="text-gray-400 text-sm">
-                                        Não tem uma conta?{' '}
-                                        <Link
+                                        {/* Não tem uma conta?{' '} */}
+                                        {/* <Link
                                             href="/SignUp"
                                             className="text-[#fefefe] hover:text-[#fefefe] font-medium transition-colors"
                                         >
                                             Cadastre-se
-                                        </Link>
+                                        </Link> */}
                                     </p>
                                 </div>
                             </div>

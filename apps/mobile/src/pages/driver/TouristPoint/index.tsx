@@ -375,6 +375,7 @@ export default function TouristPointManagement() {
 
                         >
                             <Formik
+                                enableReinitialize
                                 initialValues={{
                                     id: editingTouristPoint?.id || '',
                                     driverId: editingTouristPoint?.driverId || user.id || '',

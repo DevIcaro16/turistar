@@ -19,7 +19,6 @@ function DriverTabNavigator() {
     return (
         <Tab.Navigator
             screenOptions={({ route }) => ({
-
                 headerShown: false
             })}
         >
@@ -30,6 +29,72 @@ function DriverTabNavigator() {
                     title: 'Início',
                     tabBarIcon: ({ color, size }) => (
                         <MaterialIcons name="home" size={size} color={color} />
+                    ),
+                }}
+            />
+
+            <Tab.Screen
+                name="Profile"
+                component={Perfil}
+                options={{
+                    title: 'Perfil',
+                    tabBarIcon: ({ color, size }) => (
+                        <MaterialIcons name="person" size={size} color={color} />
+                    ),
+                }}
+            />
+
+            <Tab.Screen
+                name="CarManagement"
+                component={CarManagement}
+                options={{
+                    title: 'Meus Veículos',
+                    tabBarIcon: ({ color, size }) => (
+                        <MaterialIcons name="directions-car" size={size} color={color} />
+                    ),
+                }}
+            />
+
+            <Tab.Screen
+                name="TouristPointManagement"
+                component={TouristPointManagement}
+                options={{
+                    title: 'Pontos Turisticos',
+                    tabBarIcon: ({ color, size }) => (
+                        <MaterialIcons name="tour" size={size} color={color} />
+                    ),
+                }}
+            />
+
+            <Tab.Screen
+                name="TourPackageManagement"
+                component={TourPackageManagement}
+                options={{
+                    title: 'Pacotes de Passeio',
+                    tabBarIcon: ({ color, size }) => (
+                        <MaterialIcons name="money" size={size} color={color} />
+                    ),
+                }}
+            />
+
+            <Tab.Screen
+                name="ToursManagement"
+                component={ToursManagement}
+                options={{
+                    title: 'Passeios',
+                    tabBarIcon: ({ color, size }) => (
+                        <MaterialIcons name="directions-bus" size={size} color={color} />
+                    ),
+                }}
+            />
+
+            <Tab.Screen
+                name="DriverWallet"
+                component={DriverWallet}
+                options={{
+                    title: 'Carteira',
+                    tabBarIcon: ({ color, size }) => (
+                        <MaterialIcons name="wallet" size={size} color={color} />
                     ),
                 }}
             />

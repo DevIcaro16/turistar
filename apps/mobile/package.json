@@ -22,6 +22,7 @@
     "expo-linking": "~7.0.5",
     "expo-notifications": "~0.29.14",
     "expo-permissions": "^14.4.0",
+    "expo-router": "^5.1.4",
     "formik": "^2.4.6",
     "module-alias": "^2.2.3",
     "react-native-date-picker": "^5.0.13",

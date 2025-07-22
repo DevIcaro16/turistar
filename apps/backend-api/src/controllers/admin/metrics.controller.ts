@@ -132,6 +132,48 @@ export const getPlatformRevenue = async (req: Request, res: Response, next: Next
     }
 };
 
+export const getTaxPlatform = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const adminId = req.user?.id;
+
+        if (!adminId) {
+            return next(new ValidationError("ID do admin não fornecido!"));
+        }
+
+        const revenue = await MetricsAdminService.getTaxPlatform();
+
+        res.status(200).json({
+            success: true,
+            platformRevenue: revenue
+        });
+
+    } catch (error) {
+        return next(error);
+    }
+};
+
+export const getAllTransactions = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const adminId = req.user?.id;
+
+        if (!adminId) {
+            return next(new ValidationError("ID do admin não fornecido!"));
+        }
+
+        const transactions = await MetricsAdminService.getAllTransactions();
+        const count = transactions.length;
+
+        res.status(200).json({
+            success: true,
+            transactions,
+            count
+        });
+
+    } catch (error) {
+        return next(error);
+    }
+};
+
 export const getAllMetrics = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const adminId = req.user?.id;
@@ -145,6 +187,30 @@ export const getAllMetrics = async (req: Request, res: Response, next: NextFunct
         res.status(200).json({
             success: true,
             metrics
+        });
+
+    } catch (error) {
+        return next(error);
+    }
+};
+
+export const updateConfig = async (req: Request, res: Response, next: NextFunction) => {
+
+    try {
+
+        const adminId = req.user?.id;
+
+        if (!adminId) {
+            return next(new ValidationError("ID do admin não fornecido!"));
+        }
+
+        const { tax } = req.body;
+
+        await MetricsAdminService.updateTaxPlatform(tax);
+
+        res.status(200).json({
+            success: true,
+            message: 'Configuração atualiza com Suceso!'
         });
 
     } catch (error) {

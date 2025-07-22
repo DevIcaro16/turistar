@@ -93,21 +93,30 @@ export const handleForgotPassword = async (
     userType: "user" | "driver"
 ) => {
     try {
-
         const { email } = req.body;
 
         if (!email) throw new ValidationError("Email é Obrigatório!");
 
-        const user = userType === "driver" && await prisma.driver.findFirst({ where: { email } });
+        let user: any = null;
 
-        if (!user) throw new ValidationError(`${userType === "driver" ? "Motorista" : "Usuário"} não encontrado com este Email!`);
+        if (userType === "driver") {
+            user = await prisma.driver.findFirst({ where: { email } });
+        }
+
+        if (userType === "user") {
+            user = await prisma.user.findFirst({ where: { email } });
+        }
+
+        if (!user) {
+            throw new ValidationError(`${userType === "driver" ? "Motorista" : "Usuário"} não encontrado com este Email!`);
+        }
 
         //restrições OTP
         await checkOtpRestrictions(email);
         await trackOtpRequests(email);
 
         //Gerando OTP e envio de Email
-        await sendOtp(email, user.email, "forgot-password-user-email");
+        await sendOtp(user.name, email, "forgot-password-user-email");
 
         res.status(200).json({
             success: true,
@@ -118,6 +127,7 @@ export const handleForgotPassword = async (
         return next(error);
     }
 }
+
 
 
 export const verifyForgotPasswordOtp = async (

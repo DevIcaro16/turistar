@@ -69,7 +69,8 @@ export const getAdminById = async (req: Request, res: Response, next: NextFuncti
         const admin = await AuthService.getAdminById(adminId);
         res.status(200).json({
             success: true,
-            admin: admin
+            admin: admin,
+            role: 'admin'
         });
     } catch (error) {
         return next(error);

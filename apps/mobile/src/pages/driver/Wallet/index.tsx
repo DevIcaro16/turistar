@@ -51,7 +51,7 @@ export default function DriverWallet() {
         fetchTransactions();
         const interval = setInterval(() => {
             fetchTransactions();
-        }, 10000);
+        }, 20000);
         return () => clearInterval(interval);
     }, []);
 
@@ -170,8 +170,6 @@ export default function DriverWallet() {
                     ))}
                     {/* Resumo do dia */}
                     <View style={styles.summaryCard}>
-                        <Text style={styles.summaryTitle}>Saldo do dia</Text>
-                        <Text style={styles.summaryValue}>R$ {saldoDia.toFixed(2)}</Text>
                         <View style={styles.summaryRow}>
                             <Text style={styles.summaryLabel}>Créditos: </Text>
                             <Text style={styles.summaryCredit}>R$ {totalsCredit.amount.toFixed(2)}</Text>
@@ -183,6 +181,16 @@ export default function DriverWallet() {
                         <View style={styles.summaryRow}>
                             <Text style={styles.summaryLabel}>Pendentes: </Text>
                             <Text style={styles.summaryPendant}>R$ {totalsPendant.amount.toFixed(2)}</Text>
+                        </View>
+                        <View style={{ flexDirection: 'row', gap: 48, marginTop: 24 }}>
+                            <View style={{ flexDirection: 'column' }}>
+                                <Text style={styles.summaryTitle}>Saldo do dia</Text>
+                                <Text style={styles.summaryValue}>R$ {user?.wallet.toFixed(2) ?? 0}</Text>
+                            </View>
+                            {/* <View style={{ flexDirection: 'column' }}>
+                                <Text style={styles.summaryTitle}>Saldo do dia</Text>
+                                <Text style={styles.summaryValue}>R$ {user?.wallet.toFixed(2)}</Text>
+                            </View> */}
                         </View>
                     </View>
                 </ScrollView>

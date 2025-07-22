@@ -1,7 +1,8 @@
 import express, { Router } from "express";
-import { loginUser, userRegistration, updateUser, deleteUser, getUserById, meUser, refreshUserToken } from "../../controllers/user/auth.controller";
+import { loginUser, userRegistration, updateUser, deleteUser, getUserById, meUser, refreshUserToken, userForgotPassword, resetUserPassword } from "../../controllers/user/auth.controller";
 import { authenticateUser } from "../../utils/auth/auth.middleware";
 import { ReservationsByUser, ReservationsByUserAndDate, ReserveCancellation, ReserveConfirmation, ReserveRegistration } from "../../controllers/user/reserve.controller";
+import { verifyForgotPasswordOtp } from "../../utils/auth/auth.helper";
 
 const userRouter: Router = express.Router();
 
@@ -10,6 +11,9 @@ userRouter.get('/reservations/today', authenticateUser, ReservationsByUserAndDat
 userRouter.post('/registration', userRegistration);
 userRouter.post('/login', loginUser);
 userRouter.post('/refresh', refreshUserToken);
+userRouter.post("/forgot-password-user", userForgotPassword);
+userRouter.post("/verify-forgot-password-user", verifyForgotPasswordOtp);
+userRouter.post("/reset-password-user", resetUserPassword);
 userRouter.put('/:userId', authenticateUser, updateUser);
 userRouter.delete('/:userId', authenticateUser, deleteUser);
 userRouter.get('/:userId', authenticateUser, getUserById);

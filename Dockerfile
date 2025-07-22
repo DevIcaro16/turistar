@@ -8,7 +8,7 @@ ENV PORT=8000
 WORKDIR /app
 
 # Copia arquivos de dependência
-COPY package.json package-lock.json* prisma ./ 
+COPY package.json package-lock.json* prisma ./
 
 # Instala dependências de produção
 RUN npm install --omit=dev
@@ -18,6 +18,9 @@ RUN npx prisma generate
 
 # Copia todo o código da aplicação (apps/, packages/, dist/, etc.)
 COPY . .
+
+# Compila o backend (ajuste o comando se necessário)
+RUN cd apps/backend-api && npm install && npm run build
 
 # Comando para iniciar a aplicação
 CMD ["node", "apps/backend-api/dist/main.js"]

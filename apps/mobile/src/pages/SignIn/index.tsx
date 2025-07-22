@@ -156,6 +156,12 @@ export default function SignIn() {
                                         <Text style={styles.linkText}> Cadastre-se</Text>
                                     </Text>
                                 </TouchableOpacity>
+                                <TouchableOpacity onPress={() => (navigator as any).navigate('ForgotPassword', { activeTab })} style={{ marginTop: 12 }}>
+                                    <Text style={styles.footerText}>
+                                        Esqueçeu sua Senha?
+                                        <Text style={styles.linkText}> Recupere aqui</Text>
+                                    </Text>
+                                </TouchableOpacity>
                             </View>
                         </View>
                     )}

@@ -21,7 +21,7 @@ export const SignInSchema = Yup.object().shape({
         .required('Email é Obrigatório!'),
     password: Yup.string()
         .required('Senha é Obrigatório!')
-        .min(6, 'Senha deve ter no mínimo 6 caracteres'),
+        .min(6, 'Senha deve ter no mínimo 8 caracteres'),
 });
 
 export type BasicRegister = Yup.InferType<typeof SignUpSchema>;

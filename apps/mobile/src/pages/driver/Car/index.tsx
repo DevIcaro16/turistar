@@ -193,6 +193,7 @@ export default function CarManagement() {
     };
 
     const openEditModal = (car: Car) => {
+        console.log('Abrindo modal para editar:', car);
         setEditingCar(car);
         setModalVisible(true);
     };
@@ -314,7 +315,7 @@ export default function CarManagement() {
                             </TouchableOpacity>
                         </View>
                         <ScrollView
-                            style={styles.modalScrollView}
+                            style={{ flexGrow: 0 }}
                             showsVerticalScrollIndicator={false}
                             contentContainerStyle={styles.modalScrollContent}
                         >

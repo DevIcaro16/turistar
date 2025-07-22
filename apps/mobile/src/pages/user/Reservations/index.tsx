@@ -3,6 +3,7 @@ import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, Modal, Image
 import styles from './styles';
 import api from '../../../util/api/api';
 import AlertComponent from '../../../components/AlertComponent';
+import { useStripe } from '@stripe/stripe-react-native';
 
 interface ReservationData {
     id: string;
@@ -50,6 +51,7 @@ export default function UserReservations() {
     const [confirmAction, setConfirmAction] = useState<'confirm' | 'cancel' | null>(null);
     const [confirmModalVisible, setConfirmModalVisible] = useState(false);
     const intervalRef = useRef<NodeJS.Timeout | null>(null);
+    const { initPaymentSheet, presentPaymentSheet } = useStripe();
 
     useEffect(() => {
         fetchReservations();
@@ -91,28 +93,61 @@ export default function UserReservations() {
     const handleConfirmAction = async () => {
         if (!selectedReservation || !confirmAction) return;
         setActionLoading(true);
-        try {
-            if (confirmAction === 'confirm') {
+
+        if (confirmAction === 'confirm') {
+            try {
+                // 1. Crie o PaymentIntent no backend
+                const paymentIntentRes = await api.post('/stripe/create-payment-intent', {
+                    amount: Math.round(selectedReservation.amount * 100), // em centavos
+                    metadata: { reserveId: selectedReservation.id }
+                });
+
+                // 2. Inicialize o PaymentSheet
+                const { error: initError } = await initPaymentSheet({
+                    paymentIntentClientSecret: paymentIntentRes.data.clientSecret,
+                    merchantDisplayName: "Turistar, Inc."
+                });
+                if (initError) {
+                    setAlertMessage('Erro ao inicializar pagamento: ' + initError.message);
+                    setAlertType('error');
+                    setAlertVisible(true);
+                    setActionLoading(false);
+                    return;
+                }
+
+                // 3. Apresente o PaymentSheet
+                const { error: presentError } = await presentPaymentSheet();
+                if (presentError) {
+                    setAlertMessage('Pagamento não realizado: ' + presentError.message);
+                    setAlertType('error');
+                    setAlertVisible(true);
+                    setActionLoading(false);
+                    return;
+                }
+
+                // 4. Se chegou aqui, pagamento foi aprovado! Confirme a reserva no backend
                 await api.post('/user/reserve-confirmation', { ReserveId: selectedReservation.id });
                 setAlertMessage('Reserva confirmada com sucesso!');
                 setAlertType('success');
-            } else {
-                await api.post('user/reserve-cancellation', { ReserveId: selectedReservation.id });
-                setAlertMessage('Reserva cancelada e valor estornado!');
-                setAlertType('success');
+                setAlertVisible(true);
+                fetchReservations();
+            } catch (error: any) {
+                setAlertMessage('Erro ao processar pagamento: ' + (error.response?.data?.message || error.message));
+                setAlertType('error');
+                setAlertVisible(true);
             }
+        } else {
+            // cancelamento normal
+            await api.post('user/reserve-cancellation', { ReserveId: selectedReservation.id });
+            setAlertMessage('Reserva cancelada e valor estornado!');
+            setAlertType('success');
             setAlertVisible(true);
             fetchReservations();
-        } catch (error: any) {
-            setAlertMessage(error.response?.data?.message || 'Erro ao processar ação');
-            setAlertType('error');
-            setAlertVisible(true);
-        } finally {
-            setActionLoading(false);
-            setConfirmModalVisible(false);
-            setDetailModalVisible(false);
-            setConfirmAction(null);
         }
+        setActionLoading(false);
+        setConfirmModalVisible(false);
+        setDetailModalVisible(false);
+        setConfirmAction(null);
     };
 
     if (loading) {

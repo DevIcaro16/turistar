@@ -20,13 +20,27 @@ export class MetricsAdminService {
     }
 
     static async getAllReserves() {
-        const allReserves = await prisma.reservations.findMany();
+        const allReserves = await prisma.reservations.findMany({
+            include: {
+                tourPackage: true,
+            }
+        });
         return allReserves;
     }
 
     static async getAllTouristPoints() {
         const allTouristPoints = await prisma.touristPoint.findMany();
         return allTouristPoints;
+    }
+
+    static async getAllTransactions() {
+        const allTransactions = await prisma.transactions.findMany({
+            include: {
+                user: true,
+                driver: true
+            }
+        });
+        return allTransactions;
     }
 
     static async getPlatformRevenue() {
@@ -36,14 +50,35 @@ export class MetricsAdminService {
         return taxConfig?.value || 0;
     }
 
+    static async getTaxPlatform() {
+        const taxConfig = await prisma.configurations.findFirst({
+            where: { key: 'tax' }
+        });
+        return taxConfig?.valueReference || 0;
+    }
+
+    static async updateTaxPlatform(tax: string) {
+
+        const taxConfig = await prisma.configurations.update({
+            where: { key: 'tax' },
+            data: {
+                valueReference: String(tax)
+            }
+        });
+
+        return true;
+    }
+
     static async getAllMetrics() {
-        const [users, drivers, tourPackages, reserves, touristPoints, platformRevenue] = await Promise.all([
+        const [users, drivers, tourPackages, reserves, touristPoints, transactions, platformRevenue] = await Promise.all([
             this.getAllUsers(),
             this.getAllDrivers(),
             this.getAllTourPackages(),
             this.getAllReserves(),
             this.getAllTouristPoints(),
-            this.getPlatformRevenue()
+            this.getAllTransactions(),
+            this.getPlatformRevenue(),
+            this.getTaxPlatform(),
         ]);
 
         return {
@@ -66,6 +101,10 @@ export class MetricsAdminService {
             touristPoints: {
                 data: touristPoints,
                 count: touristPoints.length
+            },
+            transactions: {
+                data: transactions,
+                count: transactions.length
             },
             platformRevenue: {
                 value: platformRevenue
