@@ -1,4 +1,3 @@
-import React, { useState, useContext } from "react";
 import { Formik } from 'formik';
 import {
     Text,
@@ -9,44 +8,17 @@ import {
     KeyboardAvoidingView,
     Platform,
     ActivityIndicator,
-    Alert
 } from "react-native";
-import { AuthContext } from "../../contexts/auth";
-import { useNavigation, useRoute } from "@react-navigation/native";
-import { SignInSchema } from "../../schemas/schema-yup";
 import { styles } from "./styles";
 import { ForgotPasswordSchema } from "../../schemas/schema-forgotpassword";
-
-type TypeUser = 'user' | 'driver';
-
-interface FormValues {
-    email: string;
-}
+import { ForgotPasswordViewModel } from "./ForgotPasswordViewModel";
 
 export default function ForgotPassword() {
 
-    const route = useRoute();
-    const navigation = useNavigation();
-    const { activeTab }: any = route.params;
-    const userType = (activeTab as TypeUser);
-    const [loading, setLoading] = useState<boolean>(false);
-    const navigator = useNavigation();
-    const [loadingAuth, setLoadingAuth] = useState(false);
-    const { sendForgotPasswordCode } = useContext(AuthContext);
-
-    const handleResetPass = async (values: FormValues) => {
-        setLoading(true);
-        try {
-            await sendForgotPasswordCode(values.email, activeTab);
-        } catch (error) {
-            console.error('Erro no envio do código:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
+    const forgotPasswordViewModel = ForgotPasswordViewModel();
 
     return (
+
         <SafeAreaView style={[styles.container, { backgroundColor: '#f7fafc' }]}>
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -62,7 +34,7 @@ export default function ForgotPassword() {
                         email: '',
                     }}
                     validationSchema={ForgotPasswordSchema}
-                    onSubmit={handleResetPass}
+                    onSubmit={forgotPasswordViewModel.handleResetPass}
                 // onSubmit={() => Alert.alert('testeeee')}
                 >
                     {
@@ -89,25 +61,24 @@ export default function ForgotPassword() {
                                     style={[
                                         styles.loginButton,
                                         { backgroundColor: '#3B82F6', borderRadius: 8, marginTop: 8 },
-                                        (loading || loadingAuth || isSubmitting) && styles.loginButtonDisabled
+                                        (forgotPasswordViewModel.loading || forgotPasswordViewModel.loadingAuth || isSubmitting) && styles.loginButtonDisabled
                                     ]}
                                     onPress={() => handleSubmit()}
-                                    // onPress={() => Alert.alert('teste')}
-                                    disabled={loading || loadingAuth || isSubmitting}
+                                    disabled={forgotPasswordViewModel.loading || forgotPasswordViewModel.loadingAuth || isSubmitting}
                                 >
-                                    {(loading || loadingAuth || isSubmitting) ? (
+                                    {(forgotPasswordViewModel.loading || forgotPasswordViewModel.loadingAuth || isSubmitting) ? (
                                         <ActivityIndicator color="#FFFFFF" size="small" />
                                     ) : (
                                         <Text style={[styles.loginButtonText, { fontWeight: 'bold', fontSize: 16 }]}>
                                             Verificar Email como
                                             {
-                                                userType === "driver" ? " Motorista" : " Usuário"
+                                                forgotPasswordViewModel.userType === "driver" ? " Motorista" : " Usuário"
                                             }
                                         </Text>
                                     )}
                                 </TouchableOpacity>
                                 <View style={[styles.footer, { marginTop: 24, alignItems: 'center' }]}>
-                                    <TouchableOpacity onPress={() => navigator.navigate('SignIn' as never)}>
+                                    <TouchableOpacity onPress={forgotPasswordViewModel.goToSignIn}>
                                         <Text style={[styles.footerText, { color: '#2563eb', fontWeight: 'bold' }]}>
                                             Voltar para Login
                                         </Text>

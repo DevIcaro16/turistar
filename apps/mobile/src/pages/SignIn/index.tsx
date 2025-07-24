@@ -1,53 +1,14 @@
-import React, { useState, useContext } from "react";
+import React from "react";
 import { Formik } from 'formik';
-import {
-    Text,
-    View,
-    TextInput,
-    TouchableOpacity,
-    SafeAreaView,
-    KeyboardAvoidingView,
-    Platform,
-    ActivityIndicator,
-    Alert
-} from "react-native";
-import { AuthContext } from "../../contexts/auth";
-import { useNavigation } from "@react-navigation/native";
-import * as yup from "yup";
-import { SignInSchema } from "../../schemas/schema-yup";
+import { Text, View, TextInput, TouchableOpacity, SafeAreaView, KeyboardAvoidingView, Platform, ActivityIndicator } from "react-native";
+import { useSignInViewModel } from "./SignInViewModel";
+import { SignInSchema } from "./types";
 import { styles } from "./styles";
 import { Ionicons } from '@expo/vector-icons';
 
-type typeUser = 'user' | 'driver';
-
-interface FormValues {
-    email: string;
-    password: string;
-}
-
 export default function SignIn() {
-    const [activeTab, setActiveTab] = useState<typeUser>('user');
-    const [loading, setLoading] = useState<boolean>(false);
-    const [passVisible, setPassVisible] = useState<boolean>(false);
 
-    const navigator = useNavigation();
-    const { signIn, loadingAuth } = useContext(AuthContext);
-
-    const toggleVisibility = () => {
-        setPassVisible(!passVisible);
-    }
-
-    const handleLogin = async (values: FormValues) => {
-        setLoading(true);
-        // Alert.alert('LOGIN');
-        try {
-            await signIn(values.email, values.password, activeTab);
-        } catch (error) {
-            console.error('Erro no login:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
+    const signInViewModel = useSignInViewModel();
 
     return (
         <SafeAreaView style={styles.container}>
@@ -62,31 +23,27 @@ export default function SignIn() {
 
                 <View style={styles.tabContainer}>
                     <TouchableOpacity
-                        style={[styles.tab, activeTab === 'user' && styles.activeTab]}
-                        onPress={() => setActiveTab('user')}
+                        style={[styles.tab, signInViewModel.activeTab === 'user' && styles.activeTab]}
+                        onPress={() => signInViewModel.setActiveTab('user')}
                     >
-                        <Text style={[styles.tabText, activeTab === 'user' && styles.activeTabText]}>
+                        <Text style={[styles.tabText, signInViewModel.activeTab === 'user' && styles.activeTabText]}>
                             Usuário
                         </Text>
                     </TouchableOpacity>
-
                     <TouchableOpacity
-                        style={[styles.tab, activeTab === 'driver' && styles.activeTab]}
-                        onPress={() => setActiveTab('driver')}
+                        style={[styles.tab, signInViewModel.activeTab === 'driver' && styles.activeTab]}
+                        onPress={() => signInViewModel.setActiveTab('driver')}
                     >
-                        <Text style={[styles.tabText, activeTab === 'driver' && styles.activeTabText]}>
+                        <Text style={[styles.tabText, signInViewModel.activeTab === 'driver' && styles.activeTabText]}>
                             Motorista
                         </Text>
                     </TouchableOpacity>
                 </View>
 
                 <Formik
-                    initialValues={{
-                        email: '',
-                        password: ''
-                    }}
+                    initialValues={{ email: '', password: '' }}
                     validationSchema={SignInSchema}
-                    onSubmit={handleLogin}
+                    onSubmit={signInViewModel.handleLogin}
                 >
                     {({ handleChange, handleBlur, handleSubmit, isSubmitting, values, errors, touched }) => (
                         <View style={styles.formContainer}>
@@ -116,15 +73,15 @@ export default function SignIn() {
                                         value={values.password}
                                         onChangeText={handleChange('password')}
                                         onBlur={handleBlur('password')}
-                                        secureTextEntry={!passVisible}
+                                        secureTextEntry={!signInViewModel.passVisible}
                                         autoCapitalize="none"
                                     />
                                     <TouchableOpacity
                                         style={styles.eyeButton}
-                                        onPress={toggleVisibility}
+                                        onPress={signInViewModel.toggleVisibility}
                                     >
                                         <Ionicons
-                                            name={passVisible ? 'eye-off' : 'eye'}
+                                            name={signInViewModel.passVisible ? 'eye-off' : 'eye'}
                                             size={20}
                                             color="#6B7280"
                                         />
@@ -136,27 +93,26 @@ export default function SignIn() {
                             </View>
 
                             <TouchableOpacity
-                                style={[styles.loginButton, (loading || loadingAuth || isSubmitting) && styles.loginButtonDisabled]}
+                                style={[styles.loginButton, (signInViewModel.loading || signInViewModel.loadingAuth || isSubmitting) && styles.loginButtonDisabled]}
                                 onPress={handleSubmit as any}
-                                disabled={loading || loadingAuth || isSubmitting}
+                                disabled={signInViewModel.loading || signInViewModel.loadingAuth || isSubmitting}
                             >
-                                {(loading || loadingAuth || isSubmitting) ? (
+                                {(signInViewModel.loading || signInViewModel.loadingAuth || isSubmitting) ? (
                                     <ActivityIndicator color="#FFFFFF" size="small" />
                                 ) : (
                                     <Text style={styles.loginButtonText}>
-                                        Entrar como {activeTab === 'user' ? 'Usuário' : 'Motorista'}
+                                        Entrar como {signInViewModel.activeTab === 'user' ? 'Usuário' : 'Motorista'}
                                     </Text>
                                 )}
                             </TouchableOpacity>
-
                             <View style={styles.footer}>
-                                <TouchableOpacity onPress={() => navigator.navigate('SignUp' as never)}>
+                                <TouchableOpacity onPress={signInViewModel.goToSignUp}>
                                     <Text style={styles.footerText}>
                                         Não tem uma conta?
                                         <Text style={styles.linkText}> Cadastre-se</Text>
                                     </Text>
                                 </TouchableOpacity>
-                                <TouchableOpacity onPress={() => (navigator as any).navigate('ForgotPassword', { activeTab })} style={{ marginTop: 12 }}>
+                                <TouchableOpacity onPress={signInViewModel.goToForgotPassword} style={{ marginTop: 12 }}>
                                     <Text style={styles.footerText}>
                                         Esqueçeu sua Senha?
                                         <Text style={styles.linkText}> Recupere aqui</Text>

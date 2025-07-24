@@ -58,7 +58,7 @@ export class ReserveService {
 
         //SE TEM VALOR DISPONIVEL PARA RESERVA
         if (userExisting.wallet < amount) {
-            throw new ValidationError("Carteira Virtual inferior ao valor total das reservas!");
+            throw new ValidationError("Valor disponivel na Carteira Virtual inferior ao valor total das reservas!");
         }
 
         //RESERVA
@@ -85,18 +85,6 @@ export class ReserveService {
             }
         });
 
-
-        //CRIAÇÃO DA TRANSACAO
-
-        await prisma.transactions.create({
-            data: {
-                amount,
-                type: TransactionType.DEBIT,
-                description: 'Reserva do pacote de passeio: ' + tourPackageExisting.title,
-                userId,
-                ReservationId: reservation.id
-            }
-        });
 
         return reservation;
 
@@ -133,14 +121,19 @@ export class ReserveService {
 
         if (!reserveIdExisting) throw new NotFoundError("Reserva não existente!");
 
-        // Verificar se a reserva já foi confirmada
         if (reserveIdExisting.confirmed) {
             throw new ValidationError("Esta reserva já foi confirmada!");
         }
 
-        // Verificar se a data da viagem já não passou
-        const currentDate = new Date();
-        if (reserveIdExisting.tourPackage.date_tour <= currentDate) {
+        // Ajusta a data atual para GMT-3 (Brasília)
+        const now = new Date();
+        const gmt3Now = new Date(now.getTime() - (now.getTimezoneOffset() * 60000) - (3 * 60 * 60 * 1000));
+        console.log(gmt3Now);
+
+        // Converta a data do tour para Date, se necessário
+        const tourDate = new Date(reserveIdExisting.tourPackage.date_tour);
+
+        if (tourDate <= gmt3Now) {
             throw new ValidationError("Não é possível confirmar uma reserva para uma viagem que já passou!");
         }
 
@@ -174,6 +167,18 @@ export class ReserveService {
         const tourPackage = await prisma.tourPackage.findFirst({
             where: {
                 id: reserveIdExisting.tourPackageId
+            }
+        });
+
+        //CRIAÇÃO DA TRANSACAO
+
+        await prisma.transactions.create({
+            data: {
+                amount: reserveIdExisting.amount,
+                type: TransactionType.DEBIT,
+                description: 'Reserva do pacote de passeio: ' + reserveIdExisting.tourPackage.title,
+                userId,
+                ReservationId: reserveIdExisting.id
             }
         });
 
@@ -231,8 +236,11 @@ export class ReserveService {
         }
 
         // Verificar se a data da viagem já não passou
-        const currentDate = new Date();
-        if (reserveIdExisting.tourPackage.date_tour <= currentDate) {
+        const now = new Date();
+        const gmt3Now = new Date(now.getTime() - (now.getTimezoneOffset() * 60000) - (3 * 60 * 60 * 1000));
+        const tourDate = new Date(reserveIdExisting.tourPackage.date_tour);
+
+        if (tourDate <= gmt3Now) {
             throw new ValidationError("Não é possível cancelar uma reserva para uma viagem que já passou!");
         }
 

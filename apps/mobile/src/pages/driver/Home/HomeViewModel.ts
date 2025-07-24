@@ -1,0 +1,93 @@
+import { useNavigation } from "@react-navigation/native";
+import { AuthContext } from '../../../../src/contexts/auth';
+import api from '../../../util/api/api';
+import { useContext, useEffect, useState } from "react";
+import { Alert, Linking } from "react-native";
+
+
+export function formatDateTime(date: string) {
+    const d = new Date(date);
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    const hour = String(d.getHours()).padStart(2, '0');
+    const minute = String(d.getMinutes()).padStart(2, '0');
+    return `${day}/${month}/${year} ${hour}:${minute}`;
+}
+
+export function HomeViewModel(): {
+    user: any;
+    passeiosHojeCont: number;
+    ganhosHoje: number;
+    passeiosHoje: any[];
+    setModalVisible: (visible: boolean) => void;
+    modalVisible: boolean;
+    handleOpenDashboardPanel: () => void;
+    goTourPackageManagement: () => void;
+    goDriverWallet: () => void;
+} {
+
+    const { user } = useContext(AuthContext);
+    const [passeiosHojeCont, setPasseiosHojeCont] = useState<number>(0);
+    const [passeiosHoje, setPasseiosHoje] = useState<any[]>([]); // array!
+    const [ganhosHoje, setGanhosHoje] = useState(0);
+    const [modalVisible, setModalVisible] = useState<boolean>(false);
+
+    const navigator = useNavigation();
+
+    useEffect(() => {
+        fetchStats();
+    }, []);
+
+    async function fetchStats() {
+        try {
+            // Buscar pacotes do dia
+            const today = new Date();
+            const dateStr = today.toISOString().split('T')[0]; // yyyy-mm-dd
+            const tourRes = await api.get(`/TourPackage/driver/${user?.id}`);
+            const passeios = (tourRes.data.tourPackages || []).filter((p: any) => p.date_tour.startsWith(dateStr));
+
+            setPasseiosHoje(passeios);
+            setPasseiosHojeCont(passeios.length);
+
+            // Buscar ganhos do dia
+            const transRes = await api.get(`/transaction/driver/all`);
+            const transacoes = transRes.data.transactions || [];
+            const ganhos = transacoes
+                .filter((t: any) => t.type === 'CREDIT' && t.createdAt.startsWith(dateStr))
+                .reduce((sum: number, t: any) => sum + t.amount, 0);
+            setGanhosHoje(ganhos);
+        } catch (e) {
+            setPasseiosHojeCont(0);
+            setGanhosHoje(0);
+        }
+    }
+
+    function handleOpenDashboardPanel() {
+        Alert.alert(
+            'Dashboard',
+            'Deseja ser redirecionado para o painel dashboard?',
+            [
+                { text: 'Cancelar', style: 'cancel' },
+                {
+                    text: 'Ir para o Painel', style: 'default', onPress: () => Linking.openURL('http://192.168.15.3:3000/Login')
+                }
+            ]
+        );
+    }
+
+    const goTourPackageManagement = () => navigator.navigate('TourPackageManagement' as never);
+    const goDriverWallet = () => navigator.navigate('DriverWallet' as never);
+
+    return {
+        user,
+        passeiosHojeCont,
+        ganhosHoje,
+        passeiosHoje,
+        setModalVisible,
+        modalVisible,
+        handleOpenDashboardPanel,
+        goTourPackageManagement,
+        goDriverWallet
+    };
+} 

@@ -84,7 +84,7 @@ export default function Home() {
                 <View style={styles.statCard}>
                     <MaterialIcons name="attach-money" size={32} color="#4CAF50" />
                     <Text style={styles.statNumber}>R$ {saldoHoje.toFixed(2)}</Text>
-                    <Text style={styles.statLabel}>Saldo</Text>
+                    <Text style={styles.statLabel}>Gastos Hoje</Text>
                 </View>
             </View>
 

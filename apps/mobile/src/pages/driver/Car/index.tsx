@@ -1,10 +1,9 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React from 'react';
 import {
     View,
     Text,
     FlatList,
     TouchableOpacity,
-    Alert,
     RefreshControl,
     ActivityIndicator,
     TextInput,
@@ -14,199 +13,15 @@ import {
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Formik } from 'formik';
-import * as Yup from 'yup';
 import { Picker } from '@react-native-picker/picker';
-import { AuthContext } from '../../../contexts/auth';
 import AlertComponent from '../../../components/AlertComponent';
 import styles from './styles';
-import api from '../../../util/api/api';
 import { transportOptions } from '../../../util/types/transportTypes';
-import * as ImagePicker from 'expo-image-picker';
-
-interface Car {
-    id: string;
-    type: string;
-    model: string;
-    capacity: number;
-    image?: string;
-    createdAt: string;
-    updatedAt: string;
-}
-
-interface CarFormData {
-    type: string;
-    model: string;
-    capacity: string;
-}
-
-
-const validationSchema = Yup.object().shape({
-    type: Yup.string().required('Tipo de transporte é obrigatório'),
-    model: Yup.string().required('Modelo é obrigatório'),
-    capacity: Yup.string()
-        .required('Capacidade é obrigatória')
-        .max(1, 'Capacidade deve ser um valor entre 1 e 9')
-        .matches(/^\d+$/, 'Capacidade deve ser um número')
-});
+import { useCarViewModel } from './CarViewModel';
+import { validationSchema, initialFormValues, CarFormData, Car } from './types';
 
 export default function CarManagement() {
-    const { user } = useContext<any>(AuthContext);
-    const [cars, setCars] = useState<Car[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [refreshing, setRefreshing] = useState(false);
-    const [modalVisible, setModalVisible] = useState(false);
-    const [editingCar, setEditingCar] = useState<Car | null>(null);
-    const [alertVisible, setAlertVisible] = useState(false);
-    const [alertMessage, setAlertMessage] = useState('');
-    const [alertType, setAlertType] = useState<'success' | 'error'>('success');
-    const [selectedImage, setSelectedImage] = useState<any>(null);
-
-    const showAlert = (message: string, type: 'success' | 'error' = 'success') => {
-        setAlertMessage(message);
-        setAlertType(type);
-        setAlertVisible(true);
-    };
-
-    const fetchCars = async () => {
-        try {
-            const response = await api.get('/car/driver');
-            setCars(response.data.cars || []);
-        } catch (error: any) {
-            console.error('Erro ao buscar carros:', error);
-            showAlert('Erro ao carregar carros', 'error');
-        } finally {
-            setLoading(false);
-            setRefreshing(false);
-        }
-    };
-
-    useEffect(() => {
-        fetchCars();
-    }, []);
-
-    const onRefresh = () => {
-        setRefreshing(true);
-        fetchCars();
-    };
-
-    const pickImage = async () => {
-        const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
-            allowsEditing: true,
-            quality: 0.7,
-        });
-        if (!result.canceled) {
-            setSelectedImage(result.assets[0]);
-        }
-    };
-
-    const handleCreateCar = async (values: CarFormData) => {
-        try {
-            const formData = new FormData();
-            formData.append('type', values.type);
-            formData.append('model', values.model);
-            formData.append('capacity', parseInt(values.capacity));
-            formData.append('driverId', user.id);
-            if (selectedImage) {
-                formData.append('file', {
-                    uri: selectedImage.uri,
-                    name: 'car.jpg',
-                    type: 'image/jpeg',
-                } as any);
-            }
-            await api.post('/car/registration', formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            });
-            showAlert('Carro criado com sucesso!');
-            setModalVisible(false);
-            setSelectedImage(null);
-            fetchCars();
-        } catch (error: any) {
-            console.error('Erro ao criar carro:', error);
-            showAlert(error.response?.data?.message || 'Erro ao criar carro', 'error');
-        }
-    };
-
-    const handleUpdateCar = async (values: CarFormData) => {
-        if (!editingCar) return;
-
-        try {
-            const formData = new FormData();
-            formData.append('type', values.type);
-            formData.append('model', values.model);
-            formData.append('capacity', parseInt(values.capacity));
-
-            if (selectedImage) {
-                formData.append('file', {
-                    uri: selectedImage.uri,
-                    name: 'car.jpg',
-                    type: 'image/jpeg',
-                } as any);
-            }
-
-            await api.put(`/car/${editingCar.id}`, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            });
-
-            showAlert('Carro atualizado com sucesso!');
-            setModalVisible(false);
-            setEditingCar(null);
-            setSelectedImage(null);
-            fetchCars();
-        } catch (error: any) {
-            console.error('Erro ao atualizar carro:', error);
-            showAlert(error.response?.data?.message || 'Erro ao atualizar carro', 'error');
-        }
-    };
-
-    const handleDeleteCar = (car: Car) => {
-        Alert.alert(
-            'Confirmar exclusão',
-            `Tem certeza que deseja excluir o ${car.model}?`,
-            [
-                { text: 'Cancelar', style: 'cancel' },
-                {
-                    text: 'Excluir',
-                    style: 'destructive',
-                    onPress: async () => {
-                        try {
-                            await api.delete(`/car/${car.id}`);
-                            showAlert('Carro excluído com sucesso!');
-                            fetchCars();
-                        } catch (error: any) {
-                            console.error('Erro ao excluir carro:', error);
-                            showAlert(error.response?.data?.message || 'Erro ao excluir carro', 'error');
-                        }
-                    }
-                }
-            ]
-        );
-    };
-
-    const openCreateModal = () => {
-        setEditingCar(null);
-        setModalVisible(true);
-    };
-
-    const openEditModal = (car: Car) => {
-        console.log('Abrindo modal para editar:', car);
-        setEditingCar(car);
-        setModalVisible(true);
-    };
-
-    const getTransportIcon = (type: string) => {
-        const option = transportOptions.find(opt => opt.value === type);
-        return option?.icon || 'directions-car';
-    };
-
-    const getTransportLabel = (type: string) => {
-        const option = transportOptions.find(opt => opt.value === type);
-        return option?.label || type;
-    };
+    const carViewModel = useCarViewModel();
 
     const renderCarCard = ({ item }: { item: Car }) => (
         <View style={styles.carCard}>
@@ -223,25 +38,25 @@ export default function CarManagement() {
             </View>
             <View style={styles.carHeader}>
                 <MaterialIcons
-                    name={getTransportIcon(item.type) as any}
+                    name={carViewModel.getTransportIcon(item.type) as any}
                     size={24}
                     color="#007AFF"
                 />
-                <Text style={styles.carType}>{getTransportLabel(item.type)}</Text>
+                <Text style={styles.carType}>{carViewModel.getTransportLabel(item.type)}</Text>
             </View>
             <Text style={styles.carModel}>{item.model}</Text>
             <Text style={styles.carCapacity}>Capacidade: {item.capacity} pessoas</Text>
             <View style={styles.carActions}>
                 <TouchableOpacity
                     style={[styles.actionButton, styles.editButton]}
-                    onPress={() => openEditModal(item)}
+                    onPress={() => carViewModel.openEditModal(item)}
                 >
                     <MaterialIcons name="edit" size={20} color="#007AFF" />
                     <Text style={styles.editButtonText}>Editar</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                     style={[styles.actionButton, styles.deleteButton]}
-                    onPress={() => handleDeleteCar(item)}
+                    onPress={() => carViewModel.handleDeleteCar(item)}
                 >
                     <MaterialIcons name="delete" size={20} color="#FF3B30" />
                     <Text style={styles.deleteButtonText}>Excluir</Text>
@@ -260,7 +75,7 @@ export default function CarManagement() {
         </View>
     );
 
-    if (loading) {
+    if (carViewModel.loading) {
         return (
             <View style={styles.loadingContainer}>
                 <ActivityIndicator size="large" color="#007AFF" />
@@ -273,44 +88,36 @@ export default function CarManagement() {
         <View style={styles.container}>
             <View style={styles.header}>
                 <Text style={styles.title}>Meus Veículos</Text>
-                <TouchableOpacity style={styles.addButton} onPress={openCreateModal}>
+                <TouchableOpacity style={styles.addButton} onPress={carViewModel.openCreateModal}>
                     <MaterialIcons name="add" size={24} color="#fff" />
                 </TouchableOpacity>
             </View>
 
             <FlatList
-                data={cars}
+                data={carViewModel.cars}
                 renderItem={renderCarCard}
                 keyExtractor={(item) => item.id}
-                contentContainerStyle={cars.length === 0 ? styles.emptyList : styles.listContainer}
+                contentContainerStyle={carViewModel.cars.length === 0 ? styles.emptyList : styles.listContainer}
                 refreshControl={
-                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                    <RefreshControl refreshing={carViewModel.refreshing} onRefresh={carViewModel.onRefresh} />
                 }
                 ListEmptyComponent={renderEmptyState}
                 showsVerticalScrollIndicator={false}
             />
 
             <Modal
-                visible={modalVisible}
+                visible={carViewModel.modalVisible}
                 transparent={true}
                 animationType="slide"
-                onRequestClose={() => {
-                    setModalVisible(false);
-                    setEditingCar(null);
-                }}
+                onRequestClose={carViewModel.closeModal}
             >
                 <View style={styles.modalContainer}>
                     <View style={styles.modalContent}>
                         <View style={styles.modalHeader}>
                             <Text style={styles.modalTitle}>
-                                {editingCar ? 'Editar Veículo' : 'Novo Veículo'}
+                                {carViewModel.editingCar ? 'Editar Veículo' : 'Novo Veículo'}
                             </Text>
-                            <TouchableOpacity
-                                onPress={() => {
-                                    setModalVisible(false);
-                                    setEditingCar(null);
-                                }}
-                            >
+                            <TouchableOpacity onPress={carViewModel.closeModal}>
                                 <MaterialIcons name="close" size={24} color="#8E8E93" />
                             </TouchableOpacity>
                         </View>
@@ -321,32 +128,32 @@ export default function CarManagement() {
                         >
                             <Formik
                                 initialValues={{
-                                    type: editingCar?.type || '',
-                                    model: editingCar?.model || '',
-                                    capacity: editingCar?.capacity?.toString() || '',
+                                    type: carViewModel.editingCar?.type || '',
+                                    model: carViewModel.editingCar?.model || '',
+                                    capacity: carViewModel.editingCar?.capacity?.toString() || '',
                                 }}
                                 validationSchema={validationSchema}
-                                onSubmit={editingCar ? handleUpdateCar : handleCreateCar}
+                                onSubmit={carViewModel.editingCar ? carViewModel.handleUpdateCar : carViewModel.handleCreateCar}
                             >
                                 {({ handleChange, handleBlur, handleSubmit, values, errors, touched, setFieldValue }) => (
                                     <View style={styles.form}>
-                                        <TouchableOpacity style={styles.imagePickerButton} onPress={pickImage}>
+                                        <TouchableOpacity style={styles.imagePickerButton} onPress={carViewModel.pickImage}>
                                             <Text style={styles.imagePickerButtonText}>
-                                                {selectedImage ? 'Trocar Foto' : 'Escolher Foto'}
+                                                {carViewModel.selectedImage ? 'Trocar Foto' : 'Escolher Foto'}
                                             </Text>
                                         </TouchableOpacity>
-                                        {selectedImage && (
+                                        {carViewModel.selectedImage && (
                                             <Image
-                                                source={{ uri: selectedImage.uri }}
+                                                source={{ uri: carViewModel.selectedImage.uri }}
                                                 style={styles.imagePreview}
                                                 resizeMode="cover"
                                             />
                                         )}
-                                        {editingCar?.image && !selectedImage && (
+                                        {carViewModel.editingCar?.image && !carViewModel.selectedImage && (
                                             <View style={styles.currentImageContainer}>
                                                 <Text style={styles.currentImageLabel}>Imagem atual:</Text>
                                                 <Image
-                                                    source={{ uri: editingCar.image }}
+                                                    source={{ uri: carViewModel.editingCar.image }}
                                                     style={styles.imagePreview}
                                                     resizeMode="cover"
                                                 />
@@ -414,10 +221,7 @@ export default function CarManagement() {
                                         <View style={styles.formActions}>
                                             <TouchableOpacity
                                                 style={[styles.formButton, styles.cancelButton]}
-                                                onPress={() => {
-                                                    setModalVisible(false);
-                                                    setEditingCar(null);
-                                                }}
+                                                onPress={carViewModel.closeModal}
                                             >
                                                 <Text style={styles.cancelButtonText}>Cancelar</Text>
                                             </TouchableOpacity>
@@ -427,7 +231,7 @@ export default function CarManagement() {
                                                 onPress={() => handleSubmit()}
                                             >
                                                 <Text style={styles.submitButtonText}>
-                                                    {editingCar ? 'Atualizar' : 'Criar'}
+                                                    {carViewModel.editingCar ? 'Atualizar' : 'Criar'}
                                                 </Text>
                                             </TouchableOpacity>
                                         </View>
@@ -441,10 +245,10 @@ export default function CarManagement() {
 
             <AlertComponent
                 title='Aviso'
-                visible={alertVisible}
-                message={alertMessage}
-                type={alertType}
-                onClose={() => setAlertVisible(false)}
+                visible={carViewModel.alertVisible}
+                message={carViewModel.alertMessage}
+                type={carViewModel.alertType}
+                onClose={() => carViewModel.setAlertVisible(false)}
             />
         </View>
     );

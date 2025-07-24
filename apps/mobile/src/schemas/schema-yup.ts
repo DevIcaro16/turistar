@@ -8,7 +8,7 @@ export const SignUpSchema = Yup.object().shape({
     password_confirmation: Yup.string()
         .oneOf([Yup.ref('password'), ''], 'As senhas devem coincidir')
         .required('Confirmação de senha é obrigatória'),
-    TransportType: Yup.string().when('$activeTab', {
+    TransportType: Yup.string().when('activeTab', {
         is: (val: string) => val === 'driver',
         then: schema => schema.required('Tipo de transporte é obrigatório'),
         otherwise: schema => schema.notRequired(),

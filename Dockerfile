@@ -8,7 +8,7 @@ ENV PORT=8000
 WORKDIR /app
 
 # Copia arquivos de dependência
-COPY package.json package-lock.json* prisma ./
+COPY package.json package-lock.json* prisma ./ 
 
 # Instala dependências de produção
 RUN npm install --omit=dev

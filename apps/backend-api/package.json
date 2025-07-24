@@ -71,6 +71,7 @@
   "dependencies": {
     "@logtail/node": "^0.5.5",
     "cookie-parser": "^1.4.7",
+    "date-fns-tz": "^3.2.0",
     "ejs": "^3.1.10",
     "express-fileupload": "^1.5.2",
     "ioredis": "^5.6.1",
