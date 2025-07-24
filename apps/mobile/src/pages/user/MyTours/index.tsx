@@ -1,59 +1,9 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, Modal, Image, AppState } from 'react-native';
+import React from 'react';
+import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, Modal, Image } from 'react-native';
 import styles from './styles';
-import api from '../../../util/api/api';
-import * as Notifications from 'expo-notifications';
 import AlertComponent from '../../../components/AlertComponent';
-
-interface ReservationData {
-    id: string;
-    amount: number;
-    vacancies_reserved: number;
-    confirmed: boolean;
-    canceled: boolean;
-    createdAt: string;
-    tourPackage: {
-        id: string;
-        title: string;
-        origin_local: string;
-        destiny_local: string;
-        date_tour: string;
-        price: number;
-        car: {
-            type: string;
-            model: string;
-            image?: string;
-            driver?: { name: string; image?: string };
-        };
-        isRunning: boolean;
-        isFinalised: boolean;
-    };
-}
-
-function formatDateTime(date: string) {
-    const d = new Date(date);
-    const day = String(d.getDate()).padStart(2, '0');
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const year = d.getFullYear();
-    const hour = String(d.getHours() + 3).padStart(2, '0');
-    const minute = String(d.getMinutes()).padStart(2, '0');
-    return `${day}/${month}/${year} ${hour}:${minute}`;
-}
-
-function getTourStatus(pkg: { isRunning: boolean; isFinalised: boolean }) {
-    if (pkg.isFinalised) return 'Finalizado';
-    if (pkg.isRunning) return 'Em andamento';
-    return 'Pendente';
-}
-
-Notifications.setNotificationHandler({
-    handleNotification: async () => ({
-        shouldShowAlert: true,
-        shouldPlaySound: false,
-        shouldSetBadge: false,
-        shouldShowBanner: true,
-    }),
-});
+import { useMyToursViewModel, formatDateTime, getTourStatus } from './MyToursViewModel';
+import { ReservationData } from './types';
 
 function Timeline({ status }: { status: string }) {
     // status: 'Pendente', 'Em andamento', 'Finalizado'
@@ -92,77 +42,46 @@ function Timeline({ status }: { status: string }) {
 }
 
 export default function MyTours() {
-    const [tours, setTours] = useState<ReservationData[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [selectedTour, setSelectedTour] = useState<ReservationData | null>(null);
-    const [detailModalVisible, setDetailModalVisible] = useState(false);
-    const [alertVisible, setAlertVisible] = useState(false);
-    const [alertMessage, setAlertMessage] = useState('');
-    const [alertType, setAlertType] = useState<'success' | 'error'>('success');
-    const prevStatusRef = useRef<{ [id: string]: string }>({});
-    const intervalRef = useRef<NodeJS.Timeout | null>(null);
+    const myToursViewModel = useMyToursViewModel();
 
-    //Notificações - EXPO
-    useEffect(() => {
-        (async () => {
-            const { status } = await Notifications.requestPermissionsAsync();
-            if (status !== 'granted') {
-                setAlertMessage('Permissão de notificação não concedida.');
-                setAlertType('error');
-                setAlertVisible(true);
-            }
-        })();
-    }, []);
+    const renderTourCard = ({ item }: { item: ReservationData }) => (
+        <TouchableOpacity style={styles.tourCard} onPress={() => myToursViewModel.handleOpenDetail(item)}>
+            <View style={styles.tourHeader}>
+                <Text style={styles.tourTitle}>{item.tourPackage.title}</Text>
+                <View style={[styles.statusBadge, { backgroundColor: getTourStatus(item.tourPackage) === 'Finalizado' ? '#34C759' : getTourStatus(item.tourPackage) === 'Em andamento' ? '#007AFF' : '#FF9500' }]}>
+                    <Text style={styles.statusText}>{getTourStatus(item.tourPackage)}</Text>
+                </View>
+            </View>
 
-    useEffect(() => {
-        fetchTours();
-        intervalRef.current = setInterval(fetchTours, 10000);
-        return () => {
-            if (intervalRef.current) clearInterval(intervalRef.current);
-        };
-    }, []);
+            <Text style={styles.tourRoute}>{item.tourPackage.origin_local} → {item.tourPackage.destiny_local}</Text>
+            <Text style={styles.tourDate}>{formatDateTime(item.tourPackage.date_tour)}</Text>
+            <Text style={styles.tourPrice}>R$ {item.amount.toFixed(2)}</Text>
 
-    const fetchTours = async () => {
-        setLoading(true);
-        try {
+            <Timeline status={getTourStatus(item.tourPackage)} />
 
-            const response = await api.get('user/reservations');
-            const confirmed = (response.data.reservations || []).filter((r: ReservationData) => r.confirmed && !r.canceled);
-            console.log(confirmed);
-            let notified = false;
-            confirmed.forEach(async (tour: ReservationData) => {
-                const status = getTourStatus(tour.tourPackage);
-                if (!notified && prevStatusRef.current[tour.id] && prevStatusRef.current[tour.id] !== status) {
-                    await Notifications.scheduleNotificationAsync({
-                        content: {
-                            title: 'Status do passeio atualizado',
-                            body: `O passeio "${tour.tourPackage.title}" agora está: ${status}`,
-                        },
-                        trigger: null,
-                    });
-                    notified = true;
-                }
-                prevStatusRef.current[tour.id] = status;
-            });
+            {item.tourPackage.car?.driver && (
+                <View style={styles.driverInfo}>
+                    <Text style={styles.driverLabel}>Motorista:</Text>
+                    <Text style={styles.driverName}>{item.tourPackage.car.driver.name}</Text>
+                </View>
+            )}
+        </TouchableOpacity>
+    );
 
-            setTours(confirmed);
-        } catch (error: any) {
-            setTours([]);
-        } finally {
-            setLoading(false);
-        }
-    };
+    const renderEmptyState = () => (
+        <View style={styles.emptyContainer}>
+            <Text style={styles.emptyTitle}>Nenhum passeio encontrado</Text>
+            <Text style={styles.emptySubtitle}>
+                Você ainda não possui passeios reservados
+            </Text>
+        </View>
+    );
 
-    const handleOpenDetail = (tour: ReservationData) => {
-        setSelectedTour(tour);
-        setDetailModalVisible(true);
-    };
-
-    if (loading) {
+    if (myToursViewModel.loading) {
         return (
             <View style={styles.loadingContainer}>
                 <ActivityIndicator size="large" color="#007AFF" />
-                <Text style={styles.loadingText}>Carregando passeios...</Text>
+                <Text style={styles.loadingText}>Carregando seus passeios...</Text>
             </View>
         );
     }
@@ -170,92 +89,78 @@ export default function MyTours() {
     return (
         <View style={styles.container}>
             <Text style={styles.title}>Meus Passeios</Text>
+
             <FlatList
-                data={tours}
-                keyExtractor={item => item.id}
-                renderItem={({ item }) => {
-                    const status = getTourStatus(item.tourPackage);
-                    return (
-                        <TouchableOpacity
-                            style={styles.card}
-                            activeOpacity={0.85}
-                            onPress={() => handleOpenDetail(item)}
-                        >
-                            <Text style={styles.cardTitle}>{item.tourPackage.title}</Text>
-                            <Text style={styles.cardText}>Origem: {item.tourPackage.origin_local}</Text>
-                            <Text style={styles.cardText}>Destino: {item.tourPackage.destiny_local}</Text>
-                            <Text style={styles.cardText}>Data: {formatDateTime(item.tourPackage.date_tour)}</Text>
-                            <Text style={styles.cardText}>Qtd: {item.vacancies_reserved}</Text>
-                            <Text style={styles.cardText}>Valor: R$ {item.amount}</Text>
-                            <View style={{ marginTop: 32, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                                <Timeline status={status} />
-                            </View>
-                            {/* <Text style={[styles.cardText, { fontWeight: 'bold', color: status === 'Finalizado' ? '#34C759' : status === 'Em andamento' ? '#007AFF' : '#B0B0B0' }]}>Status: {status}</Text> */}
-                        </TouchableOpacity>
-                    );
-                }}
-                ListEmptyComponent={<Text style={styles.emptyText}>Nenhum passeio encontrado.</Text>}
-                contentContainerStyle={tours.length === 0 ? styles.emptyList : styles.listContainer}
+                data={myToursViewModel.tours}
+                renderItem={renderTourCard}
+                keyExtractor={(item) => item.id}
+                contentContainerStyle={myToursViewModel.tours.length === 0 ? styles.emptyList : styles.listContainer}
+                ListEmptyComponent={renderEmptyState}
+                showsVerticalScrollIndicator={false}
             />
-            {/* Modal de detalhes do passeio */}
+
             <Modal
-                visible={detailModalVisible}
-                transparent
-                animationType="fade"
-                onRequestClose={() => setDetailModalVisible(false)}
+                visible={myToursViewModel.detailModalVisible}
+                transparent={true}
+                animationType="slide"
+                onRequestClose={() => myToursViewModel.setDetailModalVisible(false)}
             >
-                <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' }}>
-                    <View style={{ backgroundColor: '#fff', borderRadius: 16, padding: 28, width: '92%', alignItems: 'center' }}>
-                        <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 18, color: '#222' }}>Detalhes do Passeio</Text>
-                        {/* Bloco do Carro */}
-                        <View style={{ alignItems: 'center', marginBottom: 18, width: '100%' }}>
-                            {selectedTour?.tourPackage?.car?.image ? (
-                                <Image source={{ uri: selectedTour.tourPackage.car.image }} style={{ width: 220, height: 120, borderRadius: 12, marginBottom: 10, backgroundColor: '#eee' }} resizeMode="cover" />
-                            ) : (
-                                <View style={{ width: 220, height: 120, borderRadius: 12, marginBottom: 10, backgroundColor: '#eee', justifyContent: 'center', alignItems: 'center' }}>
-                                    <Text style={{ color: '#aaa' }}>Sem imagem do carro</Text>
-                                </View>
-                            )}
-                            <Text style={{ fontSize: 17, fontWeight: '600', color: '#007AFF', marginBottom: 2 }}>Carro: {selectedTour?.tourPackage?.car?.model || '--'}</Text>
-                            <Text style={{ fontSize: 15, color: '#555', marginBottom: 2 }}>Tipo: {selectedTour?.tourPackage?.car?.type === 'FOUR_BY_FOUR' ? '4X4' : selectedTour?.tourPackage?.car?.type === 'BUGGY' ? 'Buggy' : selectedTour?.tourPackage?.car?.type === 'LANCHA' ? 'Lancha' : selectedTour?.tourPackage?.car?.type}</Text>
-                        </View>
-                        {/* Bloco do Motorista */}
-                        <View style={{ alignItems: 'center', marginBottom: 18, width: '100%' }}>
-                            {selectedTour?.tourPackage?.car?.driver?.image ? (
-                                <Image source={{ uri: selectedTour.tourPackage.car.driver.image }} style={{ width: 70, height: 70, borderRadius: 35, marginBottom: 8, backgroundColor: '#eee' }} />
-                            ) : (
-                                <View style={{ width: 70, height: 70, borderRadius: 35, marginBottom: 8, backgroundColor: '#eee', justifyContent: 'center', alignItems: 'center' }}>
-                                    <Text style={{ color: '#aaa' }}>Sem foto</Text>
-                                </View>
-                            )}
-                            <Text style={{ fontSize: 16, fontWeight: '600', color: '#222' }}>Motorista: {selectedTour?.tourPackage?.car?.driver?.name || '---'}</Text>
-                        </View>
-                        {/* Bloco de infos do passeio */}
-                        <View style={{ width: '100%', marginBottom: 18 }}>
-                            <Text style={{ fontSize: 15, color: '#444', marginBottom: 2 }}>Origem: <Text style={{ fontWeight: '600' }}>{selectedTour?.tourPackage?.origin_local}</Text></Text>
-                            <Text style={{ fontSize: 15, color: '#444', marginBottom: 2 }}>Destino: <Text style={{ fontWeight: '600' }}>{selectedTour?.tourPackage?.destiny_local}</Text></Text>
-                            <Text style={{ fontSize: 15, color: '#444', marginBottom: 2 }}>Data: <Text style={{ fontWeight: '600' }}>{selectedTour ? formatDateTime(selectedTour.tourPackage.date_tour) : ''}</Text></Text>
-                            <Text style={{ fontSize: 15, color: '#444', marginBottom: 2 }}>Qtd de vagas: <Text style={{ fontWeight: '600' }}>{selectedTour?.vacancies_reserved}</Text></Text>
-                            <Text style={{ fontSize: 15, color: '#444', marginBottom: 2 }}>Valor: <Text style={{ fontWeight: '600' }}>R$ {selectedTour?.amount}</Text></Text>
-                            <Text style={{ fontSize: 15, color: '#444', marginBottom: 2 }}>Status: <Text style={{ fontWeight: '600' }}>{selectedTour ? getTourStatus(selectedTour.tourPackage) : ''}</Text></Text>
-                        </View>
-                        <View style={{ flexDirection: 'row', width: '100%', marginTop: 18 }}>
-                            <TouchableOpacity
-                                style={[styles.btnClose, { flex: 1 }]}
-                                onPress={() => setDetailModalVisible(false)}
-                            >
-                                <Text style={styles.reserveButtonText}>Fechar</Text>
+                <View style={styles.modalContainer}>
+                    <View style={styles.modalContent}>
+                        <View style={styles.modalHeader}>
+                            <Text style={styles.modalTitle}>Detalhes do Passeio</Text>
+                            <TouchableOpacity onPress={() => myToursViewModel.setDetailModalVisible(false)}>
+                                <Text style={styles.closeButton}>✕</Text>
                             </TouchableOpacity>
                         </View>
+
+                        {myToursViewModel.selectedTour && (
+                            <View style={styles.modalBody}>
+                                <Text style={styles.detailTitle}>{myToursViewModel.selectedTour.tourPackage.title}</Text>
+                                <Text style={styles.detailRoute}>
+                                    {myToursViewModel.selectedTour.tourPackage.origin_local} → {myToursViewModel.selectedTour.tourPackage.destiny_local}
+                                </Text>
+                                <Text style={styles.detailDate}>
+                                    {formatDateTime(myToursViewModel.selectedTour.tourPackage.date_tour)}
+                                </Text>
+                                <Text style={styles.detailPrice}>
+                                    R$ {myToursViewModel.selectedTour.amount.toFixed(2)}
+                                </Text>
+                                <Text style={styles.detailVagas}>
+                                    Vagas reservadas: {myToursViewModel.selectedTour.vacancies_reserved}
+                                </Text>
+
+                                {myToursViewModel.selectedTour.tourPackage.car?.driver && (
+                                    <View style={styles.driverDetail}>
+                                        <Text style={styles.driverDetailLabel}>Motorista:</Text>
+                                        <Text style={styles.driverDetailName}>
+                                            {myToursViewModel.selectedTour.tourPackage.car.driver.name}
+                                        </Text>
+                                    </View>
+                                )}
+
+                                <Timeline status={getTourStatus(myToursViewModel.selectedTour.tourPackage)} />
+
+                                {!myToursViewModel.selectedTour.canceled && getTourStatus(myToursViewModel.selectedTour.tourPackage) === 'Pendente' && (
+                                    <TouchableOpacity
+                                        style={styles.cancelButton}
+                                        onPress={() => myToursViewModel.handleCancelReservation(myToursViewModel.selectedTour!)}
+                                    >
+                                        <Text style={styles.cancelButtonText}>Cancelar Reserva</Text>
+                                    </TouchableOpacity>
+                                )}
+                            </View>
+                        )}
                     </View>
                 </View>
             </Modal>
+
             <AlertComponent
-                title="Aviso"
-                visible={alertVisible}
-                message={alertMessage}
-                type={alertType}
-                onClose={() => setAlertVisible(false)}
+                title='Aviso'
+                visible={myToursViewModel.alertVisible}
+                message={myToursViewModel.alertMessage}
+                type={myToursViewModel.alertType}
+                onClose={() => myToursViewModel.setAlertVisible(false)}
             />
         </View>
     );

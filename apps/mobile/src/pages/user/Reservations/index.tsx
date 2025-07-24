@@ -1,156 +1,48 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React from 'react';
 import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, Modal, Image } from 'react-native';
 import styles from './styles';
-import api from '../../../util/api/api';
 import AlertComponent from '../../../components/AlertComponent';
-import { useStripe } from '@stripe/stripe-react-native';
-
-interface ReservationData {
-    id: string;
-    amount: number;
-    vacancies_reserved: number;
-    confirmed: boolean;
-    canceled: boolean;
-    createdAt: string;
-    tourPackage: {
-        id: string;
-        title: string;
-        origin_local: string;
-        destiny_local: string;
-        date_tour: string;
-        price: number;
-        car: {
-            type: string;
-            model: string;
-            image?: string;
-            driver?: { name: string; image?: string };
-        };
-    };
-}
-
-function formatDateTime(date: string) {
-    const d = new Date(date);
-    const day = String(d.getDate()).padStart(2, '0');
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const year = d.getFullYear();
-    const hour = String(d.getHours() + 3).padStart(2, '0');
-    const minute = String(d.getMinutes()).padStart(2, '0');
-    return `${day}/${month}/${year} ${hour}:${minute}`;
-}
+import { useReservationsViewModel, formatDateTime } from './ReservationsViewModel';
+import { ReservationData } from './types';
 
 export default function UserReservations() {
+    const reservationsViewModel = useReservationsViewModel();
 
-    const [reservations, setReservations] = useState<ReservationData[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [alertVisible, setAlertVisible] = useState(false);
-    const [alertMessage, setAlertMessage] = useState('');
-    const [alertType, setAlertType] = useState<'success' | 'error'>('success');
-    const [selectedReservation, setSelectedReservation] = useState<ReservationData | null>(null);
-    const [detailModalVisible, setDetailModalVisible] = useState(false);
-    const [actionLoading, setActionLoading] = useState(false);
-    const [confirmAction, setConfirmAction] = useState<'confirm' | 'cancel' | null>(null);
-    const [confirmModalVisible, setConfirmModalVisible] = useState(false);
-    const intervalRef = useRef<NodeJS.Timeout | null>(null);
-    const { initPaymentSheet, presentPaymentSheet } = useStripe();
+    const renderReservationCard = ({ item }: { item: ReservationData }) => (
+        <TouchableOpacity style={styles.reservationCard} onPress={() => reservationsViewModel.handleOpenDetail(item)}>
+            <View style={styles.cardHeader}>
+                <Text style={styles.cardTitle}>{item.tourPackage.title}</Text>
+                <View style={[styles.statusBadge, { backgroundColor: item.confirmed ? '#34C759' : item.canceled ? '#FF3B30' : '#FF9500' }]}>
+                    <Text style={styles.statusText}>
+                        {item.confirmed ? 'Confirmada' : item.canceled ? 'Cancelada' : 'Pendente'}
+                    </Text>
+                </View>
+            </View>
 
-    useEffect(() => {
-        fetchReservations();
+            <Text style={styles.cardRoute}>{item.tourPackage.origin_local} → {item.tourPackage.destiny_local}</Text>
+            <Text style={styles.cardDate}>{formatDateTime(item.tourPackage.date_tour)}</Text>
+            <Text style={styles.cardPrice}>R$ {item.amount.toFixed(2)}</Text>
+            <Text style={styles.cardVagas}>Vagas: {item.vacancies_reserved}</Text>
 
-        intervalRef.current = setInterval(fetchReservations, 30000);
-        return () => {
-            if (intervalRef.current) clearInterval(intervalRef.current);
-        };
-    }, []);
+            {item.tourPackage.car?.driver && (
+                <View style={styles.driverInfo}>
+                    <Text style={styles.driverLabel}>Motorista:</Text>
+                    <Text style={styles.driverName}>{item.tourPackage.car.driver.name}</Text>
+                </View>
+            )}
+        </TouchableOpacity>
+    );
 
-    const fetchReservations = async () => {
-        setLoading(true);
-        try {
-            const response = await api.get('user/reservations');
+    const renderEmptyState = () => (
+        <View style={styles.emptyContainer}>
+            <Text style={styles.emptyTitle}>Nenhuma reserva encontrada</Text>
+            <Text style={styles.emptySubtitle}>
+                Você ainda não possui reservas
+            </Text>
+        </View>
+    );
 
-
-            const reservationsData = response.data.reservations || response.data || [];
-
-            setReservations(reservationsData);
-        } catch (error: any) {
-            console.log('Erro ao buscar reservas:', error);
-
-            setReservations([]);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleOpenDetail = (reservation: ReservationData) => {
-        setSelectedReservation(reservation);
-        setDetailModalVisible(true);
-    };
-
-    const handleAction = (action: 'confirm' | 'cancel') => {
-        setConfirmAction(action);
-        setConfirmModalVisible(true);
-    };
-
-    const handleConfirmAction = async () => {
-        if (!selectedReservation || !confirmAction) return;
-        setActionLoading(true);
-
-        if (confirmAction === 'confirm') {
-            try {
-                // 1. Crie o PaymentIntent no backend
-                const paymentIntentRes = await api.post('/stripe/create-payment-intent', {
-                    amount: Math.round(selectedReservation.amount * 100), // em centavos
-                    metadata: { reserveId: selectedReservation.id }
-                });
-
-                // 2. Inicialize o PaymentSheet
-                const { error: initError } = await initPaymentSheet({
-                    paymentIntentClientSecret: paymentIntentRes.data.clientSecret,
-                    merchantDisplayName: "Turistar, Inc."
-                });
-                if (initError) {
-                    setAlertMessage('Erro ao inicializar pagamento: ' + initError.message);
-                    setAlertType('error');
-                    setAlertVisible(true);
-                    setActionLoading(false);
-                    return;
-                }
-
-                // 3. Apresente o PaymentSheet
-                const { error: presentError } = await presentPaymentSheet();
-                if (presentError) {
-                    setAlertMessage('Pagamento não realizado: ' + presentError.message);
-                    setAlertType('error');
-                    setAlertVisible(true);
-                    setActionLoading(false);
-                    return;
-                }
-
-                // 4. Se chegou aqui, pagamento foi aprovado! Confirme a reserva no backend
-                await api.post('/user/reserve-confirmation', { ReserveId: selectedReservation.id });
-                setAlertMessage('Reserva confirmada com sucesso!');
-                setAlertType('success');
-                setAlertVisible(true);
-                fetchReservations();
-            } catch (error: any) {
-                setAlertMessage('Erro ao processar pagamento: ' + (error.response?.data?.message || error.message));
-                setAlertType('error');
-                setAlertVisible(true);
-            }
-        } else {
-            // cancelamento normal
-            await api.post('user/reserve-cancellation', { ReserveId: selectedReservation.id });
-            setAlertMessage('Reserva cancelada e valor estornado!');
-            setAlertType('success');
-            setAlertVisible(true);
-            fetchReservations();
-        }
-        setActionLoading(false);
-        setConfirmModalVisible(false);
-        setDetailModalVisible(false);
-        setConfirmAction(null);
-    };
-
-    if (loading) {
+    if (reservationsViewModel.loading) {
         return (
             <View style={styles.loadingContainer}>
                 <ActivityIndicator size="large" color="#007AFF" />
@@ -162,142 +54,133 @@ export default function UserReservations() {
     return (
         <View style={styles.container}>
             <Text style={styles.title}>Minhas Reservas</Text>
-            <FlatList
-                data={reservations}
-                keyExtractor={item => item.id}
-                renderItem={({ item }) => (
-                    <TouchableOpacity
-                        style={styles.card}
-                        activeOpacity={0.85}
-                        onPress={() => handleOpenDetail(item)}
-                    >
-                        <Text style={styles.cardTitle}>{item.tourPackage.title}</Text>
-                        <Text style={styles.cardText}>Origem: {item.tourPackage.origin_local}</Text>
-                        <Text style={styles.cardText}>Destino: {item.tourPackage.destiny_local}</Text>
-                        <Text style={styles.cardText}>Data: {formatDateTime(item.tourPackage.date_tour)}</Text>
-                        <Text style={styles.cardText}>Qtd: {item.vacancies_reserved}</Text>
-                        <Text style={styles.cardText}>Valor: R$ {item.amount}</Text>
-                        <Text style={styles.cardText}>Status: {item.canceled ? 'Cancelada' : item.confirmed ? 'Confirmada' : 'Pendente'}</Text>
-                    </TouchableOpacity>
-                )}
-                ListEmptyComponent={<Text style={styles.emptyText}>Nenhuma reserva encontrada.</Text>}
-                contentContainerStyle={reservations.length === 0 ? styles.emptyList : styles.listContainer}
-            />
-            {/* Modal de detalhes da reserva */}
-            <Modal
-                visible={detailModalVisible}
-                transparent
-                animationType="fade"
-                onRequestClose={() => setDetailModalVisible(false)}
-            >
-                <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' }}>
-                    <View style={{ backgroundColor: '#fff', borderRadius: 16, padding: 28, width: '92%', alignItems: 'center' }}>
-                        <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 18, color: '#222' }}>Detalhes da Reserva</Text>
-                        {/* Bloco do Carro */}
-                        <View style={{ alignItems: 'center', marginBottom: 18, width: '100%' }}>
-                            {selectedReservation?.tourPackage?.car?.image ? (
-                                <Image source={{ uri: selectedReservation.tourPackage.car.image }} style={{ width: 220, height: 120, borderRadius: 12, marginBottom: 10, backgroundColor: '#eee' }} resizeMode="cover" />
-                            ) : (
-                                <View style={{ width: 220, height: 120, borderRadius: 12, marginBottom: 10, backgroundColor: '#eee', justifyContent: 'center', alignItems: 'center' }}>
-                                    <Text style={{ color: '#aaa' }}>Sem imagem do carro</Text>
-                                </View>
-                            )}
-                            <Text style={{ fontSize: 17, fontWeight: '600', color: '#007AFF', marginBottom: 2 }}>Carro: {selectedReservation?.tourPackage?.car?.model || '--'}</Text>
-                            <Text style={{ fontSize: 15, color: '#555', marginBottom: 2 }}>Tipo: {selectedReservation?.tourPackage?.car?.type === 'FOUR_BY_FOUR' ? '4X4' : selectedReservation?.tourPackage?.car?.type === 'BUGGY' ? 'Buggy' : selectedReservation?.tourPackage?.car?.type === 'LANCHA' ? 'Lancha' : selectedReservation?.tourPackage?.car?.type}</Text>
-                        </View>
-                        {/* Bloco do Motorista */}
-                        <View style={{ alignItems: 'center', marginBottom: 18, width: '100%' }}>
-                            {selectedReservation?.tourPackage?.car?.driver?.image ? (
-                                <Image source={{ uri: selectedReservation.tourPackage.car.driver.image }} style={{ width: 70, height: 70, borderRadius: 35, marginBottom: 8, backgroundColor: '#eee' }} />
-                            ) : (
-                                <View style={{ width: 70, height: 70, borderRadius: 35, marginBottom: 8, backgroundColor: '#eee', justifyContent: 'center', alignItems: 'center' }}>
-                                    <Text style={{ color: '#aaa' }}>Sem foto</Text>
-                                </View>
-                            )}
-                            <Text style={{ fontSize: 16, fontWeight: '600', color: '#222' }}>Motorista: {selectedReservation?.tourPackage?.car?.driver?.name || '---'}</Text>
-                        </View>
-                        {/* Bloco de infos da reserva */}
-                        <View style={{ width: '100%', marginBottom: 18 }}>
-                            <Text style={{ fontSize: 15, color: '#444', marginBottom: 2 }}>Origem: <Text style={{ fontWeight: '600' }}>{selectedReservation?.tourPackage?.origin_local}</Text></Text>
-                            <Text style={{ fontSize: 15, color: '#444', marginBottom: 2 }}>Destino: <Text style={{ fontWeight: '600' }}>{selectedReservation?.tourPackage?.destiny_local}</Text></Text>
-                            <Text style={{ fontSize: 15, color: '#444', marginBottom: 2 }}>Data: <Text style={{ fontWeight: '600' }}>{selectedReservation ? formatDateTime(selectedReservation.tourPackage.date_tour) : ''}</Text></Text>
-                            <Text style={{ fontSize: 15, color: '#444', marginBottom: 2 }}>Qtd de vagas: <Text style={{ fontWeight: '600' }}>{selectedReservation?.vacancies_reserved}</Text></Text>
-                            <Text style={{ fontSize: 15, color: '#444', marginBottom: 2 }}>Valor: <Text style={{ fontWeight: '600' }}>R$ {selectedReservation?.amount}</Text></Text>
-                            <Text style={{ fontSize: 15, color: '#444', marginBottom: 2 }}>Status: <Text style={{ fontWeight: '600' }}>{selectedReservation?.canceled ? 'Cancelada' : selectedReservation?.confirmed ? 'Confirmada' : 'Pendente'}</Text></Text>
-                        </View>
-                        {/* Botões de ação lado a lado */}
-                        <View style={{ flexDirection: 'row', width: '100%', marginTop: 18, gap: 10 }}>
-                            <TouchableOpacity
-                                style={[styles.btnClose, { flex: 1 }]}
-                                onPress={() => setDetailModalVisible(false)}
-                            >
-                                <Text style={styles.reserveButtonText}>Fechar</Text>
-                            </TouchableOpacity>
-                            {!selectedReservation?.canceled && (
-                                <TouchableOpacity
-                                    style={[styles.btnCancel, { flex: 1 }]}
-                                    onPress={() => handleAction('cancel')}
-                                    disabled={actionLoading}
-                                >
-                                    <Text style={styles.reserveButtonText}>Cancelar</Text>
-                                </TouchableOpacity>
-                            )}
-                            {!selectedReservation?.canceled && !selectedReservation?.confirmed && (
-                                <TouchableOpacity
-                                    style={[styles.reserveButton, { flex: 1 }]}
-                                    onPress={() => handleAction('confirm')}
-                                    disabled={actionLoading}
-                                >
-                                    <Text style={styles.reserveButtonText}>Confirmar</Text>
-                                </TouchableOpacity>
-                            )}
 
-                        </View>
-                    </View>
-                </View>
-            </Modal>
-            {/* Modal de confirmação de ação */}
+            <FlatList
+                data={reservationsViewModel.reservations}
+                renderItem={renderReservationCard}
+                keyExtractor={(item) => item.id}
+                contentContainerStyle={reservationsViewModel.reservations.length === 0 ? styles.emptyList : styles.listContainer}
+                ListEmptyComponent={renderEmptyState}
+                showsVerticalScrollIndicator={false}
+            />
+
+            {/* Modal de Detalhes */}
             <Modal
-                visible={confirmModalVisible}
-                transparent
-                animationType="fade"
-                onRequestClose={() => setConfirmModalVisible(false)}
+                visible={reservationsViewModel.detailModalVisible}
+                transparent={true}
+                animationType="slide"
+                onRequestClose={() => reservationsViewModel.setDetailModalVisible(false)}
             >
-                <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' }}>
-                    <View style={{ backgroundColor: '#fff', borderRadius: 16, padding: 28, width: '85%', alignItems: 'center' }}>
-                        <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 16 }}>
-                            {confirmAction === 'confirm' ? 'Confirmar Reserva?' : 'Cancelar Reserva?'}
-                        </Text>
-                        <Text style={{ fontSize: 16, marginBottom: 24 }}>
-                            {confirmAction === 'confirm'
-                                ? 'Deseja realmente confirmar esta reserva?'
-                                : 'Deseja realmente cancelar esta reserva? O valor será estornado.'}
-                        </Text>
-                        <View style={{ flexDirection: 'row', width: '100%', gap: 10 }}>
-                            <TouchableOpacity
-                                style={[styles.btnClose, { flex: 1 }]}
-                                onPress={() => setConfirmModalVisible(false)}
-                                disabled={actionLoading}
-                            >
-                                <Text style={styles.reserveButtonText}>Voltar</Text>
+                <View style={styles.modalContainer}>
+                    <View style={styles.modalContent}>
+                        <View style={styles.modalHeader}>
+                            <Text style={styles.modalTitle}>Detalhes da Reserva</Text>
+                            <TouchableOpacity onPress={() => reservationsViewModel.setDetailModalVisible(false)}>
+                                <Text style={styles.closeButton}>✕</Text>
                             </TouchableOpacity>
+                        </View>
+
+                        {reservationsViewModel.selectedReservation && (
+                            <View style={styles.modalBody}>
+                                <Text style={styles.detailTitle}>{reservationsViewModel.selectedReservation.tourPackage.title}</Text>
+                                <Text style={styles.detailRoute}>
+                                    {reservationsViewModel.selectedReservation.tourPackage.origin_local} → {reservationsViewModel.selectedReservation.tourPackage.destiny_local}
+                                </Text>
+                                <Text style={styles.detailDate}>
+                                    {formatDateTime(reservationsViewModel.selectedReservation.tourPackage.date_tour)}
+                                </Text>
+                                <Text style={styles.detailPrice}>
+                                    R$ {reservationsViewModel.selectedReservation.amount.toFixed(2)}
+                                </Text>
+                                <Text style={styles.detailVagas}>
+                                    Vagas reservadas: {reservationsViewModel.selectedReservation.vacancies_reserved}
+                                </Text>
+
+                                {reservationsViewModel.selectedReservation.tourPackage.car?.driver && (
+                                    <View style={styles.driverDetail}>
+                                        <Text style={styles.driverDetailLabel}>Motorista:</Text>
+                                        <Text style={styles.driverDetailName}>
+                                            {reservationsViewModel.selectedReservation.tourPackage.car.driver.name}
+                                        </Text>
+                                    </View>
+                                )}
+
+                                <View style={styles.actionButtons}>
+                                    {!reservationsViewModel.selectedReservation.confirmed && !reservationsViewModel.selectedReservation.canceled && (
+                                        <>
+                                            <TouchableOpacity
+                                                style={[styles.actionButton, styles.confirmButton]}
+                                                onPress={() => reservationsViewModel.handleAction('confirm')}
+                                                disabled={reservationsViewModel.actionLoading}
+                                            >
+                                                <Text style={styles.confirmButtonText}>Confirmar Pagamento</Text>
+                                            </TouchableOpacity>
+
+                                            <TouchableOpacity
+                                                style={[styles.actionButton, styles.cancelButton]}
+                                                onPress={() => reservationsViewModel.handleAction('cancel')}
+                                                disabled={reservationsViewModel.actionLoading}
+                                            >
+                                                <Text style={styles.cancelButtonText}>Cancelar Reserva</Text>
+                                            </TouchableOpacity>
+                                        </>
+                                    )}
+                                </View>
+                            </View>
+                        )}
+                    </View>
+                </View>
+            </Modal>
+
+            {/* Modal de Confirmação */}
+            <Modal
+                visible={reservationsViewModel.confirmModalVisible}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => reservationsViewModel.setConfirmModalVisible(false)}
+            >
+                <View style={styles.confirmModalContainer}>
+                    <View style={styles.confirmModalContent}>
+                        <Text style={styles.confirmModalTitle}>
+                            {reservationsViewModel.confirmAction === 'confirm' ? 'Confirmar Pagamento' : 'Cancelar Reserva'}
+                        </Text>
+                        <Text style={styles.confirmModalMessage}>
+                            {reservationsViewModel.confirmAction === 'confirm'
+                                ? 'Deseja confirmar o pagamento desta reserva?'
+                                : 'Tem certeza que deseja cancelar esta reserva?'}
+                        </Text>
+
+                        <View style={styles.confirmModalActions}>
                             <TouchableOpacity
-                                style={[styles.reserveButton, { flex: 1 }]}
-                                onPress={handleConfirmAction}
-                                disabled={actionLoading}
+                                style={[styles.confirmModalButton, styles.cancelModalButton]}
+                                onPress={() => reservationsViewModel.setConfirmModalVisible(false)}
+                                disabled={reservationsViewModel.actionLoading}
                             >
-                                <Text style={styles.reserveButtonText}>{confirmAction === 'confirm' ? 'Confirmar' : 'Cancelar'}</Text>
+                                <Text style={styles.cancelModalButtonText}>Não</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                style={[styles.confirmModalButton, styles.confirmModalButton]}
+                                onPress={reservationsViewModel.handleConfirmAction}
+                                disabled={reservationsViewModel.actionLoading}
+                            >
+                                {reservationsViewModel.actionLoading ? (
+                                    <ActivityIndicator color="#FFF" size="small" />
+                                ) : (
+                                    <Text style={styles.confirmModalButtonText}>Sim</Text>
+                                )}
                             </TouchableOpacity>
                         </View>
                     </View>
                 </View>
             </Modal>
+
             <AlertComponent
-                title="Aviso"
-                visible={alertVisible}
-                message={alertMessage}
-                type={alertType}
-                onClose={() => setAlertVisible(false)}
+                title='Aviso'
+                visible={reservationsViewModel.alertVisible}
+                message={reservationsViewModel.alertMessage}
+                type={reservationsViewModel.alertType}
+                onClose={() => reservationsViewModel.setAlertVisible(false)}
             />
         </View>
     );

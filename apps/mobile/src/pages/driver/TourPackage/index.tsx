@@ -25,25 +25,7 @@ import { adaptViewConfig } from 'react-native-reanimated/lib/typescript/ConfigHe
 import * as Linking from 'expo-linking';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { TextInputMask } from 'react-native-masked-text';
-
-interface TourPackageData {
-    id: string;
-    title: string;
-    image?: string;
-    origin_local: string;
-    destiny_local: string;
-    date_tour: string | Date;
-    startDate?: Date;
-    endDate?: Date;
-    isRunning: boolean;
-    isFinalised: boolean;
-    price: number;
-    seatsAvailable: number;
-    vacancies?: number;
-    type: string;
-    carId: string;
-    touristPointId: string;
-}
+import { TourPackageData } from './types';
 
 const validationSchema = Yup.object().shape({
     title: Yup.string().required('Título é obrigatório'),
@@ -194,17 +176,20 @@ export default function TourPackageManagement() {
     };
 
     const handleCreateTouristPoint = async (values: TourPackageData) => {
+
         try {
+
             const formData = new FormData();
             formData.append('title', values.title);
             formData.append('origin_local', values.origin_local);
             formData.append('destiny_local', values.destiny_local);
             formData.append('date_tour', values.date_tour);
-            formData.append('price', parseFloat(values.price));
-            formData.append('seatsAvailable', values.seatsAvailable);
+            formData.append('price', String(values.price));
+            formData.append('seatsAvailable', String(values.seatsAvailable));
             formData.append('type', values.type);
             formData.append('carId', values.carId);
             formData.append('touristPointId', values.touristPointId);
+
             if (selectedImage) {
                 formData.append('file', {
                     uri: selectedImage.uri,
@@ -212,6 +197,7 @@ export default function TourPackageManagement() {
                     type: 'image/jpeg',
                 } as any);
             }
+
             await api.post('/TourPackage/registration', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',

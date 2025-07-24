@@ -22,7 +22,24 @@ export default StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
-    card: {
+    emptyContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingVertical: 32,
+    },
+    emptyTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#8E8E93',
+        marginBottom: 8,
+    },
+    emptySubtitle: {
+        fontSize: 14,
+        color: '#8E8E93',
+        textAlign: 'center',
+    },
+    reservationCard: {
         backgroundColor: '#fff',
         borderRadius: 12,
         padding: 16,
@@ -33,42 +50,64 @@ export default StyleSheet.create({
         shadowRadius: 2,
         elevation: 3,
     },
+    cardHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 8,
+    },
     cardTitle: {
         fontSize: 18,
         fontWeight: 'bold',
         color: '#1C1C1E',
-        marginBottom: 4,
+        flex: 1,
     },
-    cardText: {
+    statusBadge: {
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 12,
+        marginLeft: 8,
+    },
+    statusText: {
+        fontSize: 12,
+        fontWeight: 'bold',
+        color: '#fff',
+    },
+    cardRoute: {
         fontSize: 15,
         color: '#333',
-        marginBottom: 2,
+        marginBottom: 4,
     },
-    reserveButton: {
-        marginTop: 12,
-        backgroundColor: '#007AFF',
-        borderRadius: 8,
-        paddingVertical: 10,
-        alignItems: 'center',
+    cardDate: {
+        fontSize: 14,
+        color: '#666',
+        marginBottom: 4,
     },
-    reserveButtonText: {
-        color: '#fff',
-        fontWeight: 'bold',
+    cardPrice: {
         fontSize: 16,
+        fontWeight: 'bold',
+        color: '#007AFF',
+        marginBottom: 4,
     },
-    btnClose: {
-        marginTop: 12,
-        backgroundColor: '#FF0000',
-        borderRadius: 8,
-        paddingVertical: 10,
-        alignItems: 'center',
+    cardVagas: {
+        fontSize: 14,
+        color: '#666',
+        marginBottom: 8,
     },
-    btnCancel: {
-        marginTop: 12,
-        backgroundColor: '#f97316',
-        borderRadius: 8,
-        paddingVertical: 10,
+    driverInfo: {
+        flexDirection: 'row',
         alignItems: 'center',
+        marginTop: 8,
+    },
+    driverLabel: {
+        fontSize: 14,
+        color: '#666',
+        marginRight: 4,
+    },
+    driverName: {
+        fontSize: 14,
+        fontWeight: 'bold',
+        color: '#333',
     },
     loadingContainer: {
         flex: 1,
@@ -81,10 +120,164 @@ export default StyleSheet.create({
         fontSize: 16,
         color: '#8E8E93',
     },
-    emptyText: {
-        textAlign: 'center',
+    // Modal styles
+    modalContainer: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    modalContent: {
+        backgroundColor: '#fff',
+        borderRadius: 16,
+        padding: 20,
+        width: '90%',
+        maxHeight: '80%',
+    },
+    modalHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: '#E5E5EA',
+        paddingBottom: 12,
+    },
+    modalTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: '#1C1C1E',
+    },
+    closeButton: {
+        fontSize: 24,
         color: '#8E8E93',
+        fontWeight: 'bold',
+    },
+    modalBody: {
+        flex: 1,
+    },
+    detailTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: '#1C1C1E',
+        marginBottom: 12,
+    },
+    detailRoute: {
         fontSize: 16,
-        marginTop: 32,
+        color: '#333',
+        marginBottom: 8,
+    },
+    detailDate: {
+        fontSize: 14,
+        color: '#666',
+        marginBottom: 8,
+    },
+    detailPrice: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#007AFF',
+        marginBottom: 8,
+    },
+    detailVagas: {
+        fontSize: 14,
+        color: '#666',
+        marginBottom: 12,
+    },
+    driverDetail: {
+        marginBottom: 16,
+    },
+    driverDetailLabel: {
+        fontSize: 14,
+        color: '#666',
+        marginBottom: 4,
+    },
+    driverDetailName: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#333',
+    },
+    actionButtons: {
+        flexDirection: 'row',
+        gap: 12,
+        marginTop: 16,
+    },
+    actionButton: {
+        flex: 1,
+        borderRadius: 8,
+        paddingVertical: 12,
+        alignItems: 'center',
+    },
+    confirmButton: {
+        backgroundColor: '#34C759',
+    },
+    cancelButton: {
+        backgroundColor: '#FF3B30',
+    },
+    confirmButtonText: {
+        color: '#fff',
+        fontWeight: 'bold',
+        fontSize: 16,
+    },
+    cancelButtonText: {
+        color: '#fff',
+        fontWeight: 'bold',
+        fontSize: 16,
+    },
+    // Confirm Modal styles
+    confirmModalContainer: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    confirmModalContent: {
+        backgroundColor: '#fff',
+        borderRadius: 16,
+        padding: 24,
+        width: '85%',
+        alignItems: 'center',
+    },
+    confirmModalTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: '#1C1C1E',
+        marginBottom: 12,
+        textAlign: 'center',
+    },
+    confirmModalMessage: {
+        fontSize: 16,
+        color: '#666',
+        marginBottom: 24,
+        textAlign: 'center',
+        lineHeight: 22,
+    },
+    confirmModalActions: {
+        flexDirection: 'row',
+        gap: 12,
+        width: '100%',
+    },
+    confirmModalButton: {
+        flex: 1,
+        borderRadius: 8,
+        paddingVertical: 12,
+        alignItems: 'center',
+        backgroundColor: '#007AFF',
+    },
+    cancelModalButton: {
+        flex: 1,
+        borderRadius: 8,
+        paddingVertical: 12,
+        alignItems: 'center',
+        backgroundColor: '#8E8E93',
+    },
+    cancelModalButtonText: {
+        color: '#fff',
+        fontWeight: 'bold',
+        fontSize: 16,
+    },
+    confirmModalButtonText: {
+        color: '#fff',
+        fontWeight: 'bold',
+        fontSize: 16,
     },
 }); 

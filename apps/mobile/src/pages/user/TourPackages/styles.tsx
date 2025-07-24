@@ -19,8 +19,9 @@ export default StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         marginBottom: 16,
+        gap: 8,
     },
-    input: {
+    filterInput: {
         flex: 1,
         height: 44,
         borderWidth: 1,
@@ -29,8 +30,6 @@ export default StyleSheet.create({
         backgroundColor: '#fff',
         paddingHorizontal: 12,
         fontSize: 16,
-        marginLeft: -4,
-        marginRight: 6,
     },
     pickerContainer: {
         flex: 1,
@@ -42,8 +41,8 @@ export default StyleSheet.create({
         height: 44,
     },
     picker: {
-        width: '110%',
-        height: 64,
+        width: '100%',
+        height: 44,
     },
     listContainer: {
         paddingBottom: 16,
@@ -52,6 +51,23 @@ export default StyleSheet.create({
         flexGrow: 1,
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    emptyContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingVertical: 32,
+    },
+    emptyTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#8E8E93',
+        marginBottom: 8,
+    },
+    emptySubtitle: {
+        fontSize: 14,
+        color: '#8E8E93',
+        textAlign: 'center',
     },
     card: {
         backgroundColor: '#fff',
@@ -64,29 +80,63 @@ export default StyleSheet.create({
         shadowRadius: 2,
         elevation: 3,
     },
+    cardHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 8,
+    },
     cardTitle: {
         fontSize: 18,
         fontWeight: 'bold',
         color: '#1C1C1E',
-        marginBottom: 4,
+        flex: 1,
     },
-    cardText: {
+    priceContainer: {
+        backgroundColor: '#007AFF',
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 8,
+    },
+    price: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#fff',
+    },
+    cardRoute: {
         fontSize: 15,
         color: '#333',
-        marginBottom: 2,
+        marginBottom: 4,
     },
-    reserveButton: {
-        marginTop: 12,
-        backgroundColor: '#007AFF',
-        borderRadius: 8,
-        paddingVertical: 10,
+    cardDate: {
+        fontSize: 14,
+        color: '#666',
+        marginBottom: 4,
+    },
+    cardType: {
+        fontSize: 14,
+        color: '#666',
+        marginBottom: 4,
+    },
+    cardVagas: {
+        fontSize: 14,
+        color: '#666',
+        marginBottom: 8,
+    },
+    driverInfo: {
+        flexDirection: 'row',
         alignItems: 'center',
+        marginTop: 8,
     },
-    reserveButtonText: {
-        color: '#fff',
+    driverLabel: {
+        fontSize: 14,
+        color: '#666',
+        marginRight: 4,
+    },
+    driverName: {
+        fontSize: 14,
         fontWeight: 'bold',
-        fontSize: 16,
-        textAlign: 'center'
+        color: '#333',
     },
     loadingContainer: {
         flex: 1,
@@ -99,18 +149,166 @@ export default StyleSheet.create({
         fontSize: 16,
         color: '#8E8E93',
     },
-    emptyText: {
-        textAlign: 'center',
-        color: '#8E8E93',
-        fontSize: 16,
-        marginTop: 32,
-    },
-    btnEsgotado: {
-        backgroundColor: '#FF0000',
+    // Modal styles
+    modalContainer: {
         flex: 1,
-        padding: 8,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    modalContent: {
+        backgroundColor: '#fff',
+        borderRadius: 16,
+        padding: 20,
+        width: '90%',
+        maxHeight: '80%',
+    },
+    modalHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: '#E5E5EA',
+        paddingBottom: 12,
+    },
+    modalTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: '#1C1C1E',
+    },
+    closeButton: {
+        fontSize: 24,
+        color: '#8E8E93',
+        fontWeight: 'bold',
+    },
+    modalBody: {
+        flex: 1,
+    },
+    detailTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: '#1C1C1E',
+        marginBottom: 12,
+    },
+    detailRoute: {
+        fontSize: 16,
+        color: '#333',
+        marginBottom: 8,
+    },
+    detailDate: {
+        fontSize: 14,
+        color: '#666',
+        marginBottom: 8,
+    },
+    detailPrice: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#007AFF',
+        marginBottom: 8,
+    },
+    detailVagas: {
+        fontSize: 14,
+        color: '#666',
+        marginBottom: 12,
+    },
+    driverDetail: {
+        marginBottom: 16,
+    },
+    driverDetailLabel: {
+        fontSize: 14,
+        color: '#666',
+        marginBottom: 4,
+    },
+    driverDetailName: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#333',
+    },
+    quantityContainer: {
+        marginBottom: 16,
+    },
+    quantityLabel: {
+        fontSize: 14,
+        color: '#666',
+        marginBottom: 8,
+    },
+    quantityInput: {
+        borderWidth: 1,
+        borderColor: '#E5E5EA',
         borderRadius: 8,
-        marginTop: 12,
-        marginRight: 4,
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+        fontSize: 16,
+        backgroundColor: '#fff',
+    },
+    reserveButton: {
+        backgroundColor: '#007AFF',
+        borderRadius: 8,
+        paddingVertical: 12,
+        alignItems: 'center',
+        marginTop: 16,
+    },
+    reserveButtonText: {
+        color: '#fff',
+        fontWeight: 'bold',
+        fontSize: 16,
+    },
+    // Confirm Modal styles
+    confirmModalContainer: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    confirmModalContent: {
+        backgroundColor: '#fff',
+        borderRadius: 16,
+        padding: 24,
+        width: '85%',
+        alignItems: 'center',
+    },
+    confirmModalTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: '#1C1C1E',
+        marginBottom: 12,
+        textAlign: 'center',
+    },
+    confirmModalMessage: {
+        fontSize: 16,
+        color: '#666',
+        marginBottom: 24,
+        textAlign: 'center',
+        lineHeight: 22,
+    },
+    confirmModalActions: {
+        flexDirection: 'row',
+        gap: 12,
+        width: '100%',
+    },
+    confirmModalButton: {
+        flex: 1,
+        borderRadius: 8,
+        paddingVertical: 12,
+        alignItems: 'center',
+        backgroundColor: '#007AFF',
+    },
+    cancelModalButton: {
+        flex: 1,
+        borderRadius: 8,
+        paddingVertical: 12,
+        alignItems: 'center',
+        backgroundColor: '#8E8E93',
+    },
+    cancelModalButtonText: {
+        color: '#fff',
+        fontWeight: 'bold',
+        fontSize: 16,
+    },
+    confirmModalButtonText: {
+        color: '#fff',
+        fontWeight: 'bold',
+        fontSize: 16,
     },
 }); 
