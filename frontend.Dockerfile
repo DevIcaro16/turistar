@@ -62,5 +62,5 @@ ENV NODE_ENV=production
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
 
-# Comando para iniciar a aplicação
-CMD ["npm", "start"] 
+# Comando correto para Next.js com App Router
+CMD ["node", "node_modules/next/dist/bin/next", "start"]
