@@ -34,6 +34,9 @@ RUN npx prisma generate
 # Copiar build correto
 COPY --from=builder /app/apps/backend-api/dist/ ./dist
 
+# Copiar templates de email
+COPY --from=builder /app/apps/backend-api/src/utils/email-templates/ ./src/utils/email-templates/
+
 ENV NODE_ENV=production
 ENV HOST=0.0.0.0
 ENV PORT=8000
