@@ -63,13 +63,51 @@ app.use(cookieParser());
 app.use(fileUpload());
 
 app.get('/', (req, res) => {
-    res.send({ 'message': 'Hello API' });
+    res.send({
+        'message': 'Hello API',
+        'status': 'running',
+        'timestamp': new Date().toISOString(),
+        'environment': process.env.NODE_ENV || 'development'
+    });
+});
+
+// Endpoint de health check
+app.get('/health', (req, res) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.json({
+        status: 'healthy',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime(),
+        environment: process.env.NODE_ENV || 'development'
+    });
 });
 
 
 //Docs - Swagger
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument, {
+    swaggerOptions: {
+        url: '/docs-json',
+        docExpansion: 'list',
+        filter: true,
+        showRequestHeaders: true,
+        tryItOutEnabled: true,
+        requestInterceptor: (req: any) => {
+            // Adicionar headers CORS para requisições do Swagger
+            req.headers['Access-Control-Allow-Origin'] = '*';
+            req.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS';
+            req.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization';
+            return req;
+        }
+    },
+    customCss: '.swagger-ui .topbar { display: none }',
+    customSiteTitle: "Turistar API Documentation"
+}));
+
 app.get("/docs-json", (req, res) => {
+    // Adicionar headers CORS para o endpoint de documentação
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type');
     res.json(swaggerDocument);
 });
 
