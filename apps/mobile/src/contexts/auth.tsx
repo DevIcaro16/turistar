@@ -175,7 +175,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
             });
 
             if (response.status >= 400 && response.status <= 500) {
-                // console.log(response.status);
+                console.log(response.status);
                 showAlert('error', 'Erro no Login', 'Houve um erro no login');
             } else {
 
@@ -197,7 +197,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
             }
         } catch (error: any) {
             setLoadingAuth(false);
-            // console.log(error);
+            console.log(error);
             const message = error.response?.data?.message || 'Não foi possível realizar o Login!';
             showAlert('error', 'Erro no Login', message);
         }

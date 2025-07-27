@@ -13,48 +13,56 @@ const swaggerDocument = require("./swagger-output.js");
 const app = express();
 
 // Configuração CORS para produção
-const allowedOrigins = [
-    'http://localhost:3000',
-    'http://127.0.0.1:3000',
-    'http://10.0.0.103:3000',
-    process.env.FRONTEND_URL, // URL do frontend em produção
-    process.env.EC2_PUBLIC_IP, // IP público da EC2
-    process.env.DOMAIN_NAME   // Domínio customizado se houver
-].filter(Boolean); // Remove valores undefined
+// const allowedOrigins = [
+//     'http://localhost:3000',
+//     'http://127.0.0.1:3000',
+//     'http://10.0.0.103:3000',
+//     process.env.FRONTEND_URL, // URL do frontend em produção
+//     process.env.EC2_PUBLIC_IP, // IP público da EC2
+//     process.env.DOMAIN_NAME   // Domínio customizado se houver
+// ].filter(Boolean); // Remove valores undefined
+
+// app.use(cors({
+//     origin: function (origin, callback) {
+//         // Permitir requests sem origin (mobile apps, Postman, etc)
+//         if (!origin) return callback(null, true);
+
+//         if (allowedOrigins.indexOf(origin) !== -1) {
+//             callback(null, true);
+//         } else {
+//             // console.log('CORS blocked origin:', origin);
+//             callback(new Error('Not allowed by CORS'));
+//         }
+//     },
+//     allowedHeaders: ['Authorization', 'Content-Type', 'X-Requested-With'],
+//     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+//     credentials: true
+// }));
+
+// // Middleware adicional para garantir headers CORS
+// app.use((req, res, next) => {
+//     const origin = req.headers.origin;
+//     if (origin && allowedOrigins.includes(origin)) {
+//         res.header('Access-Control-Allow-Origin', origin);
+//     }
+//     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+//     res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+//     res.header('Access-Control-Allow-Credentials', 'true');
+
+//     if (req.method === 'OPTIONS') {
+//         res.sendStatus(200);
+//     } else {
+//         next();
+//     }
+// });
+
 
 app.use(cors({
-    origin: function (origin, callback) {
-        // Permitir requests sem origin (mobile apps, Postman, etc)
-        if (!origin) return callback(null, true);
-
-        if (allowedOrigins.indexOf(origin) !== -1) {
-            callback(null, true);
-        } else {
-            // console.log('CORS blocked origin:', origin);
-            callback(new Error('Not allowed by CORS'));
-        }
-    },
-    allowedHeaders: ['Authorization', 'Content-Type', 'X-Requested-With'],
+    origin: '*',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    credentials: true
+    allowedHeaders: ['Authorization', 'Content-Type'],
 }));
 
-// Middleware adicional para garantir headers CORS
-app.use((req, res, next) => {
-    const origin = req.headers.origin;
-    if (origin && allowedOrigins.includes(origin)) {
-        res.header('Access-Control-Allow-Origin', origin);
-    }
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-    res.header('Access-Control-Allow-Credentials', 'true');
-
-    if (req.method === 'OPTIONS') {
-        res.sendStatus(200);
-    } else {
-        next();
-    }
-});
 
 app.use(express.json());
 
