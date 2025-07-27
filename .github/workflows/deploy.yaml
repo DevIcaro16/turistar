@@ -41,12 +41,12 @@ jobs:
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
 
       - name: Make build script executable
-        run: chmod +x build_and_push_images.sh
+        run: chmod +x scripts/build_and_push_images.sh
 
       - name: Update build script with credentials
         run: |
-          sed -i "s/seu-username/${{ secrets.DOCKER_HUB_USERNAME }}/g" build_and_push_images.sh
-          sed -i "s/latest/${{ github.sha }}/g" build_and_push_images.sh
+          sed -i "s/seu-username/${{ secrets.DOCKER_HUB_USERNAME }}/g" scripts/build_and_push_images.sh
+          sed -i "s/latest/${{ github.sha }}/g" scripts/build_and_push_images.sh
 
       - name: Build and push backend image
         run: |
