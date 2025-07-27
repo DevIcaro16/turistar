@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { CheckCircle, XCircle, AlertTriangle, Info, X } from 'lucide-react';
 
 interface AlertComponentProps {
@@ -26,6 +26,13 @@ export default function AlertComponent({
 }: AlertComponentProps) {
     const [isVisible, setIsVisible] = useState(false);
 
+    const handleClose = useCallback(() => {
+        setIsVisible(false);
+        setTimeout(() => {
+            onClose();
+        }, 200); // Aguarda a animação de saída
+    }, [onClose]);
+
     useEffect(() => {
         if (visible) {
             setIsVisible(true);
@@ -41,16 +48,12 @@ export default function AlertComponent({
         } else {
             setIsVisible(false);
         }
-    }, [visible, autoClose, autoCloseTime]);
 
-    const handleClose = () => {
-        setIsVisible(false);
-        setTimeout(() => {
-            onClose();
-        }, 200); // Aguarda a animação de saída
-    };
+        // Retorna undefined para casos onde não há cleanup
+        return undefined;
+    }, [visible, autoClose, autoCloseTime, handleClose]);
 
-    const getIcon = () => {
+    const getIcon = (): React.ReactElement => {
         const iconClass = "w-6 h-6";
         switch (type) {
             case 'success':
@@ -66,7 +69,7 @@ export default function AlertComponent({
         }
     };
 
-    const getBackgroundColor = () => {
+    const getBackgroundColor = (): string => {
         switch (type) {
             case 'success':
                 return 'bg-green-50 border-green-200';

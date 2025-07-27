@@ -1,7 +1,7 @@
 import { useState, useContext } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { AuthContext } from "../../contexts/auth";
-import { transportOptions } from "./types";
+import { transportOptions } from "./SignUpModel";
 
 export const initialValues = {
     name: '',

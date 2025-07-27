@@ -1,1 +1,0 @@
-export type TypeUser = 'user' | 'driver';

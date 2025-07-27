@@ -167,7 +167,7 @@ export const meuDriver = async (req: Request, res: Response, next: NextFunction)
             return res.status(401).json({ message: 'Não autenticado!' });
         }
         const driver = await AuthService.getDriverById(driverId);
-        console.log(driver);
+        // console.log(driver);
         res.status(200).json({ success: true, driver, role: 'driver' });
     } catch (error) {
         return next(error);

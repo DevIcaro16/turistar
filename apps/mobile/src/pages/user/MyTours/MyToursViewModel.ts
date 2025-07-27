@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { AppState } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import api from '../../../util/api/api';
-import { ReservationData, TimelineStep } from './types';
+import { ReservationData, TimelineStep } from './MyToursModel';
 
 export function formatDateTime(date: string) {
     const d = new Date(date);

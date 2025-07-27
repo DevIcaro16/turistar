@@ -6,7 +6,7 @@ import { TextInputMask } from 'react-native-masked-text';
 import AlertComponent from '../../../components/AlertComponent';
 import { styles } from './styles';
 import { usePerfilViewModel } from './PerfilViewModel';
-import { validationSchema, initialFormValues, ProfileFormData } from './types';
+import { validationSchema, initialFormValues, ProfileFormData } from './PerfilModel';
 
 export default function Perfil() {
     const perfilViewModel = usePerfilViewModel();

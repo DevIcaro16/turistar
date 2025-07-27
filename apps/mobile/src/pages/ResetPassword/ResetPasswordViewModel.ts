@@ -1,5 +1,5 @@
 import { useNavigation, useRoute } from "@react-navigation/native";
-import { TypeUser } from "./types";
+import { TypeUser } from "./ResetPasswordModel";
 import { useContext, useRef, useState } from "react";
 import { AuthContext } from "../../contexts/auth";
 

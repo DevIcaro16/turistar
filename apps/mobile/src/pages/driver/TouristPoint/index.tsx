@@ -17,27 +17,40 @@ import { Picker } from '@react-native-picker/picker';
 import AlertComponent from '../../../components/AlertComponent';
 import styles from './styles';
 import { useTouristPointViewModel } from './TouristPointViewModel';
-import { validationSchema, initialFormValues, TouristPoint, TouristPointFormData } from './types';
+import { validationSchema, initialFormValues, TouristPoint, TouristPointFormData } from './TouristPointModel';
 
 export default function TouristPointManagement() {
     const touristPointViewModel = useTouristPointViewModel();
 
     const renderTouristPointCard = ({ item }: { item: TouristPoint }) => (
-        <View style={styles.carCard}>
-            <View style={styles.carHeader}>
-                <MaterialIcons name="place" size={24} color="#007AFF" />
-                <Text style={styles.carType}>{item.name}</Text>
+        <View style={styles.touristPointCard}>
+            <View style={styles.touristPointImageContainer}>
+                {item.image ? (
+                    <Image
+                        source={{ uri: item.image }}
+                        style={styles.touristPointCardImage}
+                        resizeMode="cover"
+                    />
+                ) : (
+                    <MaterialIcons name="place" size={64} color="#34C759" />
+                )}
             </View>
-            <Text style={styles.carModel}>{item.city}, {item.uf}</Text>
-            {item.image && (
-                <Image source={{ uri: item.image }} style={styles.carCardImage} />
+            <View style={styles.touristPointHeader}>
+                <MaterialIcons name="place" size={24} color="#34C759" />
+                <Text style={styles.touristPointName}>{item.name}</Text>
+            </View>
+            <Text style={styles.touristPointLocation}>{item.city}, {item.uf}</Text>
+            {item.latitude && item.longitude && (
+                <Text style={styles.touristPointCoordinates}>
+                    📍 {item.latitude}, {item.longitude}
+                </Text>
             )}
-            <View style={styles.carActions}>
+            <View style={styles.touristPointActions}>
                 <TouchableOpacity
                     style={[styles.actionButton, styles.editButton]}
                     onPress={() => touristPointViewModel.openEditModal(item)}
                 >
-                    <MaterialIcons name="edit" size={20} color="#007AFF" />
+                    <MaterialIcons name="edit" size={20} color="#34C759" />
                     <Text style={styles.editButtonText}>Editar</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -49,11 +62,11 @@ export default function TouristPointManagement() {
                 </TouchableOpacity>
                 {item.latitude && item.longitude && (
                     <TouchableOpacity
-                        style={[styles.actionButton, styles.editButton]}
+                        style={[styles.actionButton, styles.locationButton]}
                         onPress={() => touristPointViewModel.openLocation(item)}
                     >
-                        <MaterialIcons name="location-on" size={20} color="#34C759" />
-                        <Text style={styles.editButtonText}>Localização</Text>
+                        <MaterialIcons name="location-on" size={20} color="#007AFF" />
+                        <Text style={styles.locationButtonText}>Localização</Text>
                     </TouchableOpacity>
                 )}
             </View>
@@ -123,6 +136,8 @@ export default function TouristPointManagement() {
                                         name: touristPointViewModel.editingTouristPoint.name,
                                         city: touristPointViewModel.editingTouristPoint.city,
                                         uf: touristPointViewModel.editingTouristPoint.uf,
+                                        latitude: touristPointViewModel.editingTouristPoint.latitude || '',
+                                        longitude: touristPointViewModel.editingTouristPoint.longitude || '',
                                     }
                                     : initialFormValues
                             }
@@ -138,6 +153,11 @@ export default function TouristPointManagement() {
                                 <ScrollView style={styles.form}>
                                     <View style={styles.inputGroup}>
                                         <Text style={styles.label}>Nome do Local</Text>
+                                        {touristPointViewModel.isLoadingAddress && (
+                                            <Text style={{ color: '#34C759', fontSize: 12, marginLeft: 8 }}>
+                                                Preenchendo automaticamente...
+                                            </Text>
+                                        )}
                                         <TextInput
                                             style={styles.input}
                                             value={values.name}
@@ -152,7 +172,14 @@ export default function TouristPointManagement() {
                                     </View>
 
                                     <View style={styles.inputGroup}>
-                                        <Text style={styles.label}>Cidade</Text>
+                                        <Text style={styles.label}>
+                                            Cidade
+                                            {touristPointViewModel.isLoadingAddress && (
+                                                <Text style={{ color: '#34C759', fontSize: 12, marginLeft: 8 }}>
+                                                    Preenchendo automaticamente...
+                                                </Text>
+                                            )}
+                                        </Text>
                                         <TextInput
                                             style={styles.input}
                                             value={values.city}
@@ -167,7 +194,14 @@ export default function TouristPointManagement() {
                                     </View>
 
                                     <View style={styles.inputGroup}>
-                                        <Text style={styles.label}>Estado</Text>
+                                        <Text style={styles.label}>
+                                            Estado
+                                            {touristPointViewModel.isLoadingAddress && (
+                                                <Text style={{ color: '#34C759', fontSize: 12, marginLeft: 8 }}>
+                                                    Preenchendo automaticamente...
+                                                </Text>
+                                            )}
+                                        </Text>
                                         <Picker
                                             selectedValue={values.uf}
                                             onValueChange={(itemValue) => setFieldValue('uf', itemValue)}
@@ -204,6 +238,50 @@ export default function TouristPointManagement() {
                                         </Picker>
                                         {touched.uf && errors.uf && (
                                             <Text style={styles.errorText}>{String(errors.uf)}</Text>
+                                        )}
+                                    </View>
+
+                                    <View style={styles.inputGroup}>
+                                        <Text style={styles.label}>Latitude (Opcional)</Text>
+                                        <TextInput
+                                            style={styles.input}
+                                            value={values.latitude}
+                                            onChangeText={(text) => {
+                                                handleChange('latitude')(text);
+                                                // Se longitude também foi preenchida, buscar endereço automaticamente
+                                                if (text && values.longitude) {
+                                                    touristPointViewModel.fetchAddressFromLatLong(Number(text), Number(values.longitude), setFieldValue);
+                                                }
+                                            }}
+                                            onBlur={handleBlur('latitude')}
+                                            placeholder="Ex: -23.5505"
+                                            placeholderTextColor="#8E8E93"
+                                            keyboardType="numeric"
+                                        />
+                                        {touched.latitude && errors.latitude && (
+                                            <Text style={styles.errorText}>{String(errors.latitude)}</Text>
+                                        )}
+                                    </View>
+
+                                    <View style={styles.inputGroup}>
+                                        <Text style={styles.label}>Longitude (Opcional)</Text>
+                                        <TextInput
+                                            style={styles.input}
+                                            value={values.longitude}
+                                            onChangeText={(text) => {
+                                                handleChange('longitude')(text);
+                                                // Se latitude também foi preenchida, buscar endereço automaticamente
+                                                if (text && values.latitude) {
+                                                    touristPointViewModel.fetchAddressFromLatLong(Number(values.latitude), Number(text), setFieldValue);
+                                                }
+                                            }}
+                                            onBlur={handleBlur('longitude')}
+                                            placeholder="Ex: -46.6333"
+                                            placeholderTextColor="#8E8E93"
+                                            keyboardType="numeric"
+                                        />
+                                        {touched.longitude && errors.longitude && (
+                                            <Text style={styles.errorText}>{String(errors.longitude)}</Text>
                                         )}
                                     </View>
 

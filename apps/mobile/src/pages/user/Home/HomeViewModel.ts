@@ -2,14 +2,14 @@ import { useEffect, useState, useContext, useRef } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { AuthContext } from '../../../contexts/auth';
 import api from '../../../util/api/api';
-import { Tour } from './types';
+import { Tour } from './HomeModel';
 
 export function formatDateTime(date: string) {
     const d = new Date(date);
     const day = String(d.getDate()).padStart(2, '0');
     const month = String(d.getMonth() + 1).padStart(2, '0');
     const year = d.getFullYear();
-    const hour = String(d.getHours()).padStart(2, '0');
+    const hour = String(d.getHours() + 3).padStart(2, '0');
     const minute = String(d.getMinutes()).padStart(2, '0');
     return `${day}/${month}/${year} ${hour}:${minute}`;
 }
@@ -55,7 +55,8 @@ export function useHomeViewModel(): {
                         p.canceled === false
                 )
 
-            console.log(passeios);
+            // console.log(passeios);
+
             setPasseiosHoje(passeios);
             setPasseiosHojeCont(passeios.length);
 

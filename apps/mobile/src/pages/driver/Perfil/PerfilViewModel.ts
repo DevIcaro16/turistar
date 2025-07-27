@@ -4,7 +4,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { AuthContext } from '../../../contexts/auth';
 import api from '../../../util/api/api';
 import { transportTypesPicker } from '../../../util/types/transportTypes';
-import { ProfileFormData } from './types';
+import { ProfileFormData } from './PerfilModel';
 
 export function PerfilViewModel(): {
     user: any;

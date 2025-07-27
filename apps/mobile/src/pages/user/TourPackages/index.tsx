@@ -4,7 +4,7 @@ import { Picker } from '@react-native-picker/picker';
 import styles from './styles';
 import AlertComponent from '../../../components/AlertComponent';
 import { useTourPackagesViewModel, formatDateTime, CAR_TYPES } from './TourPackagesViewModel';
-import { TourPackageData } from './types';
+import { TourPackageData } from './TourPackagesModel';
 
 export default function UserTourPackages() {
     const tourPackagesViewModel = useTourPackagesViewModel();
@@ -140,7 +140,7 @@ export default function UserTourPackages() {
                                         value={tourPackagesViewModel.quantities[tourPackagesViewModel.selectedPackage.id] || '1'}
                                         onChangeText={(text) => tourPackagesViewModel.setQuantities({
                                             ...tourPackagesViewModel.quantities,
-                                            [tourPackagesViewModel.selectedPackage.id]: text
+                                            [tourPackagesViewModel.selectedPackage?.id || '']: text
                                         })}
                                         keyboardType="numeric"
                                     />

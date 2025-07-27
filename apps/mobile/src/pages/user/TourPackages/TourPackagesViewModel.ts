@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import api from '../../../util/api/api';
-import { TourPackageData, CarType, PendingReservation } from './types';
+import { TourPackageData, CarType, PendingReservation } from './TourPackagesModel';
 
 export function formatDateTime(date: string) {
     const d = new Date(date);

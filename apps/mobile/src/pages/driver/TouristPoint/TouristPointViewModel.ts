@@ -3,9 +3,8 @@ import { Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as Linking from 'expo-linking';
 import { AuthContext } from '../../../contexts/auth';
-import AlertComponent from '../../../components/AlertComponent';
 import api from '../../../util/api/api';
-import { TouristPoint, TouristPointFormData } from './types';
+import { TouristPoint, TouristPointFormData } from './TouristPointModel';
 
 export function useTouristPointViewModel() {
     const { user } = useContext<any>(AuthContext);
@@ -18,6 +17,7 @@ export function useTouristPointViewModel() {
     const [alertMessage, setAlertMessage] = useState('');
     const [alertType, setAlertType] = useState<'success' | 'error'>('success');
     const [selectedImage, setSelectedImage] = useState<any>(null);
+    const [isLoadingAddress, setIsLoadingAddress] = useState(false);
 
     const showAlert = (message: string, type: 'success' | 'error' = 'success') => {
         setAlertMessage(message);
@@ -48,21 +48,86 @@ export function useTouristPointViewModel() {
     };
 
     const fetchAddressFromLatLong = async (
-        lat: string,
-        long: string,
+        lat: number,
+        long: number,
         setFieldValue: any
     ) => {
+        setIsLoadingAddress(true);
         try {
             const response = await fetch(
-                `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${long}&zoom=18&addressdetails=1`
+                `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${long}&zoom=18&addressdetails=1`,
+                {
+                    headers: {
+                        'User-Agent': 'Turistar/1.0 (suporte.turistarturismo@dgmail.com)'
+                    }
+                }
             );
             const data = await response.json();
+
+            // console.log(data);
+
             if (data.address) {
-                setFieldValue('city', data.address.city || data.address.town || data.address.village || '');
-                setFieldValue('uf', data.address.state || '');
+                // Mapear cidade - priorizar city, depois municipality, depois suburb
+                const city = data.address.city || data.address.municipality || data.address.suburb || '';
+                setFieldValue('city', city);
+
+                // Mapear estado - extrair sigla do state ou ISO3166-2-lvl4
+                let state = '';
+                if (data.address.state) {
+                    // Mapear nomes completos para siglas
+                    const stateMapping: { [key: string]: string } = {
+                        'Ceará': 'CE',
+                        'São Paulo': 'SP',
+                        'Rio de Janeiro': 'RJ',
+                        'Minas Gerais': 'MG',
+                        'Bahia': 'BA',
+                        'Pernambuco': 'PE',
+                        'Paraná': 'PR',
+                        'Rio Grande do Sul': 'RS',
+                        'Santa Catarina': 'SC',
+                        'Goiás': 'GO',
+                        'Maranhão': 'MA',
+                        'Mato Grosso': 'MT',
+                        'Mato Grosso do Sul': 'MS',
+                        'Pará': 'PA',
+                        'Paraíba': 'PB',
+                        'Piauí': 'PI',
+                        'Rio Grande do Norte': 'RN',
+                        'Rondônia': 'RO',
+                        'Roraima': 'RR',
+                        'Sergipe': 'SE',
+                        'Tocantins': 'TO',
+                        'Acre': 'AC',
+                        'Alagoas': 'AL',
+                        'Amapá': 'AP',
+                        'Amazonas': 'AM',
+                        'Distrito Federal': 'DF',
+                        'Espírito Santo': 'ES'
+                    };
+                    state = stateMapping[data.address.state] || data.address.state;
+                } else if (data.address['ISO3166-2-lvl4']) {
+                    // Extrair sigla do código ISO (ex: "BR-CE" -> "CE")
+                    const isoCode = data.address['ISO3166-2-lvl4'];
+                    state = isoCode.split('-')[1] || '';
+                }
+                setFieldValue('uf', state);
+
+                // Preencher nome do local automaticamente
+                const road = data.address.road || '';
+                const neighbourhood = data.address.neighbourhood || '';
+                const suburb = data.address.suburb || '';
+                const nameParts = [road, neighbourhood, suburb].filter(Boolean);
+                if (nameParts.length > 0) {
+                    setFieldValue('name', nameParts.join(', '));
+                }
+
+                // console.log('Dados mapeados:', { city, state });
             }
         } catch (error) {
             console.error('Erro ao buscar endereço:', error);
+            // Não mostrar erro para o usuário, pois é uma funcionalidade opcional
+        } finally {
+            setIsLoadingAddress(false);
         }
     };
 
@@ -86,6 +151,8 @@ export function useTouristPointViewModel() {
                 formData.append('city', values.city);
                 formData.append('uf', values.uf);
                 formData.append('driverId', user.id);
+                if (values.latitude) formData.append('latitude', values.latitude);
+                if (values.longitude) formData.append('longitude', values.longitude);
                 formData.append('file', {
                     uri: selectedImage.uri,
                     name: 'touristpoint.jpg',
@@ -102,6 +169,8 @@ export function useTouristPointViewModel() {
                     city: values.city,
                     uf: values.uf,
                     driverId: user.id,
+                    latitude: values.latitude || undefined,
+                    longitude: values.longitude || undefined,
                 });
             }
             showAlert('Ponto turístico criado com sucesso!');
@@ -224,5 +293,6 @@ export function useTouristPointViewModel() {
         openLocation,
         setModalVisible,
         setAlertVisible,
+        isLoadingAddress,
     };
 } 

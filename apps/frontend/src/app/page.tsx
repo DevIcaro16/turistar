@@ -1,33 +1,53 @@
 'use client';
 
-import ProtectedRoute from '../components/ProtectedRoute';
-import Header from '../components/Header';
-import { useAuth } from '../contexts/AuthContext';
+import React, { useState, useEffect } from 'react';
 import Sibebar from '../components/Sibebar';
+import Header from '../components/Header';
+import { useAuth, isAuthenticated } from '../lib/auth';
+import { useRouter } from 'next/navigation';
 import Overview from '../components/Overview';
 
-export default function Dashboard() {
-  const { user, isAuthenticated, loading: authLoading } = useAuth();
+// Forçar página dinâmica
+export const dynamic = 'force-dynamic';
 
-  // Só renderiza após autenticação estar pronta
-  if (authLoading) {
+const HomePage = () => {
+  const { user, loading, isAuthenticated: authStatus } = useAuth();
+  const router = useRouter();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    // Se não está autenticado, redirecionar para login
+    if (!isAuthenticated()) {
+      router.push('/Login');
+    }
+  }, [router]);
+
+  // Durante SSR ou loading, renderizar um loading
+  if (!mounted || loading) {
     return (
-      <div className='flex-1 flex items-center justify-center min-h-screen bg-[#1e1e1e]'>
-        <span className="text-gray-400 text-lg">Carregando autenticação...</span>
+      <div className="min-h-screen bg-[#1e1e1e] flex flex-col items-center justify-center">
+        <div className="text-gray-100 text-lg">Carregando...</div>
       </div>
     );
   }
 
+  // Se não está autenticado, não renderizar nada (será redirecionado)
+  if (!authStatus) {
+    return null;
+  }
 
   return (
-    <ProtectedRoute>
-      <div className="flex min-h-screen bg-[#1e1e1e]">
-        <Sibebar />
-        <div className="flex-1">
-          <Header />
+    <div className='flex min-h-screen bg-[#1e1e1e]'>
+      <Sibebar />
+      <div className="flex-1">
+        <Header />
+        <main className="max-w-7xl mx-auto py-4 px-4 lg:px-8">
           <Overview />
-        </div>
+        </main>
       </div>
-    </ProtectedRoute>
+    </div>
   );
-}
+};
+
+export default HomePage;

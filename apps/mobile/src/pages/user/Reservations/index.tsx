@@ -3,7 +3,7 @@ import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, Modal, Image
 import styles from './styles';
 import AlertComponent from '../../../components/AlertComponent';
 import { useReservationsViewModel, formatDateTime } from './ReservationsViewModel';
-import { ReservationData } from './types';
+import { ReservationData } from './ReservationsModel';
 
 export default function UserReservations() {
     const reservationsViewModel = useReservationsViewModel();

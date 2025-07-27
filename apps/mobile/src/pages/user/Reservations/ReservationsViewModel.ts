@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useStripe } from '@stripe/stripe-react-native';
 import api from '../../../util/api/api';
-import { ReservationData, ConfirmAction } from './types';
+import { ReservationData, ConfirmAction } from './ReservationsModel';
 
 export function formatDateTime(date: string) {
     const d = new Date(date);
@@ -27,6 +27,7 @@ export function useReservationsViewModel() {
     const intervalRef = useRef<NodeJS.Timeout | null>(null);
     const { initPaymentSheet, presentPaymentSheet } = useStripe();
 
+
     const showAlert = (message: string, type: 'success' | 'error' = 'success') => {
         setAlertMessage(message);
         setAlertType(type);
@@ -46,6 +47,8 @@ export function useReservationsViewModel() {
             setLoading(false);
         }
     };
+
+
 
     useEffect(() => {
         fetchReservations();
@@ -80,10 +83,9 @@ export function useReservationsViewModel() {
 
                 const { clientSecret } = paymentIntentRes.data;
 
-                // 2. Inicialize o PaymentSheet
                 const { error: initError } = await initPaymentSheet({
-                    clientSecret,
-                    merchantDisplayName: 'App Passeios Turísticos',
+                    paymentIntentClientSecret: clientSecret,
+                    merchantDisplayName: 'Turistar',
                 });
 
                 if (initError) {
@@ -91,7 +93,6 @@ export function useReservationsViewModel() {
                     return;
                 }
 
-                // 3. Apresente o PaymentSheet
                 const { error: presentError } = await presentPaymentSheet();
 
                 if (presentError) {
@@ -106,7 +107,9 @@ export function useReservationsViewModel() {
             }
         } else if (confirmAction === 'cancel') {
             try {
-                await api.put(`/reservation/${selectedReservation.id}/cancel`);
+                await api.post(`user/reserve-cancellation`, {
+                    ReserveId: selectedReservation.id
+                });
                 showAlert('Reserva cancelada com sucesso!');
                 setDetailModalVisible(false);
                 fetchReservations();

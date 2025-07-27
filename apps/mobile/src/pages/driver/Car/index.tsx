@@ -18,7 +18,7 @@ import AlertComponent from '../../../components/AlertComponent';
 import styles from './styles';
 import { transportOptions } from '../../../util/types/transportTypes';
 import { useCarViewModel } from './CarViewModel';
-import { validationSchema, initialFormValues, CarFormData, Car } from './types';
+import { validationSchema, initialFormValues, CarFormData, Car } from './CarModel';
 
 export default function CarManagement() {
     const carViewModel = useCarViewModel();

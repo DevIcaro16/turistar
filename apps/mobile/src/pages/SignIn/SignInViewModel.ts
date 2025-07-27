@@ -1,7 +1,7 @@
 import { useState, useContext } from "react";
 import { AuthContext } from "../../contexts/auth";
 import { useNavigation } from "@react-navigation/native";
-import { FormValues, typeUser } from "./types";
+import { FormValues, typeUser } from "./SignInModel";
 
 export function useSignInViewModel() {
 

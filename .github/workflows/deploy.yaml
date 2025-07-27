@@ -1,0 +1,310 @@
+name: Build and Deploy to EC2
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to deploy to"
+        required: true
+        default: "production"
+        type: choice
+        options:
+          - production
+          - staging
+
+env:
+  DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
+  DOCKER_HUB_PASSWORD: ${{ secrets.DOCKER_HUB_PASSWORD }}
+  REPOSITORY_NAME: turistar
+  VERSION: ${{ github.sha }}
+
+jobs:
+  build:
+    name: Build and Push Docker Images
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
+
+      - name: Make build script executable
+        run: chmod +x build_and_push_containers.sh
+
+      - name: Update build script with credentials
+        run: |
+          sed -i "s/seu-username/${{ secrets.DOCKER_HUB_USERNAME }}/g" build_and_push_containers.sh
+          sed -i "s/latest/${{ github.sha }}/g" build_and_push_containers.sh
+
+      - name: Build and push backend image
+        run: |
+          docker build -f backend-api.Dockerfile \
+            -t ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.REPOSITORY_NAME }}-backend-api:${{ env.VERSION }} \
+            -t ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.REPOSITORY_NAME }}-backend-api:latest \
+            .
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.REPOSITORY_NAME }}-backend-api:${{ env.VERSION }}
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.REPOSITORY_NAME }}-backend-api:latest
+
+      - name: Build and push frontend image
+        run: |
+          docker build -f frontend.Dockerfile \
+            -t ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.REPOSITORY_NAME }}-frontend:${{ env.VERSION }} \
+            -t ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.REPOSITORY_NAME }}-frontend:latest \
+            .
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.REPOSITORY_NAME }}-frontend:${{ env.VERSION }}
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.REPOSITORY_NAME }}-frontend:latest
+
+      - name: Create deployment info
+        run: |
+          echo "BACKEND_IMAGE=${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.REPOSITORY_NAME }}-backend-api:${{ env.VERSION }}" >> $GITHUB_ENV
+          echo "FRONTEND_IMAGE=${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.REPOSITORY_NAME }}-frontend:${{ env.VERSION }}" >> $GITHUB_ENV
+          echo "DEPLOYMENT_TIME=$(date -u +'%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_ENV
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployment-info
+          path: |
+            .github/workflows/deploy-ec2.sh
+            docker-compose.prod.yml
+          retention-days: 30
+
+  deploy:
+    name: Deploy to EC2
+    runs-on: self-hosted
+    needs: build
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || github.event_name == 'workflow_dispatch'
+
+    environment: ${{ github.event.inputs.environment || 'production' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker
+        run: |
+          sudo systemctl start docker
+          sudo usermod -aG docker $USER
+
+      - name: Create production environment file
+        run: |
+          cat > .env << EOF
+          # Configurações do Banco de Dados
+          DATABASE_URL=${{ secrets.DATABASE_URL }}
+
+          # Configurações JWT
+          ACCESS_TOKEN_SECRET=${{ secrets.ACCESS_TOKEN_SECRET }}
+          REFRESH_TOKEN_SECRET=${{ secrets.REFRESH_TOKEN_SECRET }}
+
+          # Configurações Cloudinary
+          CLOUDINARY_NAME=${{ secrets.CLOUDINARY_NAME }}
+          CLOUDINARY_KEY=${{ secrets.CLOUDINARY_KEY }}
+          CLOUDINARY_SECRET=${{ secrets.CLOUDINARY_SECRET }}
+
+          # Configurações Stripe
+          STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}
+
+          # Configurações MongoDB
+          MONGO_ROOT_USERNAME=${{ secrets.MONGO_ROOT_USERNAME }}
+          MONGO_ROOT_PASSWORD=${{ secrets.MONGO_ROOT_PASSWORD }}
+
+          # Configurações Redis
+          REDIS_URL=${{ secrets.REDIS_URL }}
+          REDIS_HOST=${{ secrets.REDIS_HOST }}
+          REDIS_PORT=${{ secrets.REDIS_PORT }}
+          REDIS_PASS=${{ secrets.REDIS_PASS }}
+
+          # Configurações SMTP
+          SMTP_HOST=${{ secrets.SMTP_HOST }}
+          SMTP_PORT=${{ secrets.SMTP_PORT }}
+          SMTP_SERVICE=${{ secrets.SMTP_SERVICE }}
+          SMTP_USER=${{ secrets.SMTP_USER }}
+          SMTP_PASS=${{ secrets.SMTP_PASS }}
+
+          # Configurações para EC2/AWS
+          EC2_PUBLIC_IP=${{ secrets.EC2_PUBLIC_IP }}
+          FRONTEND_URL=${{ secrets.FRONTEND_URL }}
+          DOMAIN_NAME=${{ secrets.DOMAIN_NAME }}
+
+          # Configurações do Frontend
+          NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}
+
+          # Configurações do Servidor
+          HOST=0.0.0.0
+          PORT=8000
+          NODE_ENV=production
+          EOF
+
+      - name: Create production docker-compose
+        run: |
+          cat > docker-compose.prod.yml << EOF
+          version: '3.8'
+
+          services:
+            # Backend API
+            backend-api:
+              image: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.REPOSITORY_NAME }}-backend-api:${{ env.VERSION }}
+              container_name: turistar-backend-api
+              ports:
+                - "8000:8000"
+              environment:
+                - NODE_ENV=production
+                - DATABASE_URL=\${DATABASE_URL}
+                - ACCESS_TOKEN_SECRET=\${ACCESS_TOKEN_SECRET}
+                - REFRESH_TOKEN_SECRET=\${REFRESH_TOKEN_SECRET}
+                - CLOUDINARY_NAME=\${CLOUDINARY_NAME}
+                - CLOUDINARY_KEY=\${CLOUDINARY_KEY}
+                - CLOUDINARY_SECRET=\${CLOUDINARY_SECRET}
+                - STRIPE_SECRET_KEY=\${STRIPE_SECRET_KEY}
+                - REDIS_URL=\${REDIS_URL}
+                - REDIS_HOST=\${REDIS_HOST}
+                - REDIS_PORT=\${REDIS_PORT}
+                - REDIS_PASS=\${REDIS_PASS}
+                - SMTP_HOST=\${SMTP_HOST}
+                - SMTP_PORT=\${SMTP_PORT}
+                - SMTP_SERVICE=\${SMTP_SERVICE}
+                - SMTP_USER=\${SMTP_USER}
+                - SMTP_PASS=\${SMTP_PASS}
+                - FRONTEND_URL=\${FRONTEND_URL}
+                - EC2_PUBLIC_IP=\${EC2_PUBLIC_IP}
+                - DOMAIN_NAME=\${DOMAIN_NAME}
+                - HOST=0.0.0.0
+                - PORT=8000
+              restart: unless-stopped
+              networks:
+                - turistar-network
+              
+            # Frontend Next.js
+            frontend:
+              image: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.REPOSITORY_NAME }}-frontend:${{ env.VERSION }}
+              container_name: turistar-frontend
+              ports:
+                - "3000:3000"
+              environment:
+                - NODE_ENV=production
+                - NEXT_PUBLIC_API_URL=\${NEXT_PUBLIC_API_URL}
+              depends_on:
+                - backend-api
+              restart: unless-stopped
+              networks:
+                - turistar-network
+              
+            # MongoDB
+            mongodb:
+              image: mongo:7.0
+              container_name: turistar-mongodb
+              ports:
+                - "27017:27017"
+              environment:
+                - MONGO_INITDB_ROOT_USERNAME=\${MONGO_ROOT_USERNAME}
+                - MONGO_INITDB_ROOT_PASSWORD=\${MONGO_ROOT_PASSWORD}
+              volumes:
+                - mongodb_data:/data/db
+              restart: unless-stopped
+              networks:
+                - turistar-network
+              
+            # Redis
+            redis:
+              image: redis:7-alpine
+              container_name: turistar-redis
+              ports:
+                - "6379:6379"
+              volumes:
+                - redis_data:/data
+              restart: unless-stopped
+              networks:
+                - turistar-network
+
+          networks:
+            turistar-network:
+              driver: bridge
+
+          volumes:
+            mongodb_data:
+            redis_data:
+          EOF
+
+      - name: Stop existing containers
+        run: |
+          docker-compose -f docker-compose.prod.yml down || true
+          docker system prune -f
+
+      - name: Pull latest images
+        run: |
+          docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.REPOSITORY_NAME }}-backend-api:${{ env.VERSION }}
+          docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.REPOSITORY_NAME }}-frontend:${{ env.VERSION }}
+
+      - name: Deploy application
+        run: |
+          docker-compose -f docker-compose.prod.yml up -d
+
+      - name: Wait for services to be ready
+        run: |
+          echo "Waiting for services to be ready..."
+          sleep 30
+
+          # Check if services are running
+          docker-compose -f docker-compose.prod.yml ps
+
+          # Health check
+          curl -f http://localhost:8000/ || exit 1
+          curl -f http://localhost:3000/ || exit 1
+
+      - name: Cleanup old images
+        run: |
+          # Remove images older than 7 days
+          docker image prune -a -f --filter "until=168h"
+
+      - name: Send deployment notification
+        run: |
+          echo "🚀 Deployment completed successfully!"
+          echo "Backend: http://${{ secrets.EC2_PUBLIC_IP }}:8000"
+          echo "Frontend: http://${{ secrets.EC2_PUBLIC_IP }}:3000"
+          echo "Version: ${{ env.VERSION }}"
+          echo "Deployed at: ${{ env.DEPLOYMENT_TIME }}"
+
+      - name: Create deployment summary
+        run: |
+          cat > deployment-summary.md << EOF
+          # Deployment Summary
+
+          ## Deployment Information
+          - **Version**: ${{ env.VERSION }}
+          - **Deployed at**: ${{ env.DEPLOYMENT_TIME }}
+          - **Environment**: ${{ github.event.inputs.environment || 'production' }}
+
+          ## Services
+          - **Backend API**: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.REPOSITORY_NAME }}-backend-api:${{ env.VERSION }}
+          - **Frontend**: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.REPOSITORY_NAME }}-frontend:${{ env.VERSION }}
+
+          ## URLs
+          - **Backend**: http://${{ secrets.EC2_PUBLIC_IP }}:8000
+          - **Frontend**: http://${{ secrets.EC2_PUBLIC_IP }}:3000
+          - **API Docs**: http://${{ secrets.EC2_PUBLIC_IP }}:8000/api-docs
+
+          ## Health Check
+          - Backend: ✅ Running
+          - Frontend: ✅ Running
+          - MongoDB: ✅ Running
+          - Redis: ✅ Running
+          EOF
+
+      - name: Upload deployment summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployment-summary
+          path: deployment-summary.md
+          retention-days: 30

@@ -7,7 +7,7 @@ import api from '../../util/api/api';
 import { ToastContainer, toast } from 'react-toastify';
 import Sibebar from '../../components/Sibebar';
 import Header from '../../components/Header';
-import ProtectedRoute from '../../components/ProtectedRoute';
+
 
 interface User {
     id: string;
@@ -60,35 +60,33 @@ const UsersPage = () => {
     ];
 
     return (
-        <ProtectedRoute>
-            <div className='flex min-h-screen bg-[#1e1e1e]'>
-                <Sibebar />
-                <div className="flex-1">
-                    <Header />
-                    <main className="max-w-7xl mx-auto py-4 px-4 lg:px-8">
-                        <ToastContainer />
-                        <TableGeneric
-                            data={users}
-                            columns={columns}
-                            title="Usuários"
-                            searchPlaceholder="Buscar por nome, email..."
-                            onView={(item) => handleView(item as User)}
-                            onDelete={(item) => handleDelete(item as User)}
-                        />
-                        <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Detalhes do Usuário">
-                            {selectedItem && (
-                                <div className="text-white flex flex-col items-center">
-                                    <img src={selectedItem.image || `https://ui-avatars.com/api/?name=${selectedItem.name}&background=1e1e1e&color=fff`} alt={selectedItem.name} className="w-24 h-24 rounded-full object-cover mb-4" />
-                                    <p><strong>ID:</strong> {selectedItem.id}</p>
-                                    <p><strong>Nome:</strong> {selectedItem.name}</p>
-                                    <p><strong>Email:</strong> {selectedItem.email}</p>
-                                </div>
-                            )}
-                        </Modal>
-                    </main>
-                </div>
+        <div className='flex min-h-screen bg-[#1e1e1e]'>
+            <Sibebar />
+            <div className="flex-1">
+                <Header />
+                <main className="max-w-7xl mx-auto py-4 px-4 lg:px-8">
+                    <ToastContainer />
+                    <TableGeneric
+                        data={users}
+                        columns={columns}
+                        title="Usuários"
+                        searchPlaceholder="Buscar por nome, email..."
+                        onView={(item) => handleView(item as User)}
+                        onDelete={(item) => handleDelete(item as User)}
+                    />
+                    <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Detalhes do Usuário">
+                        {selectedItem && (
+                            <div className="text-white flex flex-col items-center">
+                                <img src={selectedItem.image || `https://ui-avatars.com/api/?name=${selectedItem.name}&background=1e1e1e&color=fff`} alt={selectedItem.name} className="w-24 h-24 rounded-full object-cover mb-4" />
+                                <p><strong>ID:</strong> {selectedItem.id}</p>
+                                <p><strong>Nome:</strong> {selectedItem.name}</p>
+                                <p><strong>Email:</strong> {selectedItem.email}</p>
+                            </div>
+                        )}
+                    </Modal>
+                </main>
             </div>
-        </ProtectedRoute>
+        </div>
     );
 };
 

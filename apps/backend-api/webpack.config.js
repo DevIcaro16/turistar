@@ -9,7 +9,7 @@ module.exports = {
     alias: {
 
     },
-    extension: [".ts", ".js"]
+    extensions: [".ts", ".js"]
   },
   plugins: [
     new NxAppWebpackPlugin({

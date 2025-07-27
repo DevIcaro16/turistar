@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import api from '../util/api/api';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../lib/auth';
 
 interface DriverMetrics {
     tourPackages?: {
@@ -28,26 +28,39 @@ interface DriverMetrics {
 }
 
 export const useDriverMetrics = () => {
+    const { user, userRole } = useAuth();
+
     const [metrics, setMetrics] = useState<DriverMetrics>({});
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const { user, userRole } = useAuth();
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     const fetchMetrics = async () => {
+        if (!mounted) return;
+
         try {
             setLoading(true);
             setError(null);
 
-
             if (userRole !== 'driver') {
+                // console.log('useDriverMetrics: Usuário não é driver, role:', userRole);
                 setLoading(false);
                 return;
             }
 
+            // console.log('useDriverMetrics: Buscando métricas para driver...');
             const response = await api.get('driver/metrics/all', { withCredentials: true });
+            // console.log('useDriverMetrics: Resposta:', response.data);
 
             if (response.data.success) {
                 setMetrics(response.data.metrics);
+            } else {
+                console.error('useDriverMetrics: Resposta não foi bem-sucedida:', response.data);
+                setError('Resposta do servidor não foi bem-sucedida');
             }
         } catch (err: any) {
             console.error('Erro ao buscar métricas do motorista:', err);
@@ -59,26 +72,31 @@ export const useDriverMetrics = () => {
 
     // Métodos para buscar métricas individuais (caso necessário)
     const fetchTourPackages = async () => {
+        if (typeof window === 'undefined') return null;
         const response = await api.get('driver/metrics/tour-packages');
         return response.data;
     };
 
     const fetchReserves = async () => {
+        if (typeof window === 'undefined') return null;
         const response = await api.get('driver/metrics/reserves');
         return response.data;
     };
 
     const fetchTouristPoints = async () => {
+        if (typeof window === 'undefined') return null;
         const response = await api.get('driver/metrics/tourist-points');
         return response.data;
     };
 
     const fetchWallet = async () => {
+        if (typeof window === 'undefined') return null;
         const response = await api.get('driver/metrics/wallet');
         return response.data;
     };
 
     const fetchTransactions = async () => {
+        if (typeof window === 'undefined') return null;
         const response = await api.get('driver/metrics/transactions');
         return response.data;
     };
@@ -91,12 +109,14 @@ export const useDriverMetrics = () => {
     };
 
     useEffect(() => {
-        fetchMetrics();
-    }, []);
+        if (mounted && userRole === 'driver') {
+            fetchMetrics();
+        }
+    }, [mounted, userRole]);
 
     return {
         metrics,
-        loading,
+        loading: !mounted || loading,
         error,
         refetch: fetchMetrics,
         formatCurrency,

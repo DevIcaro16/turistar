@@ -7,6 +7,7 @@ import { styles } from "./styles";
 import { FlatList } from "react-native-gesture-handler";
 import { useNavigation } from "@react-navigation/native";
 import { formatDateTime, HomeViewModel } from "./HomeViewModel";
+import { TourPackage } from "./HomeModel";
 
 
 
@@ -68,7 +69,7 @@ export default function Home() {
                         <Text style={styles.modalTitle}>Agenda de Hoje</Text>
                         <FlatList
                             data={homeViewModel.passeiosHoje}
-                            keyExtractor={(item: any) => item.id}
+                            keyExtractor={(item: TourPackage) => item.id}
                             horizontal
                             showsHorizontalScrollIndicator={false}
                             contentContainerStyle={{ paddingBottom: 10 }}

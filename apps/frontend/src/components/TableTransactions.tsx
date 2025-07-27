@@ -46,7 +46,7 @@ const TableTransactions: React.FC<TableTransactionsProps> = ({
         Object.values(row).some(val => String(val ?? '').toLowerCase().includes(search.toLowerCase()))
     );
 
-    console.log(data)
+    // console.log(data);
 
     return (
         <motion.div

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import api from "../../util/api/api";
-import { FormValues, TypeUser } from "./types";
+import { FormValues, TypeUser } from "./NewPasswordModel";
 import { useNavigation, useRoute } from "@react-navigation/native";
 
 export default function NewPasswordViewModel() {
@@ -40,21 +40,36 @@ export default function NewPasswordViewModel() {
 
         try {
 
-            const response = await api.post(`${activeTab}/reset-password-user`, { email: email, newPassword: values.password });
+            await api.post(`${activeTab}/reset-password-user`, { email: email, newPassword: values.password });
 
-            if (response.status >= 400 && response.status <= 500) {
-                showAlert('error', 'Erro', 'Houve um erro ao enviar o código!');
+            // Se chegou aqui, a requisição foi bem-sucedida
+            setLoadingAuth(false);
+            showAlert('success', 'Sucesso!', 'Senha redefinida com Sucesso! Realize o Login novamente!');
+            setTimeout(() => {
+                navigation.navigate('SignIn' as never);
+            }, 1500);
+
+        } catch (error: any) {
+            console.error('Erro no reset de senha:', error);
+
+            // Captura erros HTTP específicos
+            if (error.response) {
+                const { status, data } = error.response;
+
+                if (status === 401) {
+                    showAlert('error', 'Erro', data?.message || 'Senha igual à anterior. Escolha uma nova senha.');
+                } else if (status === 400) {
+                    showAlert('error', 'Erro', data?.message || 'Dados inválidos');
+                } else if (status === 404) {
+                    showAlert('error', 'Erro', 'Usuário não encontrado');
+                } else {
+                    showAlert('error', 'Erro', data?.message || 'Erro interno do servidor');
+                }
+            } else if (error.request) {
+                showAlert('error', 'Erro de Conexão', 'Verifique sua conexão com a internet');
             } else {
-                setLoadingAuth(false);
-                showAlert('success', 'Sucesso!', 'Senha redefinida com Sucesso! Realize o Login novamente!');
-                setTimeout(() => {
-                    navigation.navigate('SignIn' as never);
-                }, 1500);
+                showAlert('error', 'Erro', 'Ocorreu um erro inesperado');
             }
-
-        } catch (error) {
-
-            console.error('Erro no login:', error);
 
         } finally {
             setLoading(false);

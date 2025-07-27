@@ -8,7 +8,7 @@ import AlertComponent from '../../../components/AlertComponent';
 import { Picker } from '@react-native-picker/picker';
 import { transportTypesPicker } from '../../../util/types/transportTypes';
 import { PerfilViewModel } from './PerfilViewModel';
-import { validationSchema, initialFormValues, ProfileFormData } from './types';
+import { validationSchema, initialFormValues, ProfileFormData } from './PerfilModel';
 
 export default function Perfil() {
     const perfilViewModel = PerfilViewModel();

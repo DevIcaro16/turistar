@@ -9,7 +9,7 @@ export const errorMiddleware = (
 ) => {
     if (err instanceof AppError) {
         const msg = `Error: ${req.method} ${req.url} - ${err.message}`;
-        console.log(msg);
+        // console.log(msg);
 
         return res.status(err.statusCode).json({
             status: 'error',

@@ -28,6 +28,19 @@ const TableComponent: React.FC<TableComponentProps> = ({
         columns.some(col => String(row[col.key] ?? '').toLowerCase().includes(search.toLowerCase()))
     );
 
+    const renderCell = (col: TableColumn, row: any) => {
+        if (col.render) {
+            const rendered = col.render(row[col.key], row);
+            // Verificar se o resultado é um elemento React válido
+            if (React.isValidElement(rendered) || typeof rendered === 'string' || typeof rendered === 'number') {
+                return rendered;
+            }
+            // Se não for válido, retornar o valor original como string
+            return String(row[col.key] ?? '');
+        }
+        return row[col.key];
+    };
+
     return (
         <motion.div
             className='bg-[#1e1e1e] backdrop-blur-md shadow-lg rounded-xl p-4 md:p-6 border border-[#1f1f1f] max-2 md:mx-0 mb-8'
@@ -67,7 +80,7 @@ const TableComponent: React.FC<TableComponentProps> = ({
                             <tr key={idx} className="hover:bg-[#232323] transition">
                                 {columns.map(col => (
                                     <td key={col.key} className="px-4 py-2 text-sm text-gray-200">
-                                        {col.render ? col.render(row[col.key], row) : row[col.key]}
+                                        {renderCell(col, row)}
                                     </td>
                                 ))}
                             </tr>

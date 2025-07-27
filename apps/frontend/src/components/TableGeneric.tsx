@@ -40,7 +40,7 @@ const TableGeneric: React.FC<TableGenericProps> = ({
         )
     );
 
-    console.log(data);
+    // console.log(data);
 
     return (
         <motion.div

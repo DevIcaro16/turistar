@@ -2,7 +2,7 @@ import React from "react";
 import { Formik } from 'formik';
 import { Text, View, TextInput, TouchableOpacity, SafeAreaView, KeyboardAvoidingView, Platform, ActivityIndicator } from "react-native";
 import { useSignInViewModel } from "./SignInViewModel";
-import { SignInSchema } from "./types";
+import { SignInSchema } from "./SignInModel";
 import { styles } from "./styles";
 import { Ionicons } from '@expo/vector-icons';
 

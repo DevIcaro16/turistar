@@ -3,7 +3,7 @@ import { Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { AuthContext } from '../../../contexts/auth';
 import api from '../../../util/api/api';
-import { ProfileFormData } from './types';
+import { ProfileFormData } from './PerfilModel';
 
 export function usePerfilViewModel(): {
     user: any;

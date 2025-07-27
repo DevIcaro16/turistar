@@ -12,7 +12,7 @@ cloudinary.config({
 
 export const CarRegistration = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        console.log(req.body);
+        // console.log(req.body);
         const { type, model, capacity } = req.body;
         const driverId = req.user?.id; // ID do motorista autenticado
 

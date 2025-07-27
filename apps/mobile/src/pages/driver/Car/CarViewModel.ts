@@ -4,7 +4,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { AuthContext } from '../../../contexts/auth';
 import api from '../../../util/api/api';
 import { transportOptions } from '../../../util/types/transportTypes';
-import { Car, CarFormData } from './types';
+import { Car, CarFormData } from './CarModel';
 
 export function useCarViewModel() {
     const { user } = useContext<any>(AuthContext);
@@ -150,7 +150,6 @@ export function useCarViewModel() {
     };
 
     const openEditModal = (car: Car) => {
-        console.log('Abrindo modal para editar:', car);
         setEditingCar(car);
         setModalVisible(true);
     };

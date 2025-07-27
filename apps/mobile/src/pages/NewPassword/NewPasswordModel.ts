@@ -1,7 +1,6 @@
-
-
 export type TypeUser = 'user' | 'driver';
 
 export interface FormValues {
-    email: string;
-}
+    password: string;
+    password_confirmation: string;
+} 

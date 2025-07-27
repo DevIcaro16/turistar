@@ -128,7 +128,7 @@ export class ReserveService {
         // Ajusta a data atual para GMT-3 (Brasília)
         const now = new Date();
         const gmt3Now = new Date(now.getTime() - (now.getTimezoneOffset() * 60000) - (3 * 60 * 60 * 1000));
-        console.log(gmt3Now);
+        // console.log(gmt3Now);
 
         // Converta a data do tour para Date, se necessário
         const tourDate = new Date(reserveIdExisting.tourPackage.date_tour);

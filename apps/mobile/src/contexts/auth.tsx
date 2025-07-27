@@ -67,17 +67,17 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
             const storedRole = await AsyncStorage.getItem('@userRole');
 
             if (accessToken) {
-                console.log('Token encontrado:', accessToken);
-                console.log('Role armazenado:', storedRole);
+                // console.log('Token encontrado:', accessToken);
+                // console.log('Role armazenado:', storedRole);
 
                 // Configurar header de autorização para todas as requisições
                 api.defaults.headers['Authorization'] = `Bearer ${accessToken}`;
 
                 try {
                     // Verificar se o token ainda é válido fazendo uma requisição
-                    console.log('Fazendo requisição para:', `${storedRole}/me`);
+                    // console.log('Fazendo requisição para:', `${storedRole}/me`);
                     const response = await api.get(`${storedRole}/me`);
-                    console.log('Resposta da API:', response.data);
+                    // console.log('Resposta da API:', response.data);
 
                     let userData;
 
@@ -86,7 +86,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
                     }
 
                     if (storedRole === 'driver') {
-                        console.log('Dados do driver:', response.data.driver);
+                        // console.log('Dados do driver:', response.data.driver);
                         userData = response.data.driver;
                     }
 
@@ -104,10 +104,10 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
                     }
                 } catch (err: any) {
                     // Se o token expirou, limpar e redirecionar para login
-                    console.log('Erro na requisição /me:', err);
-                    console.log('Status do erro:', err.response?.status);
-                    console.log('Mensagem do erro:', err.response?.data);
-                    console.log('Token expirado ou inválido');
+                    // console.log('Erro na requisição /me:', err);
+                    // console.log('Status do erro:', err.response?.status);
+                    // console.log('Mensagem do erro:', err.response?.data);
+                    // console.log('Token expirado ou inválido');
                     await AsyncStorage.removeItem('@accessToken');
                     await AsyncStorage.removeItem('@refreshToken');
                     await AsyncStorage.removeItem('@userRole');
@@ -142,7 +142,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
 
             if (transportType !== null && role === 'driver') dataSignUp.transportType = transportType;
 
-            console.log(role);
+            // console.log(role);
 
             const response = await api.post(`/${role}/registration`, dataSignUp);
 
@@ -157,7 +157,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
             }
         } catch (error: any) {
             setLoadingAuth(false);
-            console.log(error);
+            // console.log(error);
             const message = error.response?.data?.message || 'Não foi possível concluir o cadastro';
             showAlert('error', 'Erro no Cadastro', message);
         }
@@ -175,7 +175,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
             });
 
             if (response.status >= 400 && response.status <= 500) {
-                console.log(response.status);
+                // console.log(response.status);
                 showAlert('error', 'Erro no Login', 'Houve um erro no login');
             } else {
 
@@ -197,7 +197,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
             }
         } catch (error: any) {
             setLoadingAuth(false);
-            console.log(error);
+            // console.log(error);
             const message = error.response?.data?.message || 'Não foi possível realizar o Login!';
             showAlert('error', 'Erro no Login', message);
         }
@@ -228,7 +228,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
         if (!refreshToken || !userRole) return null;
 
         try {
-            console.log('Tentando refresh do token para role:', userRole);
+            // console.log('Tentando refresh do token para role:', userRole);
             const response = await api.post(`/${userRole}/refresh`, { refresh_token: refreshToken });
             const { access_token, refresh_token: newRefreshToken } = response.data;
 
@@ -236,10 +236,10 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
             await AsyncStorage.setItem('@refreshToken', newRefreshToken);
 
             api.defaults.headers['Authorization'] = `Bearer ${access_token}`;
-            console.log('Token renovado com sucesso');
+            // console.log('Token renovado com sucesso');
             return access_token;
         } catch (error) {
-            console.log('Erro no refresh do token:', error);
+            // console.log('Erro no refresh do token:', error);
             // Se falhar, deslogar
             await signOut();
             return null;

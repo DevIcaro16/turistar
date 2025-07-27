@@ -10,12 +10,14 @@ import { useDriverMetrics } from '../../hooks/useDriverMetrics';
 import TableComponent from '../../components/TableComponent';
 import Sibebar from '../../components/Sibebar';
 import Header from '../../components/Header';
-import { useAuth } from '../../contexts/AuthContext';
-import ProtectedRoute from '../../components/ProtectedRoute';
+import { useAuth } from '../../lib/auth';
+
 import TableTransactions from '../../components/TableTransactions';
 
 const Transactions = () => {
     const { user, userRole, isAuthenticated, loading: authLoading } = useAuth();
+    const { metrics: adminMetrics, loading: adminLoading, error: adminError, formatCurrency: adminFormatCurrency } = useMetrics();
+    const { metrics: driverMetrics, loading: driverLoading, error: driverError, formatCurrency: driverFormatCurrency } = useDriverMetrics();
 
     // Só renderiza após autenticação estar pronta
     if (authLoading) {
@@ -25,10 +27,6 @@ const Transactions = () => {
             </div>
         );
     }
-
-
-    const { metrics: adminMetrics, loading: adminLoading, error: adminError, formatCurrency: adminFormatCurrency } = useMetrics();
-    const { metrics: driverMetrics, loading: driverLoading, error: driverError, formatCurrency: driverFormatCurrency } = useDriverMetrics();
 
     const loading = userRole === 'admin' ? adminLoading : driverLoading;
     const error = userRole === 'admin' ? adminError : driverError;
@@ -79,105 +77,103 @@ const Transactions = () => {
     }
 
     return (
-        <ProtectedRoute>
-            <div className='flex min-h-screen bg-[#1e1e1e]'>
-                <Sibebar />
-                <div className="flex-1">
-                    <Header />
-                    <main className="max-w-7xl mx-auto py-4 px-4 lg:px-8">
+        <div className='flex min-h-screen bg-[#1e1e1e]'>
+            <Sibebar />
+            <div className="flex-1">
+                <Header />
+                <main className="max-w-7xl mx-auto py-4 px-4 lg:px-8">
 
-                        <motion.div
-                            className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-8"
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 1.5 }}
-                        >
-                            {userRole === "admin" ? (
-                                // Métricas do Admin
-                                <>
-                                    <StatCard
-                                        name="Total de Transações"
-                                        icon={Table}
-                                        value={adminMetrics.transactions?.count?.toString() || "0"}
-                                    />
-                                    <StatCard
-                                        name="Transações - DÉBITOS"
-                                        icon={() => <ArrowDownLeft color="#ef4444" />} // vermelho
-                                        value={adminTransactionsDebit.length.toString()}
-                                    />
-                                    <StatCard
-                                        name="Transações - CRÉDITOS"
-                                        icon={() => <ArrowUpRight color="#22c55e" />} // verde
-                                        value={adminTransactionsCredit.length.toString()}
-                                    />
-                                    <StatCard
-                                        name="Transações - PENDENTES"
-                                        icon={() => <Clock color="#eab308" />} // amarelo
-                                        value={adminTransactionsPendant.length.toString()}
-                                    />
-                                    <StatCard
-                                        name="Transações - ESTORNOS"
-                                        icon={() => <RotateCcw color="#60a5fa" />} // azul
-                                        value={adminTransactionsReversal.length.toString()}
-                                    />
-                                </>
-                            ) : userRole === "driver" ? (
-                                // Métricas do Driver
-                                <>
-                                    <StatCard
-                                        name="Total de Transações"
-                                        icon={Table}
-                                        value={driverMetrics.transactions?.count?.toString() || "0"}
-                                    />
-                                    <StatCard
-                                        name="Transações - CRÉDITOS"
-                                        icon={() => <ArrowUpRight color="green" />} // verde
-                                        value={transactionsCredit.length.toString()}
-                                    />
-                                    <StatCard
-                                        name="Transações - DÉBITOS"
-                                        icon={() => <ArrowDownLeft color="#ef4444" />} // vermelho
-                                        value={transactionsDebit.length.toString()}
-                                    />
-                                    <StatCard
-                                        name="Transações - PENDENTES"
-                                        icon={() => <Clock color="#eab308" />} // amarelo
-                                        value={transactionsPendant.length.toString()}
-                                    />
-                                    <StatCard
-                                        name="Transações - ESTORNOS"
-                                        icon={() => <RotateCcw color="#60a5fa" />} // azul
-                                        value={transactionsReversal.length.toString()}
-                                    />
-                                </>
-                            ) : (
-                                <>
-                                    <StatCard
-                                        name="Pacotes de Passeio"
-                                        icon={FileText}
-                                        value="0"
-                                    />
-                                </>
-                            )}
-                        </motion.div>
-
-                        {
-                            userRole === "admin" ? (
-                                <TableTransactions
-                                    data={adminTransactions}
-                                    isAdmin={true}
+                    <motion.div
+                        className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-8"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 1.5 }}
+                    >
+                        {userRole === "admin" ? (
+                            // Métricas do Admin
+                            <>
+                                <StatCard
+                                    name="Total de Transações"
+                                    icon={Table}
+                                    value={adminMetrics.transactions?.count?.toString() || "0"}
                                 />
-                            ) : (
-                                <TableTransactions
-                                    data={transactionsDriver}
+                                <StatCard
+                                    name="Transações - DÉBITOS"
+                                    icon={() => <ArrowDownLeft color="#ef4444" />} // vermelho
+                                    value={adminTransactionsDebit.length.toString()}
                                 />
-                            )
-                        }
+                                <StatCard
+                                    name="Transações - CRÉDITOS"
+                                    icon={() => <ArrowUpRight color="#22c55e" />} // verde
+                                    value={adminTransactionsCredit.length.toString()}
+                                />
+                                <StatCard
+                                    name="Transações - PENDENTES"
+                                    icon={() => <Clock color="#eab308" />} // amarelo
+                                    value={adminTransactionsPendant.length.toString()}
+                                />
+                                <StatCard
+                                    name="Transações - ESTORNOS"
+                                    icon={() => <RotateCcw color="#60a5fa" />} // azul
+                                    value={adminTransactionsReversal.length.toString()}
+                                />
+                            </>
+                        ) : userRole === "driver" ? (
+                            // Métricas do Driver
+                            <>
+                                <StatCard
+                                    name="Total de Transações"
+                                    icon={Table}
+                                    value={driverMetrics.transactions?.count?.toString() || "0"}
+                                />
+                                <StatCard
+                                    name="Transações - CRÉDITOS"
+                                    icon={() => <ArrowUpRight color="green" />} // verde
+                                    value={transactionsCredit.length.toString()}
+                                />
+                                <StatCard
+                                    name="Transações - DÉBITOS"
+                                    icon={() => <ArrowDownLeft color="#ef4444" />} // vermelho
+                                    value={transactionsDebit.length.toString()}
+                                />
+                                <StatCard
+                                    name="Transações - PENDENTES"
+                                    icon={() => <Clock color="#eab308" />} // amarelo
+                                    value={transactionsPendant.length.toString()}
+                                />
+                                <StatCard
+                                    name="Transações - ESTORNOS"
+                                    icon={() => <RotateCcw color="#60a5fa" />} // azul
+                                    value={transactionsReversal.length.toString()}
+                                />
+                            </>
+                        ) : (
+                            <>
+                                <StatCard
+                                    name="Pacotes de Passeio"
+                                    icon={FileText}
+                                    value="0"
+                                />
+                            </>
+                        )}
+                    </motion.div>
 
-                    </main>
-                </div>
+                    {
+                        userRole === "admin" ? (
+                            <TableTransactions
+                                data={adminTransactions}
+                                isAdmin={true}
+                            />
+                        ) : (
+                            <TableTransactions
+                                data={transactionsDriver}
+                            />
+                        )
+                    }
+
+                </main>
             </div>
-        </ProtectedRoute>
+        </div>
     )
 }
 

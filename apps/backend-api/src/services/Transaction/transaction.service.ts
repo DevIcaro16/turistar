@@ -254,7 +254,14 @@ export class TransactionService {
 
         const transactions = await prisma.transactions.findMany({
             where: {
-                driverId: driverId
+                type: {
+                    in: ['CREDIT', 'REVERSAL', 'PENDANT']
+                },
+                Reservation: {
+                    tourPackage: {
+                        driverId: driverId
+                    }
+                }
             },
             include: {
                 Reservation: {
@@ -301,7 +308,11 @@ export class TransactionService {
             if (typeof driverId !== 'string' || driverId.length !== 24) {
                 throw new ValidationError("ID do motorista inválido!");
             }
-            whereClause.driverId = driverId;
+            whereClause.Reservation = {
+                tourPackage: {
+                    driverId: driverId
+                }
+            };
         }
 
         const transactions = await prisma.transactions.findMany({
@@ -312,7 +323,6 @@ export class TransactionService {
             }
         });
 
-        // Calcular totalizadores por tipo
         const totals = {
             DEBIT: { amount: 0, count: 0 },
             CREDIT: { amount: 0, count: 0 },

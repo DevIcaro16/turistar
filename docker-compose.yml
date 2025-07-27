@@ -1,34 +1,97 @@
+version: '3.8'
+
 services:
+  # Backend API
   backend-api:
     build:
       context: .
-      dockerfile: Dockerfile
-    container_name: backend-api
-    restart: unless-stopped
+      dockerfile: backend-api.Dockerfile
+    container_name: turistar-backend-api
     ports:
-      - "${PORT:-8000}:8000"
+      - "8000:8000"
     environment:
       - NODE_ENV=production
-      - HOST=0.0.0.0
-      - PORT=${PORT:-8000}
       - DATABASE_URL=${DATABASE_URL}
-    env_file:
-      - .env
+      - JWT_SECRET=${JWT_SECRET}
+      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - FRONTEND_URL=${FRONTEND_URL}
+      - EC2_PUBLIC_IP=${EC2_PUBLIC_IP}
+      - DOMAIN_NAME=${DOMAIN_NAME}
+    depends_on:
+      - mongodb
     networks:
-      - app-network
+      - turistar-network
+    restart: unless-stopped
+
+  # Frontend Next.js
   frontend:
     build:
-      context: ./apps/frontend
-      dockerfile: Dockerfile
-    container_name: frontend
-    restart: unless-stopped
+      context: .
+      dockerfile: frontend.Dockerfile
+    container_name: turistar-frontend
     ports:
       - "3000:3000"
     environment:
       - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://backend-api:8000/api/}
+    depends_on:
+      - backend-api
     networks:
-      - app-network
+      - turistar-network
+    restart: unless-stopped
+
+  # Mobile Development Server
+  # mobile-dev:
+  #   build:
+  #     context: .
+  #     dockerfile: mobile.Dockerfile
+  #   container_name: turistar-mobile-dev
+  #   ports:
+  #     - "8081:8081"
+  #   environment:
+  #     - NODE_ENV=development
+  #     - EXPO_DEVTOOLS_LISTEN_ADDRESS=0.0.0.0
+  #   volumes:
+  #     - ./apps/mobile:/app/apps/mobile
+  #     - /app/apps/mobile/node_modules
+  #   networks:
+  #     - turistar-network
+  #   restart: unless-stopped
+
+  # MongoDB (opcional - se você quiser rodar localmente)
+  mongodb:
+    image: mongo:7.0
+    container_name: turistar-mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_ROOT_USERNAME:-admin}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_ROOT_PASSWORD:-password}
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - turistar-network
+    restart: unless-stopped
+
+  # Redis (opcional - para cache)
+  redis:
+    image: redis:7-alpine
+    container_name: turistar-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - turistar-network
+    restart: unless-stopped
 
 networks:
-  app-network:
+  turistar-network:
     driver: bridge
+
+volumes:
+  mongodb_data:
+  redis_data:

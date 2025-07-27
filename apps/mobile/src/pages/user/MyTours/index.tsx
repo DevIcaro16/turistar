@@ -3,7 +3,7 @@ import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, Modal, Image
 import styles from './styles';
 import AlertComponent from '../../../components/AlertComponent';
 import { useMyToursViewModel, formatDateTime, getTourStatus } from './MyToursViewModel';
-import { ReservationData } from './types';
+import { ReservationData } from './MyToursModel';
 
 function Timeline({ status }: { status: string }) {
     // status: 'Pendente', 'Em andamento', 'Finalizado'

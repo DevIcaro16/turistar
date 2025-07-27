@@ -12,7 +12,7 @@ import { Picker } from '@react-native-picker/picker';
 import { MaterialIcons } from '@expo/vector-icons';
 import { styles } from './styles';
 import DriverWalletViewModel, { formatDate, formatDateTime } from './DriverWalletViewModel';
-import { COLORS, LABELS } from './types';
+import { COLORS, LABELS } from './DriverWalletModel';
 
 export default function DriverWallet() {
 

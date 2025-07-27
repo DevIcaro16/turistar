@@ -3,7 +3,7 @@ import { Alert } from 'react-native';
 import { AuthContext } from '../../../contexts/auth';
 import AlertComponent from '../../../components/AlertComponent';
 import api from '../../../util/api/api';
-import { TourData } from './types';
+import { TourData } from './ToursModel';
 
 export function formatDate(date: Date | string) {
     if (!date) return '';
@@ -20,7 +20,7 @@ export function formatDateTime(date: Date | string) {
     const day = String(d.getDate()).padStart(2, '0');
     const month = String(d.getMonth() + 1).padStart(2, '0');
     const year = d.getFullYear();
-    const hour = String(d.getHours()).padStart(2, '0');
+    const hour = String(d.getHours() + 3).padStart(2, '0');
     const minute = String(d.getMinutes()).padStart(2, '0');
     return `${day}/${month}/${year} ${hour}:${minute}`;
 }
@@ -35,6 +35,7 @@ export function useToursViewModel() {
     const [alertVisible, setAlertVisible] = useState(false);
     const [alertMessage, setAlertMessage] = useState('');
     const [alertType, setAlertType] = useState<'success' | 'error'>('success');
+
 
     const showAlert = (message: string, type: 'success' | 'error' = 'success') => {
         setAlertMessage(message);
@@ -54,6 +55,8 @@ export function useToursViewModel() {
             setRefreshing(false);
         }
     };
+
+
 
     useEffect(() => {
         fetchTours();

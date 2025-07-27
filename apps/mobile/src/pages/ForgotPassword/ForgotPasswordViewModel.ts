@@ -1,7 +1,7 @@
 import { useState, useContext } from "react";
 import { AuthContext } from "../../contexts/auth";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import { FormValues, TypeUser } from "./types";
+import { FormValues, TypeUser } from "./ForgotPasswordModel";
 
 
 export function ForgotPasswordViewModel() {

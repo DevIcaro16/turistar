@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 
 import { FileText, LineChart, MapPin, Receipt, UserCheck, Users, Wallet, TrendingUp } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -11,20 +11,43 @@ import PackagesChart from './charts/PackagesChart';
 import PackagesCompletedChart from './charts/PackagesCompleted';
 import ReservationsChart from './charts/ReservationsChart';
 import PackagesPizzaChart from './charts/PackagesPizzaChart';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../lib/auth';
 
 const Overview = () => {
-
+    const [mounted, setMounted] = useState(false);
     const { user, userRole, isAuthenticated, loading: authLoading } = useAuth();
-
-
 
     const { metrics: adminMetrics, loading: adminLoading, error: adminError, formatCurrency: adminFormatCurrency } = useMetrics();
     const { metrics: driverMetrics, loading: driverLoading, error: driverError, formatCurrency: driverFormatCurrency } = useDriverMetrics();
 
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
     const loading = userRole === 'admin' ? adminLoading : driverLoading;
     const error = userRole === 'admin' ? adminError : driverError;
     const formatCurrency = userRole === 'admin' ? adminFormatCurrency : driverFormatCurrency;
+
+    // Durante SSR, renderizar um loading
+    if (!mounted) {
+        return (
+            <div className='flex-1 overflow-auto relative z-10'>
+                <main className="max-w-7xl mx-auto py-4 px-4 lg:px-8">
+                    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+                        {[...Array(6)].map((_, index) => (
+                            <div key={index} className="bg-[#2e2e2e] min-h-20 rounded-xl animate-pulse">
+                                <div className="px-4 py-5 sm:p-6">
+                                    <div className="h-4 bg-gray-600 rounded mb-2"></div>
+                                    <div className="h-8 bg-gray-500 rounded"></div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </main>
+            </div>
+        );
+    }
 
     if (loading) {
         return (
@@ -126,7 +149,7 @@ const Overview = () => {
                                 value={activeCount.toString()}
                             />
                             <StatCard
-                                name="Minhas Reservas"
+                                name="Total de Reservas"
                                 icon={Receipt}
                                 value={driverMetrics.reserves?.count?.toString() || "0"}
                             />

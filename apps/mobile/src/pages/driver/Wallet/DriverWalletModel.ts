@@ -15,5 +15,4 @@ export const FILTER_OPTIONS = [
     { label: 'Pacote', value: 'package' },
     { label: 'Data', value: 'date' },
     { label: 'Valor', value: 'amount' },
-];
-
+]; 
