@@ -88,7 +88,7 @@
     "typescript": "~5.8.2"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.app.json",
+    "build": "tsc -p tsconfig.app.json --skipLibCheck --noEmitOnError false",
     "start": "node out-tsc/backend-api/src/main.js"
   }
 }

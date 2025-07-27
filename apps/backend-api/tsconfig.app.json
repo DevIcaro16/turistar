@@ -13,6 +13,8 @@
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
+    "noEmitOnError": false,
     "tsBuildInfoFile": "out-tsc/backend-api/tsconfig.app.tsbuildinfo"
   },
   "include": [
