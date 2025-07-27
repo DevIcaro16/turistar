@@ -23,8 +23,13 @@ RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
 COPY --from=builder /app/apps/backend-api/package.json ./
+COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/prisma ./prisma/
 
 RUN npm install --legacy-peer-deps
+
+# Gerar Prisma Client
+RUN npx prisma generate
 
 # Copiar build correto
 COPY --from=builder /app/apps/backend-api/dist/ ./dist
