@@ -23,7 +23,8 @@ RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
 COPY --from=builder /app/apps/backend-api/package.json ./
-RUN npm install --only=production --omit=dev --silent
+
+RUN npm install --legacy-peer-deps
 
 # Copiar build correto
 COPY --from=builder /app/apps/backend-api/dist/ ./dist
