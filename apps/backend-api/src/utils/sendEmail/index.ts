@@ -9,13 +9,18 @@ dotenv.config()
 
 const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,
-    port: Number(process.env.SMTP_PORT) || 587,
-    secure: true,
-    service: process.env.SMTP_SERVICE,
+    port: Number(process.env.SMTP_PORT) || 465, // Mudança para 465 (como Python)
+    secure: true, // SSL como Python
+    // service: process.env.SMTP_SERVICE,
     auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
     },
+    tls: {
+        rejectUnauthorized: false // Para desenvolvimento
+    },
+    debug: true, // Habilitar logs detalhados
+    logger: true // Log de eventos
 });
 
 
@@ -49,7 +54,7 @@ export const sendEmail = async (
         console.log("Template:", templateName);
         console.log("SMTP Config:", {
             host: process.env.SMTP_HOST,
-            port: process.env.SMTP_PORT || 587,
+            port: process.env.SMTP_PORT || 465,
             service: process.env.SMTP_SERVICE,
             user: process.env.SMTP_USER
         });

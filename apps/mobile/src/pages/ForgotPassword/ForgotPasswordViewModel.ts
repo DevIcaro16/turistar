@@ -25,7 +25,7 @@ export function ForgotPasswordViewModel() {
         setLoading(true);
         try {
             if (!sendForgotPasswordCode) {
-                console.error('sendForgotPasswordCode não está disponível no contexto');
+                console.error('sendForgotPasswordCode não está disponível no nomento, reinice o app!');
                 Alert.alert('Erro', 'Função de recuperação de senha não disponível');
                 return;
             }

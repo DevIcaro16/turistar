@@ -254,6 +254,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
                 showAlert('error', 'Erro', 'Houve um erro ao enviar o código!');
                 return { success: false, message: 'Houve um erro ao enviar o código!' };
             } else {
+                console.log(response.data);
                 setLoadingAuth(false);
                 showAlert('success', 'Sucesso!', 'Verifique o código recebido em seu Email!');
                 setTimeout(() => {
