@@ -200,41 +200,10 @@ jobs:
               restart: unless-stopped
               networks:
                 - turistar-network
-              
-            # MongoDB
-            mongodb:
-              image: mongo:7.0
-              container_name: turistar-mongodb
-              ports:
-                - "27017:27017"
-              environment:
-                - MONGO_INITDB_ROOT_USERNAME=\${MONGO_ROOT_USERNAME}
-                - MONGO_INITDB_ROOT_PASSWORD=\${MONGO_ROOT_PASSWORD}
-              volumes:
-                - mongodb_data:/data/db
-              restart: unless-stopped
-              networks:
-                - turistar-network
-              
-            # Redis
-            redis:
-              image: redis:7-alpine
-              container_name: turistar-redis
-              ports:
-                - "6379:6379"
-              volumes:
-                - redis_data:/data
-              restart: unless-stopped
-              networks:
-                - turistar-network
 
           networks:
             turistar-network:
               driver: bridge
-
-          volumes:
-            mongodb_data:
-            redis_data:
           EOF
 
       - name: Stop existing containers
@@ -259,9 +228,28 @@ jobs:
           # Check if services are running
           docker-compose -f docker-compose.prod.yml ps
 
-          # Health check
-          curl -f http://localhost:8000/ || exit 1
-          curl -f http://localhost:3000/ || exit 1
+          # Show logs for debugging
+          echo "=== Backend logs ==="
+          docker logs turistar-backend-api --tail 20 || true
+          echo "=== Frontend logs ==="
+          docker logs turistar-frontend --tail 20 || true
+
+          # Health check with retry
+          echo "Performing health checks..."
+          for i in {1..5}; do
+            echo "Attempt $i of 5"
+            if curl -f http://localhost:8000/ && curl -f http://localhost:3000/; then
+              echo "Health checks passed!"
+              break
+            else
+              echo "Health checks failed, waiting 10 seconds..."
+              sleep 10
+            fi
+          done
+
+          # Final health check
+          curl -f http://localhost:8000/ || (echo "Backend health check failed" && exit 1)
+          curl -f http://localhost:3000/ || (echo "Frontend health check failed" && exit 1)
 
       - name: Cleanup old images
         run: |

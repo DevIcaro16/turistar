@@ -44,7 +44,7 @@ COPY --from=builder /app/apps/backend-api/package.json ./
 RUN npm install --only=production --omit=dev --silent
 
 # Copiar apenas arquivos necessários do builder
-COPY --from=builder /app/apps/backend-api/dist ./dist
+COPY --from=builder /app/apps/backend-api/out-tsc/backend-api ./out-tsc/backend-api
 COPY --from=builder /app/apps/backend-api/package.json ./package.json
 
 # Expor porta
@@ -56,4 +56,4 @@ ENV HOST=0.0.0.0
 ENV PORT=8000
 
 # Comando para iniciar a aplicação
-CMD ["node", "dist/main.js"] 
+CMD ["node", "out-tsc/backend-api/src/main.js"] 

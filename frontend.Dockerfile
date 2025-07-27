@@ -33,11 +33,15 @@ RUN apk add --no-cache libc6-compat
 
 WORKDIR /app
 
+# Copiar package.json para instalar dependências de produção
+COPY --from=builder /app/apps/frontend/package.json ./package.json
+
+# Instalar apenas dependências de produção
+RUN npm install --only=production --omit=dev --silent
+
 # Copiar apenas arquivos necessários do builder
-COPY --from=builder --chown=nextjs:nodejs /app/apps/frontend/public ./public
-COPY --from=builder --chown=nextjs:nodejs /app/apps/frontend/.next ./.next
-COPY --from=builder --chown=nextjs:nodejs /app/apps/frontend/node_modules ./node_modules
-COPY --from=builder --chown=nextjs:nodejs /app/apps/frontend/package.json ./package.json
+COPY --from=builder /app/apps/frontend/public ./public
+COPY --from=builder /app/apps/frontend/.next ./.next
 
 # Limpar arquivos desnecessários
 RUN rm -rf /tmp/* /var/tmp/*
