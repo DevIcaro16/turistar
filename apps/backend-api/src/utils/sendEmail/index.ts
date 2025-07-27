@@ -27,17 +27,31 @@ const transporter = nodemailer.createTransport({
 //Renderização do template do email
 const renderEmailTemplate = async (templateName: string, data: Record<string, any>): Promise<string> => {
 
-    const templatePath = path.join(
-        process.cwd(),
-        "apps",
-        "backend-api",
-        "src",
-        "utils",
-        "email-templates",
-        `${templateName}.ejs`
-    );
+    // Tentar diferentes caminhos para desenvolvimento e produção
+    const possiblePaths = [
+        // Caminho para produção (container)
+        path.join(process.cwd(), "src", "utils", "email-templates", `${templateName}.ejs`),
+        // Caminho para desenvolvimento
+        path.join(process.cwd(), "apps", "backend-api", "src", "utils", "email-templates", `${templateName}.ejs`),
+        // Caminho relativo ao arquivo atual
+        path.join(__dirname, "..", "email-templates", `${templateName}.ejs`)
+    ];
 
-    return ejs.renderFile(templatePath, data);
+    console.log("🔍 Procurando template em:", possiblePaths);
+
+    for (const templatePath of possiblePaths) {
+        try {
+            console.log("Tentando caminho:", templatePath);
+            const result = await ejs.renderFile(templatePath, data);
+            console.log("✅ Template encontrado em:", templatePath);
+            return result;
+        } catch (error) {
+            console.log("❌ Template não encontrado em:", templatePath);
+            continue;
+        }
+    }
+
+    throw new Error(`Template ${templateName}.ejs não encontrado em nenhum dos caminhos: ${possiblePaths.join(", ")}`);
 };
 
 //envio do email
