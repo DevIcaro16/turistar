@@ -56,4 +56,4 @@ ENV HOST=0.0.0.0
 ENV PORT=8000
 
 # Comando para iniciar a aplicação
-CMD ["node", "out-tsc/backend-api/src/main.js"] 
+CMD ["node", "out-tsc/backend-api/apps/backend-api/src/main.js"] 

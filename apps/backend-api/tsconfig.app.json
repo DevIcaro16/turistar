@@ -4,7 +4,7 @@
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "outDir": "out-tsc/backend-api",
-    "rootDir": ".",
+    "rootDir": "../../",
     "types": [
       "node",
       "express"
@@ -13,8 +13,6 @@
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
-    "skipLibCheck": true,
-    "noEmitOnError": false,
     "tsBuildInfoFile": "out-tsc/backend-api/tsconfig.app.tsbuildinfo"
   },
   "include": [
@@ -28,8 +26,5 @@
     "jest.config.ts",
     "src/**/*.spec.ts",
     "src/**/*.test.ts"
-  ],
-  "ts-node": {
-    "transpileOnly": true
-  }
+  ]
 }
