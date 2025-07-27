@@ -131,13 +131,13 @@ const port = process.env.PORT ? Number(process.env.PORT) : 8000;
 const httpServer = createServer(app);
 
 // Configurar Socket.IO
-const io = new Server(httpServer, {
-    cors: {
-        origin: allowedOrigins.filter(Boolean) as string[],
-        methods: ['GET', 'POST'],
-        credentials: true
-    }
-});
+// const io = new Server(httpServer, {
+//     cors: {
+//         origin: allowedOrigins.filter(Boolean) as string[],
+//         methods: ['GET', 'POST'],
+//         credentials: true
+//     }
+// });
 
 // Armazenar conexões por usuário
 const userSockets = new Map<string, string>();
@@ -190,7 +190,7 @@ httpServer.listen(port, host, () => {
 });
 
 // Exportar io para usar nos controllers
-export { io };
+// export { io };
 
 httpServer.on('error', (err: any) => {
     console.error('❌ Erro no Servidor:', err.message);
