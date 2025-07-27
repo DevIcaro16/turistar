@@ -17,6 +17,10 @@ export function ForgotPasswordViewModel() {
     const authContext = useContext(AuthContext);
     const { sendForgotPasswordCode } = authContext;
 
+    // Debug: verificar o que está no contexto
+    console.log('AuthContext completo:', authContext);
+    console.log('sendForgotPasswordCode:', sendForgotPasswordCode);
+
     const handleResetPass = async (values: FormValues) => {
         setLoading(true);
         try {

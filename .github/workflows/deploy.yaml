@@ -24,7 +24,7 @@ env:
 
 jobs:
   build:
-    name: Build and Push Docker Images
+    name: Build and Push das imagens Docker
     runs-on: ubuntu-latest
 
     steps:
@@ -34,7 +34,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Login to Docker Hub
+      - name: Login no Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
@@ -43,7 +43,7 @@ jobs:
       - name: Make build script executable
         run: chmod +x scripts/build_and_push_images.sh
 
-      - name: Update build script with credentials
+      - name: atualiza o script com as credenciais do docker hub
         run: |
           sed -i "s/seu-username/${{ secrets.DOCKER_HUB_USERNAME }}/g" scripts/build_and_push_images.sh
           sed -i "s/latest/${{ github.sha }}/g" scripts/build_and_push_images.sh
@@ -82,7 +82,7 @@ jobs:
           retention-days: 30
 
   deploy:
-    name: Deploy to EC2
+    name: Deploy na EC2
     runs-on: self-hosted
     needs: build
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || github.event_name == 'workflow_dispatch'
@@ -93,12 +93,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Docker
+      - name: Set up Docker (User e Grupo)
         run: |
           sudo systemctl start docker
           sudo usermod -aG docker $USER
 
-      - name: Create production environment file
+      - name: Criando .env
         run: |
           cat > .env << EOF
           # Configurações do Banco de Dados
@@ -115,10 +115,6 @@ jobs:
 
           # Configurações Stripe
           STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}
-
-          # Configurações MongoDB
-          MONGO_ROOT_USERNAME=${{ secrets.MONGO_ROOT_USERNAME }}
-          MONGO_ROOT_PASSWORD=${{ secrets.MONGO_ROOT_PASSWORD }}
 
           # Configurações Redis
           REDIS_URL=${{ secrets.REDIS_URL }}
@@ -206,12 +202,12 @@ jobs:
               driver: bridge
           EOF
 
-      - name: Stop existing containers
+      - name: stopando containers existentes
         run: |
           docker-compose -f docker-compose.prod.yml down || true
           docker system prune -f
 
-      - name: Pull latest images
+      - name: Pull nas images
         run: |
           docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.REPOSITORY_NAME }}-backend-api:${{ env.VERSION }}
           docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.REPOSITORY_NAME }}-frontend:${{ env.VERSION }}
@@ -224,7 +220,7 @@ jobs:
           export PORT=8000
           ./scripts/update-swagger-host.sh
 
-      - name: Deploy application
+      - name: Deploy das aplicações com compose
         run: |
           docker-compose -f docker-compose.prod.yml up -d
 
@@ -266,7 +262,7 @@ jobs:
 
       - name: Send deployment notification
         run: |
-          echo "🚀 Deployment completed successfully!"
+          echo "Deploy finalizado com Sucesso!!"
           echo "Backend: http://${{ secrets.EC2_PUBLIC_IP }}:8000"
           echo "Frontend: http://${{ secrets.EC2_PUBLIC_IP }}:3000"
           echo "Version: ${{ env.VERSION }}"
@@ -292,10 +288,8 @@ jobs:
           - **API Docs**: http://${{ secrets.EC2_PUBLIC_IP }}:8000/api-docs
 
           ## Health Check
-          - Backend: ✅ Running
-          - Frontend: ✅ Running
-          - MongoDB: ✅ Running
-          - Redis: ✅ Running
+          - Backend: Running
+          - Frontend: Running
           EOF
 
       - name: Upload deployment summary
