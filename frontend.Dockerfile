@@ -25,6 +25,10 @@ COPY packages ./packages/
 WORKDIR /app/apps/frontend
 RUN npm run build
 
+# Verificar se o build foi bem-sucedido
+RUN ls -la .next/
+RUN echo "Build completed successfully"
+
 # Stage 2: Production stage
 FROM node:18-alpine AS production
 
@@ -33,15 +37,19 @@ RUN apk add --no-cache libc6-compat
 
 WORKDIR /app
 
-# Copiar package.json para instalar dependências de produção
+# Copiar package.json para instalar dependências
 COPY --from=builder /app/apps/frontend/package.json ./package.json
 
-# Instalar apenas dependências de produção
-RUN npm install --only=production --omit=dev --silent
+# Instalar todas as dependências (incluindo devDependencies necessárias para Next.js)
+RUN npm install --legacy-peer-deps
 
 # Copiar apenas arquivos necessários do builder
 COPY --from=builder /app/apps/frontend/public ./public
 COPY --from=builder /app/apps/frontend/.next ./.next
+
+# Verificar se os arquivos foram copiados corretamente
+RUN ls -la .next/
+RUN echo "Files copied successfully"
 
 # Limpar arquivos desnecessários
 RUN rm -rf /tmp/* /var/tmp/*

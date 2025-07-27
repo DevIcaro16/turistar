@@ -4,7 +4,7 @@
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "outDir": "out-tsc/backend-api",
-    "rootDir": "../../",
+    "rootDir": ".",
     "types": [
       "node",
       "express"
