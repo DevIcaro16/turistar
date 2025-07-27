@@ -107,5 +107,6 @@ main() {
     print_message "API Docs: http://localhost:8000/api-docs"
 }
 
+
 # Executar função principal
 main "$@" 
