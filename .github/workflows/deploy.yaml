@@ -216,6 +216,14 @@ jobs:
           docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.REPOSITORY_NAME }}-backend-api:${{ env.VERSION }}
           docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.REPOSITORY_NAME }}-frontend:${{ env.VERSION }}
 
+      - name: Update Swagger host
+        run: |
+          chmod +x scripts/update-swagger-host.sh
+          export EC2_PUBLIC_IP=${{ secrets.EC2_PUBLIC_IP }}
+          export DOMAIN_NAME=${{ secrets.DOMAIN_NAME }}
+          export PORT=8000
+          ./scripts/update-swagger-host.sh
+
       - name: Deploy application
         run: |
           docker-compose -f docker-compose.prod.yml up -d

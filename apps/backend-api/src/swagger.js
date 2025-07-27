@@ -7,7 +7,8 @@ const doc = {
         version: "1.0.1"
     },
 
-    host: "localhost:8000",
+    host: `${process.env.EC2_PUBLIC_IP || process.env.DOMAIN_NAME || "localhost"}:${process.env.PORT || "8000"}`,
+    basePath: "/api/",
     schemes: ["http"],
 
 };
