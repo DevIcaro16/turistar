@@ -26,7 +26,7 @@ COPY --from=builder /app/apps/backend-api/package.json ./
 RUN npm install --only=production --omit=dev --silent
 
 # Copiar build correto
-COPY --from=builder /app/dist/apps/backend-api ./dist
+COPY --from=builder /app/apps/backend-api/dist/ ./dist
 
 ENV NODE_ENV=production
 ENV HOST=0.0.0.0
