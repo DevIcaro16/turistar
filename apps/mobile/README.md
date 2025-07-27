@@ -1,34 +1,304 @@
-# Mobile App - Passeios Turísticos
+# 📱 Mobile App - Turistar
 
-Aplicativo mobile para motoristas e turistas.
+Aplicativo mobile nativo para motoristas e turistas com funcionalidades completas de reservas, pagamentos e gestão de passeios turísticos.
 
-## ✨ Overview
-- Cadastro e login de usuários e motoristas
-- Gerenciamento de reservas, pacotes, veículos e pontos turísticos
-- Visualização de passeios, carteira, perfil
-- Integração com Stripe para pagamentos
-- Notificações e alertas
+## ✨ Funcionalidades
 
-## 🚀 Tecnologias
-- React Native
-- Expo
-- TypeScript
-- Axios
-- Stripe
-- Jest (testes)
-- Docker (opcional)
-- Integração com backend Node.js (MongoDB e Redis)
+### **Para Turistas**
+- Cadastro e login de usuários
+- Visualização de pacotes turísticos
+- Reserva de passeios
+- Histórico de reservas
+- Carteira digital
+- Perfil personalizado
+- Notificações
 
-## 📦 Comandos principais
-- `npm start` — inicia o app com Expo
-- `npm run android` — roda no Android
-- `npm run ios` — roda no iOS
-- `npm run test` — executa testes
+### **Para Motoristas**
+- Cadastro e aprovação de motoristas
+- Gestão de veículos
+- Registro de tours
+- Histórico de passeios
+- Carteira de ganhos
+- Status de disponibilidade
+- Notificações de reservas
 
-## 📚 Documentação
-- Configurações em `.env`
-- Para builds, veja a documentação do Expo
-- Certifique-se de que o backend esteja configurado com MongoDB e Redis para funcionamento completo.
+### **Pagamentos & Transações**
+- Integração com Stripe
+- Pagamento seguro
+- Histórico de transações
+- Carteira digital
+- Comprovantes automáticos
+
+### **Autenticação & Segurança**
+- Login seguro com JWT
+- Recuperação de senha
+- Verificação de email
+- Proteção de rotas
+- Logout automático
+
+## 🛠️ Stack Tecnológica
+
+- **Framework**: React Native
+- **Plataforma**: Expo SDK
+- **Linguagem**: TypeScript
+- **Navegação**: React Navigation
+- **Estado**: React Context + Hooks
+- **Forms**: Formik + Yup
+- **HTTP Client**: Axios
+- **Pagamentos**: Stripe
+- **Notificações**: Expo Notifications
+- **Testes**: Jest
+- **Build**: EAS Build
+
+## 📁 Estrutura do Projeto
+
+```
+src/
+├── app/                  # Entry point
+│   └── App.tsx          # Componente principal
+├── components/          # Componentes reutilizáveis
+│   ├── AlertComponent.tsx
+│   ├── ModalComponent.tsx
+│   └── ...
+├── contexts/            # Contextos React
+│   └── auth.tsx         # Contexto de autenticação
+├── hooks/               # Custom hooks
+├── pages/               # Páginas da aplicação
+│   ├── driver/          # Páginas do motorista
+│   │   ├── Home/        # Dashboard motorista
+│   │   ├── Tours/       # Gestão de tours
+│   │   ├── Wallet/      # Carteira
+│   │   └── ...
+│   ├── user/            # Páginas do usuário
+│   │   ├── Home/        # Dashboard usuário
+│   │   ├── Reservations/ # Reservas
+│   │   ├── Wallet/      # Carteira
+│   │   └── ...
+│   ├── SignIn/          # Login
+│   ├── SignUp/          # Cadastro
+│   └── ForgotPassword/  # Recuperar senha
+├── routes/              # Configuração de rotas
+│   ├── auth/            # Rotas de autenticação
+│   ├── driver/          # Rotas do motorista
+│   └── user/            # Rotas do usuário
+├── schemas/             # Schemas de validação
+├── util/                # Utilitários
+│   ├── api/             # Configuração da API
+│   ├── stripe/          # Configuração Stripe
+│   └── types/           # Tipos TypeScript
+```
+
+## 🚀 Comandos
+
+### **Desenvolvimento**
+```bash
+# Instalar dependências
+npm install
+
+# Iniciar Expo
+npm start
+
+# Executar no Android
+npm run android
+
+# Executar no iOS
+npm run ios
+
+# Executar no web
+npm run web
+```
+
+### **Build & Deploy**
+```bash
+# Build para Android
+eas build --platform android
+
+# Build para iOS
+eas build --platform ios
+
+# Build para ambos
+eas build --platform all
+
+# Deploy para stores
+eas submit
+```
+
+### **Testes**
+```bash
+# Testes unitários
+npm run test
+
+# Testes com coverage
+npm run test:coverage
+```
+
+## 📱 Telas Principais
+
+### **Autenticação**
+- **SignIn** - Login de usuários e motoristas
+- **SignUp** - Cadastro de novos usuários
+- **ForgotPassword** - Recuperação de senha
+- **NewPassword** - Definição de nova senha
+
+### **Usuários (Turistas)**
+- **Home** - Dashboard com pacotes disponíveis
+- **TourPackages** - Lista de pacotes turísticos
+- **Reservations** - Histórico de reservas
+- **MyTours** - Tours agendados
+- **Wallet** - Carteira digital
+- **Perfil** - Configurações da conta
+
+### **Motoristas**
+- **Home** - Dashboard com tours ativos
+- **Tours** - Gestão de tours
+- **TourPackage** - Criação de pacotes
+- **TouristPoint** - Gestão de pontos turísticos
+- **Car** - Gestão de veículos
+- **Wallet** - Carteira de ganhos
+- **Perfil** - Configurações da conta
+
+## 🔧 Configuração
+
+### **Variáveis de Ambiente**
+```bash
+# API
+API_URL=http://localhost:8000
+
+# Stripe
+STRIPE_PUBLISHABLE_KEY=pk_test_...
+
+# Expo
+EXPO_PUBLIC_API_URL=http://localhost:8000
+```
+
+### **Configuração do Expo**
+- `app.json` - Configuração principal
+- `eas.json` - Configuração de builds
+- `metro.config.js` - Configuração Metro
+
+### **Configuração do Stripe**
+- Integração com Stripe Elements
+- Processamento de pagamentos
+- Webhooks para confirmação
+
+## 🎨 Design & UX
+
+### **Tema**
+- **Cores**: Azul Turistar (#0ea5e9)
+- **Tipografia**: Sistema nativo
+- **Ícones**: Lucide React Native
+- **Componentes**: Customizados
+
+### **Navegação**
+- **Tab Navigation** - Navegação principal
+- **Stack Navigation** - Navegação entre telas
+- **Drawer Navigation** - Menu lateral (se necessário)
+
+### **Componentes Base**
+- **AlertComponent** - Alertas e notificações
+- **ModalComponent** - Modais interativos
+- **DateTimePicker** - Seleção de data/hora
+- **CheckoutForm** - Formulário de pagamento
+
+## 🔐 Autenticação
+
+### **Fluxo de Login**
+1. Usuário seleciona tipo (turista/motorista)
+2. Preenche credenciais
+3. API retorna JWT tokens
+4. Tokens armazenados no AsyncStorage
+5. Redirecionamento para dashboard
+
+### **Contexto de Autenticação**
+```tsx
+const { user, login, logout, sendForgotPasswordCode } = useContext(AuthContext);
+```
+
+### **Proteção de Rotas**
+- Verificação automática de tokens
+- Redirecionamento para login
+- Refresh automático de tokens
+
+## 💳 Integração Stripe
+
+### **Funcionalidades**
+- **Checkout** - Processamento de pagamentos
+- **Carteira** - Gestão de saldo
+
+### **Configuração**
+```tsx
+import { StripeProvider } from '@stripe/stripe-react-native';
+
+<StripeProvider publishableKey={STRIPE_PUBLISHABLE_KEY}>
+  <App />
+</StripeProvider>
+```
+
+## 📊 Estados e Contextos
+
+### **AuthContext**
+- Estado de autenticação
+- Funções de login/logout
+- Recuperação de senha
+- Gestão de tokens
+
+### **Hooks Customizados**
+- **useAlert** - Gestão de alertas
+- **useMetrics** - Métricas do sistema
+- **useDriverMetrics** - Métricas do motorista
+
+## 🐛 Troubleshooting
+
+### **Problemas Comuns**
+
+1. **App não conectando com API:**
+   - Verificar API_URL
+   - Verificar se backend está rodando
+   - Verificar configuração CORS
+
+2. **Build falhando:**
+   - Verificar dependências
+   - Limpar cache: `expo r -c`
+   - Verificar configuração EAS
+
+3. **Stripe não funcionando:**
+   - Verificar chaves Stripe
+   - Verificar configuração webhooks
+   - Verificar modo (test/prod)
+
+4. **Navegação com problemas:**
+   - Verificar configuração de rotas
+   - Verificar dependências React Navigation
+   - Verificar tipos TypeScript
+
+## 📱 Build & Deploy
+
+### **EAS Build**
+```bash
+# Configurar EAS
+eas build:configure
+
+# Build para desenvolvimento
+eas build --profile development
+
+# Build para produção
+eas build --profile production
+```
+
+### **App Stores**
+```bash
+# Submeter para Google Play
+eas submit --platform android
+
+# Submeter para App Store
+eas submit --platform ios
+```
+
+## 📄 Licença
+
+Desenvolvido por Ícaro Rebouças Pinheiro para Turistar.
 
 ---
-Consulte o README do projeto raiz para informações gerais. 
+
+**Versão**: 1.0.0  
+**Última atualização**: Julho 2024 
