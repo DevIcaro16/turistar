@@ -13,7 +13,7 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  output: 'standalone',
+  // output: 'standalone', // Temporariamente desabilitado para debug
   images: {
     unoptimized: true,
   },

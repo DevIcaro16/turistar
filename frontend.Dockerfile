@@ -25,10 +25,14 @@ RUN apk add --no-cache libc6-compat
 
 WORKDIR /app
 
-# Copy the standalone output from the builder
-COPY --from=builder /app/apps/frontend/.next/standalone ./
-COPY --from=builder /app/apps/frontend/.next/static ./.next/static
+# Copy package.json and install only production dependencies
+COPY --from=builder /app/apps/frontend/package.json ./package.json
+RUN npm install --only=production --legacy-peer-deps
+
+# Copy the built application
+COPY --from=builder /app/apps/frontend/.next ./.next
 COPY --from=builder /app/apps/frontend/public ./public
+COPY --from=builder /app/apps/frontend/next.config.js ./
 
 ENV NODE_ENV=production
 ENV PORT=3000
@@ -37,4 +41,4 @@ ENV NEXT_TELEMETRY_DISABLED=1
 
 EXPOSE 3000
 
-CMD ["node", "server.js"]
+CMD ["npx", "next", "start"]
