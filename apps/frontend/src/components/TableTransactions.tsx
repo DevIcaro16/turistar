@@ -17,7 +17,7 @@ interface TableTransactionsProps {
     data: Transaction[];
     title?: string;
     searchPlaceholder?: string;
-    isAdmin?: boolean; // NOVO: indica se é adminTransactions
+    isAdmin?: boolean;
 }
 
 const typeColors: Record<string, string> = {

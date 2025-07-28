@@ -44,7 +44,7 @@ export class TourPackageService {
             throw new ValidationError("Todos os campos obrigatórios devem ser preenchidos!");
         }
 
-        // Validar se o carro existe e pertence ao motorista
+
         const existingCar = await prisma.car.findFirst({
             where: {
                 id: carId,
@@ -56,7 +56,7 @@ export class TourPackageService {
             throw new NotFoundError("Carro não encontrado ou não pertence a este motorista!");
         }
 
-        // Validar se o ponto turístico existe
+
         const existingTouristPoint = await prisma.touristPoint.findUnique({
             where: { id: touristPointId }
         });
@@ -70,7 +70,7 @@ export class TourPackageService {
         }
 
 
-        // Validar os assentos disponíveis
+
         if (parseFloat(seatsAvailable) <= 0 || parseFloat(seatsAvailable) > existingCar.capacity) {
             throw new ValidationError("Número de assentos disponíveis inválido!");
         }
@@ -109,7 +109,7 @@ export class TourPackageService {
     }
 
     static async updateTourPackage(tourPackageId: string, driverId: string, data: TourPackageUpdateProps) {
-        // Verificar se o pacote turístico existe e pertence ao motorista
+
         const existingTourPackage = await prisma.tourPackage.findFirst({
             where: {
                 id: tourPackageId,
@@ -126,7 +126,7 @@ export class TourPackageService {
             throw new NotFoundError("Pacote turístico não encontrado ou não pertence a este motorista!");
         }
 
-        // Preparar dados para atualização
+
         const updateData: any = {};
 
         if (data.origin_local) updateData.origin_local = data.origin_local;
@@ -182,7 +182,7 @@ export class TourPackageService {
     }
 
     static async deleteTourPackage(tourPackageId: string, driverId: string) {
-        // Verificar se o pacote turístico existe e pertence ao motorista
+
         const existingTourPackage = await prisma.tourPackage.findFirst({
             where: {
                 id: tourPackageId,
@@ -196,7 +196,7 @@ export class TourPackageService {
             throw new NotFoundError("Pacote turístico não encontrado ou não pertence a este motorista!");
         }
 
-        // Deletar o pacote turístico
+
         await prisma.tourPackage.delete({
             where: { id: tourPackageId }
         });
@@ -231,7 +231,7 @@ export class TourPackageService {
     }
 
     static async getTourPackagesByDriver(driverId: string) {
-        // Verificar se o motorista existe
+
         const driver = await prisma.driver.findUnique({
             where: { id: driverId }
         });
@@ -319,7 +319,7 @@ export class TourPackageService {
 
         const whereClause: any = {};
 
-        // Filtrar por origem
+
         if (filters.origin) {
             whereClause.origin_local = {
                 contains: filters.origin,
@@ -327,7 +327,7 @@ export class TourPackageService {
             };
         }
 
-        // Filtrar por destino
+
         if (filters.destiny) {
             whereClause.destiny_local = {
                 contains: filters.destiny,
@@ -335,7 +335,7 @@ export class TourPackageService {
             };
         }
 
-        // Filtrar por tipo de transporte
+
         if (filters.transportType) {
             whereClause.car = {
                 type: filters.transportType.toUpperCase()

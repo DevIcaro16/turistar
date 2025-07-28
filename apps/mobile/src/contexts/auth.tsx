@@ -13,7 +13,7 @@ interface User {
     email: string;
     image: string;
     role: string;
-    transport_type?: string; // Adicionado para driver
+    transport_type?: string;
 }
 
 type TypeUser = 'user' | 'driver';
@@ -70,11 +70,10 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
                 // console.log('Token encontrado:', accessToken);
                 // console.log('Role armazenado:', storedRole);
 
-                // Configurar header de autorização para todas as requisições
                 api.defaults.headers['Authorization'] = `Bearer ${accessToken}`;
 
                 try {
-                    // Verificar se o token ainda é válido fazendo uma requisição
+
                     // console.log('Fazendo requisição para:', `${storedRole}/me`);
                     const response = await api.get(`${storedRole}/me`);
                     // console.log('Resposta da API:', response.data);
@@ -103,7 +102,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
                         await AsyncStorage.setItem('@userRole', userData.role);
                     }
                 } catch (err: any) {
-                    // Se o token expirou, limpar e redirecionar para login
+
                     // console.log('Erro na requisição /me:', err);
                     // console.log('Status do erro:', err.response?.status);
                     // console.log('Mensagem do erro:', err.response?.data);
@@ -182,12 +181,10 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
 
                 const { user, access_token, refresh_token } = response.data;
 
-                // Armazenar tokens e role no AsyncStorage
                 await AsyncStorage.setItem('@accessToken', access_token);
                 await AsyncStorage.setItem('@refreshToken', refresh_token);
                 await AsyncStorage.setItem('@userRole', user.role);
 
-                // Configurar header de autorização para todas as requisições futuras
                 api.defaults.headers['Authorization'] = `Bearer ${access_token}`;
 
                 setUser(user);
@@ -205,12 +202,11 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
 
     async function signOut() {
         try {
-            // Limpar tokens e role do AsyncStorage
+
             await AsyncStorage.removeItem('@accessToken');
             await AsyncStorage.removeItem('@refreshToken');
             await AsyncStorage.removeItem('@userRole');
 
-            // Remover header de autorização
             delete api.defaults.headers['Authorization'];
 
             setUser(null);
@@ -240,7 +236,6 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
             return access_token;
         } catch (error) {
             // console.log('Erro no refresh do token:', error);
-            // Se falhar, deslogar
             await signOut();
             return null;
         }

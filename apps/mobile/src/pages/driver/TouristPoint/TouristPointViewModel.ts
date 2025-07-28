@@ -125,7 +125,6 @@ export function useTouristPointViewModel() {
             }
         } catch (error) {
             console.error('Erro ao buscar endereço:', error);
-            // Não mostrar erro para o usuário, pois é uma funcionalidade opcional
         } finally {
             setIsLoadingAddress(false);
         }

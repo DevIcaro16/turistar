@@ -5,8 +5,10 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2025-06
 
 export const createPaymentIntent = async (req: Request, res: Response, next: NextFunction) => {
     try {
+
         const { amount, currency = 'brl', metadata } = req.body;
-        // amount deve ser em centavos!
+
+        // amount é em centavos
         const paymentIntent = await stripe.paymentIntents.create({
             amount,
             currency,

@@ -12,12 +12,9 @@ import { authenticateDriver, authenticateToken } from "../../utils/auth/auth.mid
 
 const TourPackageRouter: Router = express.Router();
 
-// Rotas que requerem autenticação de motorista
 TourPackageRouter.post('/registration', authenticateDriver, TourPackageRegistration);
 TourPackageRouter.put('/:tourPackageId', authenticateDriver, updateTourPackage);
 TourPackageRouter.delete('/:tourPackageId', authenticateDriver, deleteTourPackage);
-
-// Rotas de consulta (algumas requerem autenticação)
 TourPackageRouter.get('/:tourPackageId', authenticateToken, getTourPackageById);
 TourPackageRouter.get('/driver/:driverId', authenticateToken, getTourPackagesByDriver);
 TourPackageRouter.get('/', authenticateToken, getAllTourPackages);

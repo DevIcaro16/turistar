@@ -13,13 +13,10 @@ import { UploadedFile, FileArray } from 'express-fileupload';
 
 const carRouter: Router = express.Router();
 
-// Rotas que requerem autenticação de motorista
 carRouter.post('/registration', authenticateDriver, CarRegistration);
 carRouter.put('/:carId', authenticateDriver, updateCar);
 carRouter.delete('/:carId', authenticateDriver, deleteCar);
 carRouter.get('/driver', authenticateDriver, getCarsByAuthenticatedDriver);
-
-// Rotas públicas (apenas para visualização)
 carRouter.get('/:carId', getCarById);
 carRouter.get('/driver/:driverId', authenticateDriver, getCarsByDriver);
 carRouter.get('/', authenticateAdmin, getAllCars);

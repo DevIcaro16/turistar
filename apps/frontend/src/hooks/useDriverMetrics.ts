@@ -120,7 +120,6 @@ export const useDriverMetrics = () => {
         error,
         refetch: fetchMetrics,
         formatCurrency,
-        // Métodos individuais
         fetchTourPackages,
         fetchReserves,
         fetchTouristPoints,

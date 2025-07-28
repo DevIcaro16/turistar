@@ -130,14 +130,12 @@ export class ReserveService {
         const gmt3Now = new Date(now.getTime() - (now.getTimezoneOffset() * 60000) - (3 * 60 * 60 * 1000));
         // console.log(gmt3Now);
 
-        // Converta a data do tour para Date, se necessário
         const tourDate = new Date(reserveIdExisting.tourPackage.date_tour);
 
         if (tourDate <= gmt3Now) {
             throw new ValidationError("Não é possível confirmar uma reserva para uma viagem que já passou!");
         }
 
-        // Verificar se o usuário ainda tem saldo suficiente
         if (userExisting.wallet < reserveIdExisting.amount) {
             throw new ValidationError("Saldo insuficiente na carteira virtual para confirmar esta reserva!");
         }

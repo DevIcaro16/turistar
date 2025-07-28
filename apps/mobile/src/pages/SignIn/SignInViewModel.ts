@@ -19,7 +19,6 @@ export function useSignInViewModel() {
         try {
             await signIn(values.email, values.password, activeTab);
         } catch (error) {
-            // Trate o erro aqui se quiser
             console.error('Erro no login:', error);
         } finally {
             setLoading(false);

@@ -120,7 +120,6 @@ export const deleteDriver = async (req: Request, res: Response, next: NextFuncti
     try {
         const { driverId } = req.params;
 
-        // Validar formato do ID
         if (typeof driverId !== 'string' || driverId.length !== 24) {
             return next(new ValidationError("ID do motorista inválido!"));
         }
@@ -142,7 +141,7 @@ export const getDriverById = async (req: Request, res: Response, next: NextFunct
     try {
         const { driverId } = req.params;
 
-        // Validar formato do ID
+
         if (typeof driverId !== 'string' || driverId.length !== 24) {
             return next(new ValidationError("ID do motoristaaaaaaaaaaa inválido!"));
         }

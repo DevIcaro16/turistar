@@ -30,14 +30,13 @@ export default function AlertComponent({
         setIsVisible(false);
         setTimeout(() => {
             onClose();
-        }, 200); // Aguarda a animação de saída
+        }, 200);
     }, [onClose]);
 
     useEffect(() => {
         if (visible) {
             setIsVisible(true);
 
-            // Auto close se habilitado
             if (autoClose) {
                 const timer = setTimeout(() => {
                     handleClose();

@@ -28,13 +28,10 @@ COPY --from=builder /app/prisma ./prisma/
 
 RUN npm install --legacy-peer-deps
 
-# Gerar Prisma Client
 RUN npx prisma generate
 
-# Copiar build correto
 COPY --from=builder /app/apps/backend-api/dist/ ./dist
 
-# Copiar templates de email
 COPY --from=builder /app/apps/backend-api/src/utils/email-templates/ ./src/utils/email-templates/
 
 ENV NODE_ENV=production

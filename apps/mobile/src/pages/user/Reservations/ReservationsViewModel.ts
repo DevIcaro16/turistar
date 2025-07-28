@@ -75,7 +75,7 @@ export function useReservationsViewModel() {
 
         if (confirmAction === 'confirm') {
             try {
-                // 1. Crie o PaymentIntent no backend
+
                 const paymentIntentRes = await api.post('/stripe/create-payment-intent', {
                     amount: selectedReservation.amount,
                     reservationId: selectedReservation.id,

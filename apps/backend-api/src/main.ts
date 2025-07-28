@@ -12,7 +12,7 @@ const swaggerDocument = require("./swagger-output.js");
 
 const app = express();
 
-// Configuração CORS para produção
+
 // const allowedOrigins = [
 //     'http://localhost:3000',
 //     'http://127.0.0.1:3000',
@@ -143,7 +143,7 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument, {
         showRequestHeaders: true,
         tryItOutEnabled: true,
         requestInterceptor: (req: any) => {
-            // Adicionar headers CORS para requisições do Swagger
+
             req.headers['Access-Control-Allow-Origin'] = '*';
             req.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS';
             req.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization';
@@ -155,12 +155,11 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument, {
 }));
 
 app.get("/docs-json", (req, res) => {
-    // Adicionar headers CORS para o endpoint de documentação
+
     res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Methods', 'GET, OPTIONS');
     res.header('Access-Control-Allow-Headers', 'Content-Type');
 
-    // Forçar HTTPS em produção
     if (process.env.NODE_ENV === 'production') {
         const modifiedDoc = {
             ...swaggerDocument,
@@ -244,12 +243,11 @@ httpServer.listen(port, host, () => {
     console.log(`📚 API Docs: http://${host}:${port}/api-docs`);
 });
 
-// Exportar io para usar nos controllers
 // export { io };
 
 httpServer.on('error', (err: any) => {
-    console.error('❌ Erro no Servidor:', err.message);
+    console.error('Erro no Servidor:', err.message);
     if (err.code === 'EADDRINUSE') {
-        console.error('⚠️  Porta já está em uso. Tente usar outra porta.');
+        console.error('Porta já está em uso. Tente usar outra porta.');
     }
 });

@@ -5,7 +5,7 @@ import { Search } from 'lucide-react';
 interface TableColumn {
     key: string;
     label: string;
-    render?: (value: any, row: any) => React.ReactNode; // opcional para customização
+    render?: (value: any, row: any) => React.ReactNode;
 }
 
 interface TableComponentProps {
@@ -23,7 +23,7 @@ const TableComponent: React.FC<TableComponentProps> = ({
 }) => {
     const [search, setSearch] = useState("");
 
-    // Filtro simples por texto
+
     const filteredData = data.filter(row =>
         columns.some(col => String(row[col.key] ?? '').toLowerCase().includes(search.toLowerCase()))
     );

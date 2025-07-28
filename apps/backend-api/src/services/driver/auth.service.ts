@@ -132,7 +132,7 @@ export class AuthService {
     }
 
     static async updateDriver(driverId: string, data: DriverUpdateProps) {
-        // Verificar se o motorista existe
+
         const existingDriver = await prisma.driver.findUnique({
             where: { id: driverId }
         });
@@ -141,7 +141,7 @@ export class AuthService {
             throw new NotFoundError("Motorista não encontrado!");
         }
 
-        // Se email está sendo atualizado, verificar se já existe
+
         if (data.email && data.email !== existingDriver.email) {
             const emailExists = await prisma.driver.findUnique({
                 where: { email: data.email }
@@ -156,12 +156,11 @@ export class AuthService {
             }
         }
 
-        // Validar tipo de transporte se fornecido
+
         if (data.transportType && !Object.values(TransportType).includes(data.transportType)) {
             throw new ValidationError("Tipo de transporte inválido!");
         }
 
-        // Preparar dados para atualização
         const updateData: any = {};
 
         if (data.name) updateData.name = data.name;
@@ -170,7 +169,6 @@ export class AuthService {
         if (data.transportType) updateData.transport_type = data.transportType.toUpperCase();
         if (data.image) updateData.image = data.image;
 
-        // Se senha está sendo atualizada, fazer hash
         if (data.password) {
             updateData.password = await bcrypt.hash(data.password, 10);
         }
@@ -194,7 +192,7 @@ export class AuthService {
     }
 
     static async deleteDriver(driverId: string) {
-        // Verificar se o motorista existe
+
         const existingDriver = await prisma.driver.findUnique({
             where: { id: driverId }
         });
@@ -203,7 +201,6 @@ export class AuthService {
             throw new NotFoundError("Motorista não encontrado!");
         }
 
-        // Deletar o motorista
         await prisma.driver.delete({
             where: { id: driverId }
         });
@@ -239,14 +236,12 @@ export class AuthService {
             const payload = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET as string) as any;
             if (payload.role !== 'driver') throw new AuthError("Token inválido!");
 
-            // Gere um novo access token
             const accessToken = jwt.sign(
                 { id: payload.id, role: 'driver' },
                 process.env.ACCESS_TOKEN_SECRET as string,
                 { expiresIn: "30m" }
             );
 
-            // Gere um novo refresh token (opcional, mas recomendado)
             const newRefreshToken = jwt.sign(
                 { id: payload.id, role: 'driver' },
                 process.env.REFRESH_TOKEN_SECRET as string,

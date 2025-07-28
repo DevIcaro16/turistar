@@ -9,7 +9,7 @@ dotenv.config()
 
 const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,
-    port: Number(process.env.SMTP_PORT) || 465, // Mudança para 465 (como Python)
+    port: Number(process.env.SMTP_PORT) || 465,
     secure: true, // SSL como Python
     // service: process.env.SMTP_SERVICE,
     auth: {
@@ -29,11 +29,8 @@ const renderEmailTemplate = async (templateName: string, data: Record<string, an
 
     // Tentar diferentes caminhos para desenvolvimento e produção
     const possiblePaths = [
-        // Caminho para produção (container)
         path.join(process.cwd(), "src", "utils", "email-templates", `${templateName}.ejs`),
-        // Caminho para desenvolvimento
         path.join(process.cwd(), "apps", "backend-api", "src", "utils", "email-templates", `${templateName}.ejs`),
-        // Caminho relativo ao arquivo atual
         path.join(__dirname, "..", "email-templates", `${templateName}.ejs`)
     ];
 
@@ -43,10 +40,10 @@ const renderEmailTemplate = async (templateName: string, data: Record<string, an
         try {
             console.log("Tentando caminho:", templatePath);
             const result = await ejs.renderFile(templatePath, data);
-            console.log("✅ Template encontrado em:", templatePath);
+            console.log("Template encontrado em:", templatePath);
             return result;
         } catch (error) {
-            console.log("❌ Template não encontrado em:", templatePath);
+            console.log("Template não encontrado em:", templatePath);
             continue;
         }
     }

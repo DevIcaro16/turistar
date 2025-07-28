@@ -195,7 +195,6 @@ export class AuthService {
         if (!admin) {
             throw new ValidationError("Administrador não encontrado!");
         }
-        // Aqui você implementaria a lógica de envio de email
         return true;
     }
 

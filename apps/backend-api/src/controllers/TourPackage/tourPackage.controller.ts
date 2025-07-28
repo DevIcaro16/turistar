@@ -35,7 +35,7 @@ export const TourPackageRegistration = async (req: Request, res: Response, next:
         if (file && Array.isArray(file)) {
             throw new Error("Apenas um arquivo é permitido para upload.");
         }
-        // Validar formato dos IDs
+
         if (typeof carId !== 'string' || carId.length !== 24) {
             throw new ValidationError("ID do carro inválido!");
         }
@@ -44,7 +44,7 @@ export const TourPackageRegistration = async (req: Request, res: Response, next:
         }
 
 
-        // Validar data do tour
+
         if (date_tour) {
             const dateTourObj = new Date(date_tour);
             if (isNaN(dateTourObj.getTime())) {
@@ -145,7 +145,7 @@ export const deleteTourPackage = async (req: Request, res: Response, next: NextF
         const { tourPackageId } = req.params;
         const driverId = req.user?.id; // ID do motorista autenticado
 
-        // Validar formato do ID do pacote turístico
+
         if (typeof tourPackageId !== 'string' || tourPackageId.length !== 24) {
             return next(new ValidationError("ID do pacote turístico inválido!"));
         }
@@ -171,7 +171,7 @@ export const getTourPackageById = async (req: Request, res: Response, next: Next
     try {
         const { tourPackageId } = req.params;
 
-        // Validar formato do ID do pacote turístico
+
         if (typeof tourPackageId !== 'string' || tourPackageId.length !== 24) {
             return next(new ValidationError("ID do pacote turístico inválido!"));
         }
@@ -193,7 +193,7 @@ export const getTourPackagesByDriver = async (req: Request, res: Response, next:
     try {
         const { driverId } = req.params;
 
-        // Validar formato do ID
+
         if (typeof driverId !== 'string' || driverId.length !== 24) {
             return next(new ValidationError("ID do motorista inválido!"));
         }

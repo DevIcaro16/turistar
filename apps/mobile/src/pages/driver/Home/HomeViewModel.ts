@@ -42,7 +42,7 @@ export function HomeViewModel(): {
 
     async function fetchStats() {
         try {
-            // Buscar pacotes do dia
+
             const today = new Date();
             const dateStr = today.toISOString().split('T')[0]; // yyyy-mm-dd
             const tourRes = await api.get(`/TourPackage/driver/${user?.id}`);
@@ -51,7 +51,6 @@ export function HomeViewModel(): {
             setPasseiosHoje(passeios);
             setPasseiosHojeCont(passeios.length);
 
-            // Buscar ganhos do dia
             const transRes = await api.get(`/transaction/driver/all`);
             const transacoes = transRes.data.transactions || [];
             const ganhos = transacoes
@@ -65,13 +64,16 @@ export function HomeViewModel(): {
     }
 
     function handleOpenDashboardPanel() {
+
+        const dashboardWebLinking = process.env.EXPO_PUBLIC_BACKEND_API + 'Login';
+
         Alert.alert(
             'Dashboard',
             'Deseja ser redirecionado para o painel dashboard?',
             [
                 { text: 'Cancelar', style: 'cancel' },
                 {
-                    text: 'Ir para o Painel', style: 'default', onPress: () => Linking.openURL('http://192.168.15.3:3000/Login')
+                    text: 'Ir para o Painel', style: 'default', onPress: () => Linking.openURL(dashboardWebLinking)
                 }
             ]
         );

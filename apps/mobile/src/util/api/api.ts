@@ -2,7 +2,7 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const api = axios.create({
-    baseURL: 'https://www.turistarturismo.shop/api/',
+    baseURL: process.env.EXPO_PUBLIC_BACKEND_API,
     // baseURL: 'http://54.91.55.102:8000/api/',
     // baseURL: 'http://10.0.0.103:8000/api/',
     headers: {
@@ -29,7 +29,7 @@ async function refreshAccessToken() {
         api.defaults.headers['Authorization'] = `Bearer ${access_token}`;
         return access_token;
     } catch (error) {
-        // Se falhar, remova os tokens
+
         await AsyncStorage.removeItem('@accessToken');
         await AsyncStorage.removeItem('@refreshToken');
         return null;

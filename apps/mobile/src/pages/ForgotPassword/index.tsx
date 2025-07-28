@@ -35,7 +35,6 @@ export default function ForgotPassword() {
                     }}
                     validationSchema={ForgotPasswordSchema}
                     onSubmit={forgotPasswordViewModel.handleResetPass}
-                // onSubmit={() => Alert.alert('testeeee')}
                 >
                     {
                         ({ handleChange, handleBlur, handleSubmit, isSubmitting, values, errors, touched }) => (

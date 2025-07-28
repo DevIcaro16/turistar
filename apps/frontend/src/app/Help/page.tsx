@@ -6,7 +6,7 @@ import Header from '../../components/Header';
 import { useAuth, isAuthenticated } from '../../lib/auth';
 import { useRouter } from 'next/navigation';
 
-// Forçar página dinâmica
+
 export const dynamic = 'force-dynamic';
 
 const HelpPage = () => {
@@ -16,13 +16,13 @@ const HelpPage = () => {
 
     useEffect(() => {
         setMounted(true);
-        // Se não está autenticado, redirecionar para login
+
         if (!isAuthenticated()) {
             router.push('/Login');
         }
     }, [router]);
 
-    // Durante SSR ou loading, renderizar um loading
+
     if (!mounted || loading) {
         return (
             <div className="min-h-screen bg-[#1e1e1e] flex flex-col items-center justify-center">
@@ -31,7 +31,7 @@ const HelpPage = () => {
         );
     }
 
-    // Se não está autenticado, não renderizar nada (será redirecionado)
+
     if (!authStatus) {
         return null;
     }

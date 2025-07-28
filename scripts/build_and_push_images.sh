@@ -1,7 +1,6 @@
 #!/bin/bash
 
 # Script para build e push das imagens Docker para Docker Hub
-# Autor: Sistema de Passeios Turísticos
 # Data: $(date)
 
 # Configurações

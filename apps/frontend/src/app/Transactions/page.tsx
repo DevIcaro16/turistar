@@ -19,7 +19,6 @@ const Transactions = () => {
     const { metrics: adminMetrics, loading: adminLoading, error: adminError, formatCurrency: adminFormatCurrency } = useMetrics();
     const { metrics: driverMetrics, loading: driverLoading, error: driverError, formatCurrency: driverFormatCurrency } = useDriverMetrics();
 
-    // Só renderiza após autenticação estar pronta
     if (authLoading) {
         return (
             <div className='flex-1 flex items-center justify-center min-h-screen bg-[#1e1e1e]'>

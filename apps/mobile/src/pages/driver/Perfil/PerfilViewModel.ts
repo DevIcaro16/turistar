@@ -155,7 +155,6 @@ export function PerfilViewModel(): {
     };
 
     return {
-        // State
         user,
         loading,
         editFields,
@@ -164,8 +163,6 @@ export function PerfilViewModel(): {
         alertTitle,
         alertMessage,
         selectedImage,
-
-        // Methods
         toggleEditFields,
         showLocalAlert,
         getTransportIcon,

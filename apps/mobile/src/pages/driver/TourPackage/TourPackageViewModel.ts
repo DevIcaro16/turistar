@@ -299,7 +299,6 @@ export function useTourPackageViewModel() {
     };
 
     return {
-        // Estados
         tourPackages,
         loading,
         refreshing,
@@ -312,7 +311,6 @@ export function useTourPackageViewModel() {
         cars,
         touristPoints,
 
-        // Métodos
         showAlert,
         fetchTourPackages,
         onRefresh,
@@ -327,8 +325,6 @@ export function useTourPackageViewModel() {
         formatDate,
         getInitialValues,
         handleSubmit,
-
-        // Setters
         setModalVisible,
         setAlertVisible,
         setEditingTourPackage,

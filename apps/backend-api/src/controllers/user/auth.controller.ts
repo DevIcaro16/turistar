@@ -117,7 +117,6 @@ export const deleteUser = async (req: Request, res: Response, next: NextFunction
     try {
         const { userId } = req.params;
 
-        // Validar formato do ID
         if (typeof userId !== 'string' || userId.length !== 24) {
             return next(new ValidationError("ID do usuário inválido!"));
         }
@@ -141,7 +140,6 @@ export const getUserById = async (req: Request, res: Response, next: NextFunctio
 
         const userId = req.user?.id;
 
-        // Validar formato do ID
         if (typeof userId !== 'string' || userId.length !== 24) {
             return next(new ValidationError("ID do usuário inválido!"));
         }

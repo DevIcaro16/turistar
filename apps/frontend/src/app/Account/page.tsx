@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation';
 import api from '../../util/api/api';
 import { ArrowDownCircle, ArrowUpCircle, Clock, RefreshCcw, DollarSign } from "lucide-react";
 
-// Forçar página dinâmica
+
 export const dynamic = 'force-dynamic';
 
 const AccountPage = () => {
@@ -24,7 +24,7 @@ const AccountPage = () => {
 
     useEffect(() => {
         setMounted(true);
-        // Se não está autenticado, redirecionar para login
+
         if (!isAuthenticated()) {
             router.push('/Login');
         }
@@ -59,7 +59,7 @@ const AccountPage = () => {
         fetchData();
     }, [user?.id]);
 
-    // Durante SSR ou loading, renderizar um loading
+
     if (!mounted || loading) {
         return (
             <div className="min-h-screen bg-[#1e1e1e] flex flex-col items-center justify-center">
@@ -85,7 +85,7 @@ const AccountPage = () => {
 
     const fetchDriverTransactions = async (driverId: string) => {
         const res = await api.get('transaction/driver/totals', { withCredentials: true });
-        // console.log(res.data.totals);
+
         return res.data.totals;
     };
 
@@ -104,12 +104,12 @@ const AccountPage = () => {
         return `${day}/${month}/${year} ${hour}:${minute}`;
     }
 
-    // Se não está autenticado, não renderizar nada (será redirecionado)
+
     if (!authStatus) {
         return null;
     }
 
-    // Mapeamento de status para cor, ícone e label
+
     const walletSummary = [
         {
             key: 'CREDIT',
@@ -143,14 +143,14 @@ const AccountPage = () => {
             value: transactions?.REVERSAL?.amount || 0,
             count: transactions?.REVERSAL?.count || 0,
         },
-        // {
-        //     key: 'Saldo',
-        //     label: 'Saldo',
-        //     color: 'bg-purple-900/30 border-purple-600',
-        //     icon: <DollarSign className="w-7 h-7 text-purple-400" />,
-        //     value: user?.wallet || 0,
-        //     count: user?.wallet || '',
-        // },
+
+
+
+
+
+
+
+
     ];
 
     return (

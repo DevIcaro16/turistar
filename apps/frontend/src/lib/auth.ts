@@ -12,7 +12,7 @@ export interface User {
     phone?: string;
 }
 
-// Funções para gerenciar localStorage de forma segura
+
 const getFromStorage = (key: string): string | null => {
     if (typeof window === 'undefined') return null;
     try {
@@ -26,8 +26,8 @@ const setToStorage = (key: string, value: string): void => {
     if (typeof window === 'undefined') return;
     try {
         localStorage.setItem(key, value);
-    } catch {
-        // Ignorar erros de localStorage
+    } catch (error: any) {
+        console.log('Erro: ', error);
     }
 };
 
@@ -35,12 +35,12 @@ const removeFromStorage = (key: string): void => {
     if (typeof window === 'undefined') return;
     try {
         localStorage.removeItem(key);
-    } catch {
-        // Ignorar erros de localStorage
+    } catch (error: any) {
+        console.log('Erro: ', error);
     }
 };
 
-// Função de login
+
 export const login = async (email: string, password: string, role: 'driver' | 'admin'): Promise<{ success: boolean; user?: User; error?: string }> => {
     try {
         const response = await api.post(`/${role}/login`, {
@@ -53,7 +53,7 @@ export const login = async (email: string, password: string, role: 'driver' | 'a
         const data = response.data;
 
         if (data.access_token && data.user) {
-            // Salvar no localStorage
+
             setToStorage('access_token', data.access_token);
             setToStorage('refresh_token', data.refresh_token || '');
             setToStorage('user_role', data.user.role);
@@ -70,22 +70,22 @@ export const login = async (email: string, password: string, role: 'driver' | 'a
     }
 };
 
-// Função de logout
+
 export const logout = async (): Promise<void> => {
     try {
         const role = getFromStorage('user_role') || 'driver';
         await api.post(`/${role}/logout`, {}, { withCredentials: true });
-    } catch {
-        // Ignorar erros de logout
+    } catch (error: any) {
+        console.log('Erro: ', error);
     }
 
-    // Limpar localStorage
+
     removeFromStorage('access_token');
     removeFromStorage('refresh_token');
     removeFromStorage('user_role');
 };
 
-// Função para obter usuário atual via API
+
 export const getCurrentUser = async (): Promise<User | null> => {
     const accessToken = getFromStorage('access_token');
     const role = getFromStorage('user_role');
@@ -111,7 +111,7 @@ export const getCurrentUser = async (): Promise<User | null> => {
 
         return null;
     } catch (error: any) {
-        // Se der erro 401, limpar localStorage
+
         if (error?.response?.status === 401) {
             logout();
         }
@@ -119,22 +119,22 @@ export const getCurrentUser = async (): Promise<User | null> => {
     }
 };
 
-// Função para obter token de acesso
+
 export const getAccessToken = (): string | null => {
     return getFromStorage('access_token');
 };
 
-// Função para verificar se está autenticado
+
 export const isAuthenticated = (): boolean => {
     return getAccessToken() !== null;
 };
 
-// Função para obter role do usuário
+
 export const getUserRole = (): string => {
     return getFromStorage('user_role') || '';
 };
 
-// Função para refresh do token
+
 export const refreshToken = async (): Promise<string | null> => {
     try {
         const refreshTokenValue = getFromStorage('refresh_token');
@@ -161,7 +161,7 @@ export const refreshToken = async (): Promise<string | null> => {
     }
 };
 
-// Hook personalizado para autenticação
+
 export const useAuth = () => {
     const [user, setUser] = React.useState<User | null>(null);
     const [loading, setLoading] = React.useState(true);

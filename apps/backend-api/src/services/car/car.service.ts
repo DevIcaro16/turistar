@@ -64,7 +64,7 @@ export class CarService {
     }
 
     static async updateCar(carId: string, driverId: string, data: CarUpdateProps) {
-        // Verificar se o carro existe e pertence ao motorista
+
         const existingCar = await prisma.car.findFirst({
             where: {
                 id: carId,
@@ -87,7 +87,6 @@ export class CarService {
             updateData.type = typeUpper;
         }
 
-        // Adicionar outros campos se fornecidos
         if (data.model) {
             updateData.model = data.model;
         }
@@ -118,7 +117,7 @@ export class CarService {
     }
 
     static async deleteCar(carId: string, driverId: string) {
-        // Verificar se o carro existe e pertence ao motorista
+
         const existingCar = await prisma.car.findFirst({
             where: {
                 id: carId,
@@ -130,7 +129,6 @@ export class CarService {
             throw new NotFoundError("Carro não encontrado ou não pertence a este motorista!");
         }
 
-        // Deletar o carro
         await prisma.car.delete({
             where: { id: carId }
         });
@@ -163,7 +161,7 @@ export class CarService {
     }
 
     static async getCarsByDriver(driverId: string) {
-        // Verificar se o motorista existe
+
         const driver = await prisma.driver.findUnique({
             where: { id: driverId }
         });

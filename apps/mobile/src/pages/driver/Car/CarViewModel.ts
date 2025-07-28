@@ -171,7 +171,7 @@ export function useCarViewModel() {
     };
 
     return {
-        // State
+
         cars,
         loading,
         refreshing,
@@ -182,7 +182,6 @@ export function useCarViewModel() {
         alertType,
         selectedImage,
 
-        // Methods
         showAlert,
         fetchCars,
         onRefresh,

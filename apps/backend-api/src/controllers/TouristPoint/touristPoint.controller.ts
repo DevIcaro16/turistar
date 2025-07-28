@@ -114,9 +114,8 @@ export const updateTouristPoint = async (req: Request, res: Response, next: Next
 export const deleteTouristPoint = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { touristPointId } = req.params;
-        const driverId = req.user?.id; // ID do motorista autenticado
+        const driverId = req.user?.id;
 
-        // Validar formato do ID do ponto turístico
         if (typeof touristPointId !== 'string' || touristPointId.length !== 24) {
             return next(new ValidationError("ID do ponto turístico inválido!"));
         }
@@ -168,7 +167,7 @@ export const getTouristPointsByDriver = async (req: Request, res: Response, next
     try {
         const { driverId } = req.params;
 
-        // Validar formato do ID
+
         if (typeof driverId !== 'string' || driverId.length !== 24) {
             return next(new ValidationError("ID do motorista inválido!"));
         }

@@ -13,7 +13,7 @@ const doc = {
     basePath: "/api/",
     schemes: process.env.NODE_ENV === 'production' ? ["https"] : ["http"],
 
-    // Configurações adicionais para evitar conflitos
+
     consumes: ['application/json'],
     produces: ['application/json'],
 

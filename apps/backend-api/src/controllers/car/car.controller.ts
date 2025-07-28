@@ -14,7 +14,7 @@ export const CarRegistration = async (req: Request, res: Response, next: NextFun
     try {
         // console.log(req.body);
         const { type, model, capacity } = req.body;
-        const driverId = req.user?.id; // ID do motorista autenticado
+        const driverId = req.user?.id;
 
         const file = req.files?.['file'] as UploadedFile | undefined;
 
@@ -63,15 +63,13 @@ export const CarRegistration = async (req: Request, res: Response, next: NextFun
 export const updateCar = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { carId } = req.params;
-        const driverId = req.user?.id; // ID do motorista autenticado
+        const driverId = req.user?.id;
         const { type, model, capacity } = req.body;
 
-        // Validar se pelo menos um campo foi fornecido
         if (!type && !model && !capacity) {
             return next(new ValidationError("Pelo menos um campo deve ser fornecido para atualização!"));
         }
 
-        // Validar formato do ID do carro
         if (typeof carId !== 'string' || carId.length !== 24) {
             return next(new ValidationError("ID do carro inválido!"));
         }
@@ -102,9 +100,9 @@ export const updateCar = async (req: Request, res: Response, next: NextFunction)
 export const deleteCar = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { carId } = req.params;
-        const driverId = req.user?.id; // ID do motorista autenticado
+        const driverId = req.user?.id;
 
-        // Validar formato do ID do carro
+
         if (typeof carId !== 'string' || carId.length !== 24) {
             return next(new ValidationError("ID do carro inválido!"));
         }
@@ -129,9 +127,8 @@ export const deleteCar = async (req: Request, res: Response, next: NextFunction)
 export const getCarById = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { carId } = req.params;
-        const driverId = req.user?.id; // ID do motorista autenticado
+        const driverId = req.user?.id;
 
-        // Validar formato do ID do carro
         if (typeof carId !== 'string' || carId.length !== 24) {
             return next(new ValidationError("ID do carro inválido!"));
         }
@@ -158,7 +155,6 @@ export const getCarsByDriver = async (req: Request, res: Response, next: NextFun
 
         const driverId = req.user?.id;
 
-        // Validar formato do ID
         if (typeof driverId !== 'string' || driverId.length !== 24) {
             return next(new ValidationError("ID do motorista inválido!"));
         }
@@ -178,7 +174,7 @@ export const getCarsByDriver = async (req: Request, res: Response, next: NextFun
 //Buscar todos os carros do motorista autenticado
 export const getCarsByAuthenticatedDriver = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const driverId = req.user?.id; // ID do motorista autenticado
+        const driverId = req.user?.id;
 
         if (!driverId) {
             return next(new ValidationError("Usuário não autenticado!"));

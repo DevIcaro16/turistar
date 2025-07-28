@@ -29,7 +29,6 @@ const Overview = () => {
     const error = userRole === 'admin' ? adminError : driverError;
     const formatCurrency = userRole === 'admin' ? adminFormatCurrency : driverFormatCurrency;
 
-    // Durante SSR, renderizar um loading
     if (!mounted) {
         return (
             <div className='flex-1 overflow-auto relative z-10'>

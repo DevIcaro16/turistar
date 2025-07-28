@@ -112,14 +112,14 @@ export class TourRegistrationService {
             }
         });
 
-        // 1. Buscar todos os IDs de reservas do pacote
+
         const reservations = await prisma.reservations.findMany({
             where: { tourPackageId },
             select: { id: true }
         });
         const reservationIds = reservations.map(r => r.id);
 
-        // 2. Atualizar todas as transactions dessas reservas
+
         await prisma.transactions.updateMany({
             data: { type: TransactionType.CREDIT },
             where: {
@@ -128,7 +128,7 @@ export class TourRegistrationService {
             }
         });
 
-        // 3. Somar o valor das transações CREDIT dessas reservas
+
         const creditTransactions = await prisma.transactions.findMany({
             where: {
                 ReservationId: { in: reservationIds },
@@ -140,7 +140,6 @@ export class TourRegistrationService {
         const descPlatform = (totalCredit * tax);
         const totalCreditDesc = totalCredit - descPlatform; //Desconto da taxa da plataforma.
 
-        // 4. Atualizar a wallet do driver
         await prisma.driver.update({
             where: { id: driverId },
             data: {

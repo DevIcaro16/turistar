@@ -248,7 +248,7 @@ export default function TouristPointManagement() {
                                             value={values.latitude}
                                             onChangeText={(text) => {
                                                 handleChange('latitude')(text);
-                                                // Se longitude também foi preenchida, buscar endereço automaticamente
+
                                                 if (text && values.longitude) {
                                                     touristPointViewModel.fetchAddressFromLatLong(Number(text), Number(values.longitude), setFieldValue);
                                                 }
@@ -270,7 +270,7 @@ export default function TouristPointManagement() {
                                             value={values.longitude}
                                             onChangeText={(text) => {
                                                 handleChange('longitude')(text);
-                                                // Se latitude também foi preenchida, buscar endereço automaticamente
+
                                                 if (text && values.latitude) {
                                                     touristPointViewModel.fetchAddressFromLatLong(Number(values.latitude), Number(text), setFieldValue);
                                                 }

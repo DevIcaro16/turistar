@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { AuthError } from '../../../../../packages/error-handle';
 
-// Extend Request interface to include user info
+
 declare global {
     namespace Express {
         interface Request {
@@ -17,12 +17,12 @@ declare global {
 export const authenticateToken = async (req: Request, res: Response, next: NextFunction) => {
 
     try {
-        // Verificar se o token está no header Authorization
+
         const authHeader = req.headers.authorization;
-        const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+        const token = authHeader && authHeader.split(' ')[1];
 
         if (!token) {
-            // Se não há token no header, verificar nos cookies
+
             const accessToken = req.cookies?.access_token;
             const refreshToken = req.cookies?.refresh_token;
 
@@ -30,12 +30,12 @@ export const authenticateToken = async (req: Request, res: Response, next: NextF
                 throw new AuthError('Token de acesso não fornecido!');
             }
 
-            // Se há refresh token mas não access token, tentar renovar
+
             if (!accessToken && refreshToken) {
                 try {
                     const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET as string) as any;
 
-                    // Gerar novo access token
+
                     const newAccessToken = jwt.sign(
                         {
                             id: decoded.id,
@@ -47,12 +47,12 @@ export const authenticateToken = async (req: Request, res: Response, next: NextF
                         }
                     );
 
-                    // Definir novo access token no cookie
+
                     res.cookie('access_token', newAccessToken, {
                         httpOnly: true,
                         secure: process.env.NODE_ENV === 'production',
                         sameSite: 'strict',
-                        maxAge: 15 * 60 * 1000 // 15 minutos
+                        maxAge: 15 * 60 * 1000
                     });
 
                     req.user = {
@@ -66,7 +66,7 @@ export const authenticateToken = async (req: Request, res: Response, next: NextF
                 }
             }
 
-            // Se há access token nos cookies, verificar
+
             if (accessToken) {
                 try {
                     const decoded = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET as string) as any;
@@ -80,7 +80,7 @@ export const authenticateToken = async (req: Request, res: Response, next: NextF
                 }
             }
         } else {
-            // Verificar token do header Authorization
+
             try {
                 const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET as string) as any;
                 req.user = {
@@ -97,19 +97,19 @@ export const authenticateToken = async (req: Request, res: Response, next: NextF
     }
 };
 
-// Middleware específico para motoristas
+
 export const authenticateDriver = async (req: Request, res: Response, next: NextFunction) => {
     try {
 
 
-        // Primeiro autenticar o token
+
         const authHeader = req.headers.authorization;
-        const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+        const token = authHeader && authHeader.split(' ')[1];
 
 
 
         if (!token) {
-            // Se não há token no header, verificar nos cookies
+
             const accessToken = req.cookies?.access_token;
             const refreshToken = req.cookies?.refresh_token;
 
@@ -120,19 +120,19 @@ export const authenticateDriver = async (req: Request, res: Response, next: Next
                 throw new AuthError('Token de acesso não fornecido!');
             }
 
-            // Se há refresh token mas não access token, tentar renovar
+
             if (!accessToken && refreshToken) {
                 try {
                     const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET as string) as any;
 
 
-                    // Verificar se é um motorista
+
                     if (decoded.role !== 'driver') {
 
                         throw new AuthError('Acesso negado! Apenas motoristas podem acessar este recurso.');
                     }
 
-                    // Gerar novo access token
+
                     const newAccessToken = jwt.sign(
                         {
                             id: decoded.id,
@@ -144,12 +144,12 @@ export const authenticateDriver = async (req: Request, res: Response, next: Next
                         }
                     );
 
-                    // Definir novo access token no cookie
+
                     res.cookie('access_token', newAccessToken, {
                         httpOnly: true,
                         secure: process.env.NODE_ENV === 'production',
                         sameSite: 'strict',
-                        maxAge: 15 * 60 * 1000 // 15 minutos
+                        maxAge: 15 * 60 * 1000
                     });
 
                     req.user = {
@@ -164,14 +164,14 @@ export const authenticateDriver = async (req: Request, res: Response, next: Next
                 }
             }
 
-            // Se há access token nos cookies, verificar
+
             if (accessToken) {
                 try {
 
                     const decoded = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET as string) as any;
 
 
-                    // Verificar se é um motorista
+
                     if (decoded.role !== 'driver') {
 
                         throw new AuthError('Acesso negado! Apenas motoristas podem acessar este recurso.');
@@ -185,17 +185,17 @@ export const authenticateDriver = async (req: Request, res: Response, next: Next
 
                     return next();
                 } catch (error) {
-                    // throw new AuthError('Token de acesso inválido!');
+
                     return next(error);
                 }
             }
         } else {
-            // Verificar token do header Authorization
+
             try {
                 const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET as string) as any;
 
 
-                // Verificar se é um motorista
+
                 if (decoded.role !== 'driver') {
 
                     throw new AuthError('Acesso negado! Apenas motoristas podem acessar este recurso.');
@@ -212,20 +212,20 @@ export const authenticateDriver = async (req: Request, res: Response, next: Next
             }
         }
     } catch (error) {
-        // 
+
         return next(error);
     }
 };
 
-// Middleware específico para usuários
+
 export const authenticateUser = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        // Primeiro autenticar o token
+
         const authHeader = req.headers.authorization;
-        const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+        const token = authHeader && authHeader.split(' ')[1];
 
         if (!token) {
-            // Se não há token no header, verificar nos cookies
+
             const accessToken = req.cookies?.access_token;
             const refreshToken = req.cookies?.refresh_token;
 
@@ -233,17 +233,17 @@ export const authenticateUser = async (req: Request, res: Response, next: NextFu
                 throw new AuthError('Token de acesso não fornecido!');
             }
 
-            // Se há refresh token mas não access token, tentar renovar
+
             if (!accessToken && refreshToken) {
                 try {
                     const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET as string) as any;
 
-                    // Verificar se é um usuário
+
                     if (decoded.role !== 'user') {
                         throw new AuthError('Acesso negado! Apenas usuários podem acessar este recurso.');
                     }
 
-                    // Gerar novo access token
+
                     const newAccessToken = jwt.sign(
                         {
                             id: decoded.id,
@@ -255,12 +255,12 @@ export const authenticateUser = async (req: Request, res: Response, next: NextFu
                         }
                     );
 
-                    // Definir novo access token no cookie
+
                     res.cookie('access_token', newAccessToken, {
                         httpOnly: true,
                         secure: process.env.NODE_ENV === 'production',
                         sameSite: 'strict',
-                        maxAge: 15 * 60 * 1000 // 15 minutos
+                        maxAge: 15 * 60 * 1000
                     });
 
                     req.user = {
@@ -274,12 +274,12 @@ export const authenticateUser = async (req: Request, res: Response, next: NextFu
                 }
             }
 
-            // Se há access token nos cookies, verificar
+
             if (accessToken) {
                 try {
                     const decoded = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET as string) as any;
 
-                    // Verificar se é um usuário
+
                     if (decoded.role !== 'user') {
                         throw new AuthError('Acesso negado! Apenas usuários podem acessar este recurso.');
                     }
@@ -295,11 +295,11 @@ export const authenticateUser = async (req: Request, res: Response, next: NextFu
                 }
             }
         } else {
-            // Verificar token do header Authorization
+
             try {
                 const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET as string) as any;
 
-                // Verificar se é um usuário
+
                 if (decoded.role !== 'user') {
                     throw new AuthError('Acesso negado! Apenas usuários podem acessar este recurso.');
                 }
@@ -323,7 +323,7 @@ export const authenticateAdmin = async (req: Request, res: Response, next: NextF
     try {
 
         const authHeader = req.headers.authorization;
-        const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+        const token = authHeader && authHeader.split(' ')[1];
 
         if (!token) {
 
@@ -339,12 +339,12 @@ export const authenticateAdmin = async (req: Request, res: Response, next: NextF
                 try {
                     const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET as string) as any;
 
-                    // Verificar se é um usuário
+
                     if (decoded.role !== 'admin') {
                         throw new AuthError('Acesso negado! Apenas administradores podem acessar este recurso.');
                     }
 
-                    // Gerar novo access token
+
                     const newAccessToken = jwt.sign(
                         {
                             id: decoded.id,
@@ -356,12 +356,12 @@ export const authenticateAdmin = async (req: Request, res: Response, next: NextF
                         }
                     );
 
-                    // Definir novo access token no cookie
+
                     res.cookie('access_token', newAccessToken, {
                         httpOnly: true,
                         secure: process.env.NODE_ENV === 'production',
                         sameSite: 'strict',
-                        maxAge: 15 * 60 * 1000 // 15 minutos
+                        maxAge: 15 * 60 * 1000
                     });
 
                     req.user = {
@@ -375,12 +375,12 @@ export const authenticateAdmin = async (req: Request, res: Response, next: NextF
                 }
             }
 
-            // Se há access token nos cookies, verificar
+
             if (accessToken) {
                 try {
                     const decoded = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET as string) as any;
 
-                    // Verificar se é um usuário
+
                     if (decoded.role !== 'admin') {
                         throw new AuthError('Acesso negado! Apenas administradores podem acessar este recurso.');
                     }
@@ -396,7 +396,7 @@ export const authenticateAdmin = async (req: Request, res: Response, next: NextF
                 }
             }
         } else {
-            // Verificar token do header Authorization
+
             try {
                 const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET as string) as any;
 

@@ -81,7 +81,6 @@ export class MetricsDriverService {
             this.getDriverTransactions(driverId)
         ]);
 
-        // Calcular estatísticas adicionais
         const completedTours = tourPackages.filter(tp => tp.isFinalised);
         const activeTours = tourPackages.filter(tp => tp.isRunning && !tp.isFinalised);
         const totalEarnings = transactions

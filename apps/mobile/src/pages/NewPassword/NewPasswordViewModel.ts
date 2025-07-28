@@ -42,7 +42,6 @@ export default function NewPasswordViewModel() {
 
             await api.post(`${activeTab}/reset-password-user`, { email: email, newPassword: values.password });
 
-            // Se chegou aqui, a requisição foi bem-sucedida
             setLoadingAuth(false);
             showAlert('success', 'Sucesso!', 'Senha redefinida com Sucesso! Realize o Login novamente!');
             setTimeout(() => {
@@ -52,7 +51,6 @@ export default function NewPasswordViewModel() {
         } catch (error: any) {
             console.error('Erro no reset de senha:', error);
 
-            // Captura erros HTTP específicos
             if (error.response) {
                 const { status, data } = error.response;
 

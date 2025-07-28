@@ -14,7 +14,7 @@ declare global {
     }
 }
 
-// Buscar transações por tipo (com filtros opcionais)
+
 export const getTransactionsByType = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { type } = req.params;
@@ -45,7 +45,7 @@ export const getTransactionsByType = async (req: Request, res: Response, next: N
     }
 };
 
-// Buscar transações do usuário autenticado
+
 export const getUserTransactions = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const userId = req.user?.id;
@@ -70,7 +70,7 @@ export const getUserTransactions = async (req: Request, res: Response, next: Nex
     }
 };
 
-// Buscar transações do motorista autenticado
+
 export const getDriverTransactions = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const driverId = req.user?.id;
@@ -98,7 +98,7 @@ export const getDriverTransactions = async (req: Request, res: Response, next: N
     }
 };
 
-// Buscar transações do motorista autenticado
+
 export const getDriverAllTransactions = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const driverId = req.user?.id;
@@ -127,7 +127,7 @@ export const getDriverAllTransactions = async (req: Request, res: Response, next
     }
 };
 
-// Buscar totalizadores do usuário autenticado
+
 export const getUserTransactionTotals = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const userId = req.user?.id;
@@ -148,7 +148,7 @@ export const getUserTransactionTotals = async (req: Request, res: Response, next
     }
 };
 
-// Buscar totalizadores do motorista autenticado
+
 export const getDriverTransactionTotals = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const driverId = req.user?.id;
@@ -169,7 +169,7 @@ export const getDriverTransactionTotals = async (req: Request, res: Response, ne
     }
 };
 
-// Buscar todas as transações (admin)
+
 export const getAllTransactions = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const result = await TransactionService.getAllTransactions();
@@ -184,7 +184,7 @@ export const getAllTransactions = async (req: Request, res: Response, next: Next
     }
 };
 
-// Buscar totalizadores gerais (admin)
+
 export const getGeneralTransactionTotals = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const totals = await TransactionService.getTotals({});

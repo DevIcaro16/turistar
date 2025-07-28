@@ -118,14 +118,14 @@ export class AuthService {
     }
 
     static async updateUser(userId: string, data: UserUpdateProps & { image?: string }) {
-        // Verificar se o usuário existe
+
         const existingUser = await prisma.user.findUnique({
             where: { id: userId }
         });
         if (!existingUser) {
             throw new NotFoundError("Usuário não encontrado!");
         }
-        // Se email está sendo atualizado, verificar se já existe
+
         if (data.email && data.email !== existingUser.email) {
             const emailExists = await prisma.user.findUnique({
                 where: { email: data.email }
@@ -137,13 +137,13 @@ export class AuthService {
                 throw new ValidationError("Formato inválido de Email!");
             }
         }
-        // Preparar dados para atualização
+
         const updateData: any = {};
         if (data.name) updateData.name = data.name;
         if (data.email) updateData.email = data.email;
         if (data.phone) updateData.phone = data.phone;
         if (data.image) updateData.image = data.image;
-        // Se senha está sendo atualizada, fazer hash
+
         if (data.password) {
             updateData.password = await bcrypt.hash(data.password, 10);
         }
@@ -165,7 +165,7 @@ export class AuthService {
     }
 
     static async deleteUser(userId: string) {
-        // Verificar se o usuário existe
+
         const existingUser = await prisma.user.findUnique({
             where: { id: userId }
         });
@@ -174,7 +174,7 @@ export class AuthService {
             throw new NotFoundError("Usuário não encontrado!");
         }
 
-        // Deletar o usuário
+
         await prisma.user.delete({
             where: { id: userId }
         });
@@ -239,9 +239,6 @@ export class AuthService {
             throw new ValidationError("Usuário não encontrado!");
         }
 
-        // Aqui você implementaria a lógica de envio de email
-        // Por exemplo: await EmailService.sendPasswordResetEmail(email);
-
         return true;
     }
 
@@ -251,14 +248,14 @@ export class AuthService {
             const payload = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET as string) as any;
             if (payload.role !== 'user') throw new AuthError("Token inválido!");
 
-            // Gere um novo access token
+
             const accessToken = jwt.sign(
                 { id: payload.id, role: 'user' },
                 process.env.ACCESS_TOKEN_SECRET as string,
                 { expiresIn: "15m" }
             );
 
-            // Gere um novo refresh token (opcional, mas recomendado)
+
             const newRefreshToken = jwt.sign(
                 { id: payload.id, role: 'user' },
                 process.env.REFRESH_TOKEN_SECRET as string,

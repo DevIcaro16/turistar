@@ -24,7 +24,6 @@ const Configuration = () => {
     const [error, setError] = useState('');
     const [currentTax, setCurrentTax] = useState<number | null>(null);
 
-    // Mova fetchCurrentTax para o escopo do componente
     const fetchCurrentTax = async () => {
         try {
             const res = await api.get('/admin/metrics/tax-platform', { withCredentials: true });
@@ -55,7 +54,6 @@ const Configuration = () => {
         );
     }
 
-    // Verificar userRole apenas após o mount
     if (mounted && userRole !== 'admin') {
         return (
             <div className="flex items-center justify-center min-h-screen bg-[#1e1e1e]">
@@ -88,7 +86,7 @@ const Configuration = () => {
                                     if (res.data.success) {
                                         setSuccess('Taxa atualizada com sucesso!');
                                         resetForm();
-                                        fetchCurrentTax(); // Agora funciona pois está no escopo
+                                        fetchCurrentTax();
                                     } else {
                                         setError('Erro ao atualizar taxa.');
                                     }

@@ -65,7 +65,6 @@ export const ReserveConfirmation = async (req: Request, res: Response, next: Nex
 
         await ReserveService.confirm({ userId, ReserveId });
 
-        // 🆕 NOTIFICAR USUÁRIO EM TEMPO REAL
         try {
             const reservation = await prisma.reservations.findFirst({
                 where: { id: ReserveId },
@@ -109,7 +108,6 @@ export const ReserveCancellation = async (req: Request, res: Response, next: Nex
 
         await ReserveService.cancel({ userId, ReserveId });
 
-        // 🆕 NOTIFICAR USUÁRIO EM TEMPO REAL
         try {
             const reservation = await prisma.reservations.findFirst({
                 where: { id: ReserveId },
