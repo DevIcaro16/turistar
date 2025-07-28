@@ -46,9 +46,14 @@ RUN npm install --legacy-peer-deps
 # Copiar apenas arquivos necessários do builder
 COPY --from=builder /app/apps/frontend/public ./public
 COPY --from=builder /app/apps/frontend/.next ./.next
+COPY --from=builder /app/apps/frontend/src ./src
+COPY --from=builder /app/apps/frontend/next.config.js ./
+COPY --from=builder /app/apps/frontend/tailwind.config.js ./
+COPY --from=builder /app/apps/frontend/postcss.config.js ./
 
 # Verificar se os arquivos foram copiados corretamente
 RUN ls -la .next/
+RUN ls -la src/app/
 RUN echo "Files copied successfully"
 
 # Limpar arquivos desnecessários
