@@ -27,6 +27,14 @@ RUN npm run build
 
 # Verificar se o build foi bem-sucedido
 RUN ls -la .next/
+RUN ls -la .next/static/ 2>/dev/null || echo "Diretório static não encontrado"
+RUN ls -la .next/static/css/ 2>/dev/null || echo "CSS não encontrado"
+RUN ls -la .next/static/chunks/ 2>/dev/null || echo "Chunks não encontrados"
+RUN find .next -name "*.css" -type f
+RUN find .next -name "*.js" -type f | head -10
+
+# Verificar se o build foi bem-sucedido
+RUN ls -la .next/
 RUN echo "Build completed successfully"
 
 # Stage 2: Production stage
@@ -43,17 +51,23 @@ COPY --from=builder /app/apps/frontend/package.json ./package.json
 # Instalar todas as dependências (incluindo devDependencies necessárias para Next.js)
 RUN npm install --legacy-peer-deps
 
-# Copiar apenas arquivos necessários do builder
+# Copiar todos os arquivos necessários do builder
 COPY --from=builder /app/apps/frontend/public ./public
 COPY --from=builder /app/apps/frontend/.next ./.next
 COPY --from=builder /app/apps/frontend/src ./src
 COPY --from=builder /app/apps/frontend/next.config.js ./
 COPY --from=builder /app/apps/frontend/tailwind.config.js ./
 COPY --from=builder /app/apps/frontend/postcss.config.js ./
+COPY --from=builder /app/apps/frontend/tsconfig.json ./
+COPY --from=builder /app/apps/frontend/next-env.d.ts ./
+COPY --from=builder /app/apps/frontend/package.json ./
 
 # Verificar se os arquivos foram copiados corretamente
 RUN ls -la .next/
 RUN ls -la src/app/
+RUN ls -la .next/static/css/ 2>/dev/null || echo "CSS não encontrado"
+RUN ls -la .next/static/chunks/ 2>/dev/null || echo "Chunks não encontrados"
+RUN ls -la .next/static/webpack/ 2>/dev/null || echo "Webpack não encontrado"
 RUN echo "Files copied successfully"
 
 # Limpar arquivos desnecessários
