@@ -27,10 +27,10 @@ RUN npm run build
 
 # Verificar se o build foi bem-sucedido
 RUN ls -la .next/
-RUN ls -la .next/standalone/ 2>/dev/null || echo "Standalone não encontrado"
 RUN ls -la .next/static/ 2>/dev/null || echo "Diretório static não encontrado"
 RUN ls -la .next/static/css/ 2>/dev/null || echo "CSS não encontrado"
 RUN ls -la .next/static/chunks/ 2>/dev/null || echo "Chunks não encontrados"
+RUN ls -la .next/server/ 2>/dev/null || echo "Diretório server não encontrado"
 RUN find .next -name "*.css" -type f
 RUN find .next -name "*.js" -type f | head -10
 
@@ -52,11 +52,9 @@ COPY --from=builder /app/apps/frontend/package.json ./package.json
 # Instalar todas as dependências (incluindo devDependencies necessárias para Next.js)
 RUN npm install --legacy-peer-deps
 
-# Copiar arquivos do standalone build
+# Copiar arquivos do build normal
 COPY --from=builder /app/apps/frontend/public ./public
-COPY --from=builder /app/apps/frontend/.next/standalone/.next ./.next
-COPY --from=builder /app/apps/frontend/.next/static ./.next/static
-COPY --from=builder /app/apps/frontend/.next/standalone/server.js ./server.js
+COPY --from=builder /app/apps/frontend/.next ./.next
 COPY --from=builder /app/apps/frontend/src ./src
 COPY --from=builder /app/apps/frontend/next.config.js ./
 COPY --from=builder /app/apps/frontend/tailwind.config.js ./
@@ -70,7 +68,7 @@ RUN ls -la .next/
 RUN ls -la src/app/
 RUN ls -la .next/static/css/ 2>/dev/null || echo "CSS não encontrado"
 RUN ls -la .next/static/chunks/ 2>/dev/null || echo "Chunks não encontrados"
-RUN ls -la .next/static/webpack/ 2>/dev/null || echo "Webpack não encontrado"
+RUN ls -la .next/server/ 2>/dev/null || echo "Server não encontrado"
 RUN echo "Files copied successfully"
 
 # Limpar arquivos desnecessários
@@ -84,5 +82,5 @@ ENV NODE_ENV=production
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
 
-# Comando para Next.js standalone
-CMD ["node", "server.js"]
+# Comando para Next.js normal
+CMD ["npm", "start"]
