@@ -27,15 +27,6 @@ RUN npm run build
 
 # Verificar se o build foi bem-sucedido
 RUN ls -la .next/
-RUN ls -la .next/static/ 2>/dev/null || echo "Diretório static não encontrado"
-RUN ls -la .next/static/css/ 2>/dev/null || echo "CSS não encontrado"
-RUN ls -la .next/static/chunks/ 2>/dev/null || echo "Chunks não encontrados"
-RUN ls -la .next/server/ 2>/dev/null || echo "Diretório server não encontrado"
-RUN find .next -name "*.css" -type f
-RUN find .next -name "*.js" -type f | head -10
-
-# Verificar se o build foi bem-sucedido
-RUN ls -la .next/
 RUN echo "Build completed successfully"
 
 # Stage 2: Production stage
@@ -52,27 +43,10 @@ COPY --from=builder /app/apps/frontend/package.json ./package.json
 # Instalar todas as dependências (incluindo devDependencies necessárias para Next.js)
 RUN npm install --legacy-peer-deps
 
-# Copiar arquivos do build normal
-COPY --from=builder /app/apps/frontend/public ./public
-COPY --from=builder /app/apps/frontend/.next ./.next
-COPY --from=builder /app/apps/frontend/src ./src
-COPY --from=builder /app/apps/frontend/next.config.js ./
-COPY --from=builder /app/apps/frontend/tailwind.config.js ./
-COPY --from=builder /app/apps/frontend/postcss.config.js ./
-COPY --from=builder /app/apps/frontend/tsconfig.json ./
-COPY --from=builder /app/apps/frontend/next-env.d.ts ./
-
-# Garantir que os arquivos estáticos sejam copiados corretamente
-RUN ls -la .next/static/chunks/ | head -5
-RUN ls -la .next/static/css/
-
-# Verificar se os arquivos foram copiados corretamente
-RUN ls -la .next/
-RUN ls -la src/app/
-RUN ls -la .next/static/css/ 2>/dev/null || echo "CSS não encontrado"
-RUN ls -la .next/static/chunks/ 2>/dev/null || echo "Chunks não encontrados"
-RUN ls -la .next/server/ 2>/dev/null || echo "Server não encontrado"
-RUN echo "Files copied successfully"
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./package.json
 
 # Limpar arquivos desnecessários
 RUN rm -rf /tmp/* /var/tmp/*
@@ -87,4 +61,4 @@ ENV HOSTNAME=0.0.0.0
 ENV NEXT_TELEMETRY_DISABLED=1
 
 # Comando para Next.js normal
-CMD ["npm", "start", "--", "-H", "0.0.0.0", "-p", "3000"]
+CMD ["npm", "start"]
