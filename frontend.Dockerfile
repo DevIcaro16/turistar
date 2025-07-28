@@ -44,7 +44,7 @@ FROM node:18-alpine AS production
 # Instalar apenas dependências necessárias para runtime
 RUN apk add --no-cache libc6-compat
 
-WORKDIR /app
+WORKDIR /app/apps/frontend
 
 # Copiar package.json para instalar dependências
 COPY --from=builder /app/apps/frontend/package.json ./package.json
@@ -61,7 +61,10 @@ COPY --from=builder /app/apps/frontend/tailwind.config.js ./
 COPY --from=builder /app/apps/frontend/postcss.config.js ./
 COPY --from=builder /app/apps/frontend/tsconfig.json ./
 COPY --from=builder /app/apps/frontend/next-env.d.ts ./
-COPY --from=builder /app/apps/frontend/package.json ./
+
+# Garantir que os arquivos estáticos sejam copiados corretamente
+RUN ls -la .next/static/chunks/ | head -5
+RUN ls -la .next/static/css/
 
 # Verificar se os arquivos foram copiados corretamente
 RUN ls -la .next/
@@ -81,6 +84,7 @@ EXPOSE 3000
 ENV NODE_ENV=production
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
+ENV NEXT_TELEMETRY_DISABLED=1
 
 # Comando para Next.js normal
-CMD ["npm", "start"]
+CMD ["npm", "start", "--", "-H", "0.0.0.0", "-p", "3000"]

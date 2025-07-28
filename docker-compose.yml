@@ -44,46 +44,19 @@ services:
     restart: unless-stopped
 
   # Mobile Development Server
-  # mobile-dev:
-  #   build:
-  #     context: .
-  #     dockerfile: mobile.Dockerfile
-  #   container_name: turistar-mobile-dev
-  #   ports:
-  #     - "8081:8081"
-  #   environment:
-  #     - NODE_ENV=development
-  #     - EXPO_DEVTOOLS_LISTEN_ADDRESS=0.0.0.0
-  #   volumes:
-  #     - ./apps/mobile:/app/apps/mobile
-  #     - /app/apps/mobile/node_modules
-  #   networks:
-  #     - turistar-network
-  #   restart: unless-stopped
-
-  # MongoDB (opcional - se você quiser rodar localmente)
-  mongodb:
-    image: mongo:7.0
-    container_name: turistar-mongodb
+  mobile-dev:
+    build:
+      context: .
+      dockerfile: mobile.Dockerfile
+    container_name: turistar-mobile-dev
     ports:
-      - "27017:27017"
+      - "8081:8081"
     environment:
-      - MONGO_INITDB_ROOT_USERNAME=${MONGO_ROOT_USERNAME:-admin}
-      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_ROOT_PASSWORD:-password}
+      - NODE_ENV=development
+      - EXPO_DEVTOOLS_LISTEN_ADDRESS=0.0.0.0
     volumes:
-      - mongodb_data:/data/db
-    networks:
-      - turistar-network
-    restart: unless-stopped
-
-  # Redis (opcional - para cache)
-  redis:
-    image: redis:7-alpine
-    container_name: turistar-redis
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
+      - ./apps/mobile:/app/apps/mobile
+      - /app/apps/mobile/node_modules
     networks:
       - turistar-network
     restart: unless-stopped
@@ -91,7 +64,3 @@ services:
 networks:
   turistar-network:
     driver: bridge
-
-volumes:
-  mongodb_data:
-  redis_data:
