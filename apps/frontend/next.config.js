@@ -18,7 +18,6 @@ const nextConfig = {
     unoptimized: true,
   },
   // Configuração para servir arquivos estáticos corretamente
-  assetPrefix: process.env.NODE_ENV === 'production' ? '' : '',
   basePath: '',
   trailingSlash: false,
 
