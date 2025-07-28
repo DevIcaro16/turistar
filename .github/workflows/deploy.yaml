@@ -202,13 +202,22 @@ jobs:
               driver: bridge
           EOF
 
-      - name: stopando containers existentes
+      - name: Stop and remove existing containers
         run: |
+          # Stop and remove containers
           docker-compose -f docker-compose.prod.yml down || true
-          docker system prune -f
+          docker stop $(docker ps -q) || true
+          docker rm $(docker ps -aq) || true
 
-      - name: Pull nas images
+      - name: Remove existing images
         run: |
+          # Remove all images to ensure clean state
+          docker rmi $(docker images -q) || true
+          docker system prune -a -f
+
+      - name: Pull new images
+        run: |
+          # Pull the new images
           docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.REPOSITORY_NAME }}-backend-api:${{ env.VERSION }}
           docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.REPOSITORY_NAME }}-frontend:${{ env.VERSION }}
 
@@ -255,10 +264,22 @@ jobs:
           curl -f http://localhost:8000/ || (echo "Backend health check failed" && exit 1)
           curl -f http://localhost:3000/ || (echo "Frontend health check failed" && exit 1)
 
-      - name: Cleanup old images
+      - name: Cleanup old images and containers
         run: |
-          # Remove images older than 7 days
-          docker image prune -a -f --filter "until=168h"
+          # Remove all stopped containers
+          docker container prune -f
+
+          # Remove all unused images
+          docker image prune -a -f
+
+          # Remove all unused networks
+          docker network prune -f
+
+          # Remove all unused volumes
+          docker volume prune -f
+
+          # Full system cleanup
+          docker system prune -a -f
 
       - name: Send deployment notification
         run: |

@@ -2,7 +2,7 @@ import axios from 'axios';
 import { getAccessToken, refreshToken } from '../../lib/auth';
 
 const api = axios.create({
-    baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/',
+    baseURL: process.env.NEXT_PUBLIC_API_URL || 'https://www.turistarturismo.shop/api/',
     headers: {
         'Content-Type': 'application/json'
     },

@@ -20,7 +20,7 @@ COPY apps/frontend ./apps/frontend
 
 # Build da aplicação
 WORKDIR /app/apps/frontend
-RUN npm list next && npm run build
+# RUN npm list next && npm run build
 
 # Stage 2: Production
 FROM node:18-alpine AS production
@@ -44,7 +44,6 @@ ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NEXT_PUBLIC_API_URL=https://www.turistarturismo.shop/api/
-ENV NEXT_STANDALONE=true
 
 EXPOSE 3000
 
