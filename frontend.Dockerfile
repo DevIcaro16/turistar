@@ -10,8 +10,6 @@ COPY nx.json tsconfig*.json jest.preset.js ./
 COPY apps/frontend/package*.json ./apps/frontend/
 COPY packages ./packages
 
-
-
 # Instalar dependências com cache otimizado
 RUN npm ci --legacy-peer-deps && npm cache clean --force
 
@@ -20,7 +18,7 @@ COPY apps/frontend ./apps/frontend
 
 # Build da aplicação
 WORKDIR /app/apps/frontend
-# RUN npm list next && npm run build
+RUN npm run build
 
 # Stage 2: Production
 FROM node:18-alpine AS production
@@ -37,6 +35,7 @@ RUN npm install --only=production --legacy-peer-deps
 COPY --from=builder --chown=nextjs:nodejs /app/apps/frontend/.next ./.next
 COPY --from=builder --chown=nextjs:nodejs /app/apps/frontend/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/apps/frontend/next.config.js ./
+
 
 # Configurar variáveis de ambiente
 ENV NODE_ENV=production
