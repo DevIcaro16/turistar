@@ -27,6 +27,7 @@ RUN npm run build
 
 # Verificar se o build foi bem-sucedido
 RUN ls -la .next/
+RUN ls -la .next/standalone/ 2>/dev/null || echo "Standalone não encontrado"
 RUN ls -la .next/static/ 2>/dev/null || echo "Diretório static não encontrado"
 RUN ls -la .next/static/css/ 2>/dev/null || echo "CSS não encontrado"
 RUN ls -la .next/static/chunks/ 2>/dev/null || echo "Chunks não encontrados"
@@ -51,9 +52,11 @@ COPY --from=builder /app/apps/frontend/package.json ./package.json
 # Instalar todas as dependências (incluindo devDependencies necessárias para Next.js)
 RUN npm install --legacy-peer-deps
 
-# Copiar todos os arquivos necessários do builder
+# Copiar arquivos do standalone build
 COPY --from=builder /app/apps/frontend/public ./public
-COPY --from=builder /app/apps/frontend/.next ./.next
+COPY --from=builder /app/apps/frontend/.next/standalone/.next ./.next
+COPY --from=builder /app/apps/frontend/.next/static ./.next/static
+COPY --from=builder /app/apps/frontend/.next/standalone/server.js ./server.js
 COPY --from=builder /app/apps/frontend/src ./src
 COPY --from=builder /app/apps/frontend/next.config.js ./
 COPY --from=builder /app/apps/frontend/tailwind.config.js ./
@@ -81,5 +84,5 @@ ENV NODE_ENV=production
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
 
-# Comando correto para Next.js com App Router
-CMD ["node", "node_modules/next/dist/bin/next", "start"]
+# Comando para Next.js standalone
+CMD ["node", "server.js"]
