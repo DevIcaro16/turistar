@@ -10,6 +10,8 @@ COPY nx.json tsconfig*.json jest.preset.js ./
 COPY apps/frontend/package*.json ./apps/frontend/
 COPY packages ./packages
 
+
+
 # Instalar dependências com cache otimizado
 RUN npm ci --legacy-peer-deps && npm cache clean --force
 
@@ -27,10 +29,14 @@ RUN apk add --no-cache libc6-compat curl
 
 WORKDIR /app
 
-# Copiar a estrutura standalone completa
-COPY --from=builder --chown=nextjs:nodejs /app/apps/frontend/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/apps/frontend/.next/static ./.next/static
+# Copiar package.json e instalar apenas dependências de produção
+COPY --from=builder /app/apps/frontend/package.json ./package.json
+RUN npm install --only=production --legacy-peer-deps
+
+# Copiar a aplicação built
+COPY --from=builder --chown=nextjs:nodejs /app/apps/frontend/.next ./.next
 COPY --from=builder --chown=nextjs:nodejs /app/apps/frontend/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/apps/frontend/next.config.js ./
 
 # Configurar variáveis de ambiente
 ENV NODE_ENV=production
@@ -42,4 +48,4 @@ ENV NEXT_STANDALONE=true
 
 EXPOSE 3000
 
-CMD ["node", "server.js"]
+CMD ["npx", "next", "start"]
