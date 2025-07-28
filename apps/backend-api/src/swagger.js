@@ -7,9 +7,15 @@ const doc = {
         version: "1.0.1"
     },
 
-    host: `${process.env.EC2_PUBLIC_IP || process.env.DOMAIN_NAME || "localhost"}:${process.env.PORT || "8000"}`,
+    host: process.env.NODE_ENV === 'production'
+        ? (process.env.DOMAIN_NAME || process.env.EC2_PUBLIC_IP || "www.turistarturismo.shop")
+        : `${process.env.EC2_PUBLIC_IP || process.env.DOMAIN_NAME || "localhost"}:${process.env.PORT || "8000"}`,
     basePath: "/api/",
-    schemes: ["http"],
+    schemes: process.env.NODE_ENV === 'production' ? ["https"] : ["http"],
+
+    // Configurações adicionais para evitar conflitos
+    consumes: ['application/json'],
+    produces: ['application/json'],
 
 };
 

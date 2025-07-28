@@ -2,9 +2,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  swcMinify: true,
+  // swcMinify removido - é padrão no Next.js 13+
+
   experimental: {
-    appDir: true,
+    appDir: true, // Necessário para Next.js 13.0.5
   },
 
   typescript: {

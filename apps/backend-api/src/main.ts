@@ -126,7 +126,10 @@ app.get('/health', (req, res) => {
         status: 'healthy',
         timestamp: new Date().toISOString(),
         uptime: process.uptime(),
-        environment: process.env.NODE_ENV || 'development'
+        environment: process.env.NODE_ENV || 'development',
+        swaggerUrl: process.env.NODE_ENV === 'production'
+            ? 'https://www.turistarturismo.shop/api-docs'
+            : 'http://localhost:8000/api-docs'
     });
 });
 
@@ -156,7 +159,19 @@ app.get("/docs-json", (req, res) => {
     res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Methods', 'GET, OPTIONS');
     res.header('Access-Control-Allow-Headers', 'Content-Type');
-    res.json(swaggerDocument);
+
+    // Forçar HTTPS em produção
+    if (process.env.NODE_ENV === 'production') {
+        const modifiedDoc = {
+            ...swaggerDocument,
+            schemes: ['https'],
+            host: process.env.DOMAIN_NAME || process.env.EC2_PUBLIC_IP || "www.turistarturismo.shop",
+            basePath: "/api/"
+        };
+        res.json(modifiedDoc);
+    } else {
+        res.json(swaggerDocument);
+    }
 });
 
 app.use("/api/", allRoutes);

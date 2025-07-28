@@ -5,10 +5,10 @@
     "description": "Gerado automaticamente com documentação do Swagger!",
     "version": "1.0.1"
   },
-  "host": "https://www.turistarturismo.shop",
+  "host": "www.turistarturismo.shop",
   "basePath": "/api/",
   "schemes": [
-    "http"
+    "https"
   ],
   "paths": {
     "/user/reservations": {
