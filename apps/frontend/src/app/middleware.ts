@@ -4,19 +4,19 @@ import type { NextRequest } from 'next/server';
 export function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
 
-    const publicRoutes = [
-        '/Login',
-    ];
+    // const publicRoutes = [
+    //     '/Login',
+    // ];
 
-    const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route));
+    // const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route));
 
-    if (!isPublicRoute && pathname !== '/') {
-        return NextResponse.next();
-    }
+    // if (!isPublicRoute && pathname !== '/') {
+    //     return NextResponse.next();
+    // }
 
-    if (pathname === '/') {
-        return NextResponse.next();
-    }
+    // if (pathname === '/') {
+    //     return NextResponse.next();
+    // }
 
     return NextResponse.next();
 }
