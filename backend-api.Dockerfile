@@ -11,7 +11,7 @@ COPY jest.preset.js ./
 COPY apps/backend-api/package*.json ./apps/backend-api/
 COPY packages ./packages/
 COPY prisma ./prisma/
-RUN npm ci --legacy-peer-deps
+RUN npm install --legacy-peer-deps
 RUN npx prisma generate
 COPY apps/backend-api ./apps/backend-api/
 RUN npm run build
