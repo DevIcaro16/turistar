@@ -11,12 +11,10 @@ COPY jest.preset.js ./
 COPY apps/backend-api/package*.json ./apps/backend-api/
 COPY packages ./packages/
 COPY prisma ./prisma/
-RUN npm install --legacy-peer-deps
+RUN npm ci --legacy-peer-deps
 RUN npx prisma generate
 COPY apps/backend-api ./apps/backend-api/
-WORKDIR /app/apps/backend-api
 RUN npm run build
-WORKDIR /app
 
 # Stage 2: Production
 FROM node:18-alpine AS production
