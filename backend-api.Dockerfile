@@ -18,7 +18,6 @@ COPY apps/backend-api-e2e ./apps/backend-api-e2e/
 COPY apps/frontend ./apps/frontend/
 COPY apps/frontend-e2e ./apps/frontend-e2e/
 COPY apps/mobile ./apps/mobile/
-COPY apps/mobile-e2e ./apps/mobile-e2e/
 RUN npx nx build backend-api
 
 # Stage 2: Production
