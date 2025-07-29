@@ -32,7 +32,7 @@ RUN npm install --legacy-peer-deps
 
 RUN npx prisma generate
 
-COPY --from=builder /app/apps/backend-api/dist/ ./dist
+COPY --from=builder /app/apps/backend-api/out-tsc/backend-api/ ./dist
 
 COPY --from=builder /app/apps/backend-api/src/utils/email-templates/ ./src/utils/email-templates/
 
@@ -41,4 +41,4 @@ ENV HOST=0.0.0.0
 ENV PORT=8000
 EXPOSE 8000
 
-CMD ["node", "dist/main.js"]
+CMD ["node", "dist/apps/backend-api/src/main.js"]
