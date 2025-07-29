@@ -8,7 +8,7 @@ WORKDIR /app
 
 COPY package.json package-lock.json* prisma ./ 
 
-RUN npm install --omit=dev
+RUN npm install --omit=dev --legacy-peer-deps
 
 RUN npx prisma generate
 
