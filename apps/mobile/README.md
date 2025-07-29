@@ -50,6 +50,70 @@ Aplicativo mobile nativo para motoristas e turistas com funcionalidades completa
 - **Testes**: Jest
 - **Build**: EAS Build
 
+## 📱 Arquitetura MVVM
+
+O aplicativo mobile utiliza a arquitetura **Model-View-ViewModel (MVVM)** para garantir uma separação clara de responsabilidades e melhor manutenibilidade do código.
+
+### **Estrutura MVVM**
+```
+src/pages/
+├── driver/
+│   ├── Home/
+│   │   ├── HomeModel.ts      # Model - Dados e lógica de negócio
+│   │   ├── HomeViewModel.ts  # ViewModel - Estado e lógica de apresentação
+│   │   ├── index.tsx         # View - Interface do usuário
+│   │   └── styles.tsx        # Estilos específicos
+│   ├── Car/
+│   │   ├── CarModel.ts
+│   │   ├── CarViewModel.ts
+│   │   ├── index.tsx
+│   │   └── styles.tsx
+│   ├── TouristPoint/
+│   ├── TourPackage/
+│   ├── Tours/
+│   ├── Wallet/
+│   └── Perfil/
+└── user/
+    ├── Home/
+    │   ├── HomeModel.ts
+    │   ├── HomeViewModel.ts
+    │   ├── index.tsx
+    │   └── styles.tsx
+    ├── Reservations/
+    ├── MyTours/
+    ├── TourPackages/
+    ├── Wallet/
+    └── Perfil/
+```
+
+### **Componentes MVVM**
+
+#### **Model**
+- Gerencia dados, validações e lógica de negócio
+- Responsável por comunicação com APIs
+- Contém interfaces e tipos de dados
+- Implementa validações e transformações
+
+#### **ViewModel**
+- Controla estado da UI e transformações de dados
+- Comunica com Model para obter/atualizar dados
+- Gerencia estado reativo da interface
+- Implementa lógica de apresentação
+
+#### **View**
+- Interface do usuário reativa às mudanças do ViewModel
+- Componentes React Native puros
+- Estilos e animações
+- Interações do usuário
+
+### **Benefícios da Arquitetura MVVM**
+- **Separação de responsabilidades** clara
+- **Testabilidade** melhorada
+- **Reutilização** de código
+- **Manutenibilidade** facilitada
+- **Escalabilidade** do projeto
+- **Independência** entre camadas
+
 ## 📁 Estrutura do Projeto
 
 ```
@@ -63,16 +127,16 @@ src/
 ├── contexts/            # Contextos React
 │   └── auth.tsx         # Contexto de autenticação
 ├── hooks/               # Custom hooks
-├── pages/               # Páginas da aplicação
+├── pages/               # Páginas da aplicação (MVVM)
 │   ├── driver/          # Páginas do motorista
-│   │   ├── Home/        # Dashboard motorista
-│   │   ├── Tours/       # Gestão de tours
-│   │   ├── Wallet/      # Carteira
+│   │   ├── Home/        # Dashboard motorista (MVVM)
+│   │   ├── Tours/       # Gestão de tours (MVVM)
+│   │   ├── Wallet/      # Carteira (MVVM)
 │   │   └── ...
 │   ├── user/            # Páginas do usuário
-│   │   ├── Home/        # Dashboard usuário
-│   │   ├── Reservations/ # Reservas
-│   │   ├── Wallet/      # Carteira
+│   │   ├── Home/        # Dashboard usuário (MVVM)
+│   │   ├── Reservations/ # Reservas (MVVM)
+│   │   ├── Wallet/      # Carteira (MVVM)
 │   │   └── ...
 │   ├── SignIn/          # Login
 │   ├── SignUp/          # Cadastro

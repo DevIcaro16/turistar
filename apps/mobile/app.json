@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Turistar",
-    "slug": "@app-passeios-turisticos/Turistar",
+    "slug": "turistar-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -23,7 +23,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#FFFFFF"
-      }
+      },
+      "package": "com.devicaro16.turistarapp"
     },
     "web": {
       "favicon": "./assets/icon.png",
@@ -35,13 +36,9 @@
       [
         "expo-notifications",
         {
-          "icon": "./assets/notification_icon.png",
+          "icon": "./assets/icon.png",
           "color": "#ffffff",
           "defaultChannel": "default",
-          "sounds": [
-            "./assets/notification_sound.wav",
-            "./assets/notification_sound_other.wav"
-          ],
           "enableBackgroundRemoteNotifications": false
         }
       ],
@@ -52,6 +49,11 @@
           "publishableKey": "pk_test_51RmZNjCmMj907B9mfpZByFn1ehbdjr7gjJpBna5JZtgTblB1WdNdzbixrs7kM7sNyXfONCb6oEFqDcyn2x5sqlv000aoAnINZN"
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "09e018a4-87bf-44ef-b95d-e85e283e8fee"
+      }
+    }
   }
 }

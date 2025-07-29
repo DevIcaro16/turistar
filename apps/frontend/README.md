@@ -88,17 +88,7 @@ npm run build
 npm start
 ```
 
-### **Testes**
-```bash
-# Testes unitários
-npm run test
 
-# Testes E2E
-npm run test:e2e
-
-# Cobertura
-npm run test:coverage
-```
 
 ### **Linting & Formatação**
 ```bash

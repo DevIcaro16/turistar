@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react'
+import React, { useEffect } from 'react'
 
 import { FileText, ArrowDownLeft, ArrowUpRight, Clock, RotateCcw, Users, Table } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -11,6 +11,7 @@ import TableComponent from '../../components/TableComponent';
 import Sibebar from '../../components/Sibebar';
 import Header from '../../components/Header';
 import { useAuth } from '../../lib/auth';
+import { useAlertContext } from '../../components/AlertProvider';
 
 import TableTransactions from '../../components/TableTransactions';
 
@@ -18,6 +19,20 @@ const Transactions = () => {
     const { user, userRole, isAuthenticated, loading: authLoading } = useAuth();
     const { metrics: adminMetrics, loading: adminLoading, error: adminError, formatCurrency: adminFormatCurrency } = useMetrics();
     const { metrics: driverMetrics, loading: driverLoading, error: driverError, formatCurrency: driverFormatCurrency } = useDriverMetrics();
+    const { showError } = useAlertContext();
+
+    // Mostrar erro se houver problemas ao carregar métricas
+    useEffect(() => {
+        if (adminError) {
+            showError('Erro ao carregar métricas', 'Falha ao carregar as métricas de transações. Tente novamente.');
+        }
+    }, [adminError, showError]);
+
+    useEffect(() => {
+        if (driverError) {
+            showError('Erro ao carregar métricas', 'Falha ao carregar as métricas de transações. Tente novamente.');
+        }
+    }, [driverError, showError]);
 
     if (authLoading) {
         return (

@@ -4,10 +4,9 @@ import React, { useEffect, useState } from 'react';
 import TableGeneric from '../../components/TableGeneric';
 import Modal from '../../components/Modal';
 import api from '../../util/api/api';
-import { ToastContainer, toast } from 'react-toastify';
 import Sibebar from '../../components/Sibebar';
 import Header from '../../components/Header';
-
+import { useAlertContext } from '../../components/AlertProvider';
 
 interface Driver {
     id: string;
@@ -20,6 +19,7 @@ const DriversPage = () => {
     const [drivers, setDrivers] = useState<Driver[]>([]);
     const [selectedItem, setSelectedItem] = useState<Driver | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const { showSuccess, showError } = useAlertContext();
 
     useEffect(() => {
         const fetchDrivers = async () => {
@@ -27,12 +27,12 @@ const DriversPage = () => {
                 const response = await api.get('/admin/metrics/drivers', { withCredentials: true });
                 setDrivers(response.data.drivers);
             } catch (error) {
-                toast.error("Falha ao buscar motoristas.");
+                showError('Erro ao buscar motoristas', 'Falha ao carregar a lista de motoristas. Tente novamente.');
                 console.error("Failed to fetch drivers:", error);
             }
         };
         fetchDrivers();
-    }, []);
+    }, [showError]);
 
     const handleView = (item: Driver) => {
         setSelectedItem(item);
@@ -44,9 +44,9 @@ const DriversPage = () => {
             try {
                 // await api.delete(`/admin/drivers/${item.id}`);
                 setDrivers(drivers.filter(d => d.id !== item.id));
-                toast.success("Motorista excluído com sucesso!");
+                showSuccess('Motorista excluído', `${item.name} foi excluído com sucesso!`);
             } catch (error) {
-                toast.error("Falha ao excluir motorista.");
+                showError('Erro ao excluir motorista', 'Falha ao excluir o motorista. Tente novamente.');
                 console.error("Failed to delete driver:", error);
             }
         }
@@ -65,7 +65,6 @@ const DriversPage = () => {
             <div className="flex-1">
                 <Header />
                 <main className="max-w-7xl mx-auto py-4 px-4 lg:px-8">
-                    <ToastContainer />
                     <TableGeneric
                         data={drivers}
                         columns={columns}

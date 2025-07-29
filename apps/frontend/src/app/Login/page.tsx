@@ -11,12 +11,14 @@ import { AlertCircle, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import { SignInSchema } from '../../schemas/schema-yup';
 import { login, isAuthenticated } from '../../lib/auth';
+import { useAlertContext } from '../../components/AlertProvider';
 
 // Forçar página dinâmica
 export const dynamic = 'force-dynamic';
 
 const Login = () => {
     const router = useRouter();
+    const { showSuccess, showError } = useAlertContext();
     const [role, setRole] = useState<'driver' | 'admin'>('admin');
     const [error, setError] = useState('');
     const [showPassword, setShowPassword] = useState(false);
@@ -77,12 +79,17 @@ const Login = () => {
                                     const result = await login(values.email, values.password, role);
 
                                     if (result.success) {
+                                        showSuccess('Login realizado com sucesso!', 'Bem-vindo ao sistema Turistar.');
                                         router.push('/');
                                     } else {
-                                        setError(result.error || 'Erro ao fazer login');
+                                        const errorMessage = result.error || 'Erro ao fazer login';
+                                        setError(errorMessage);
+                                        showError('Erro no login', errorMessage);
                                     }
                                 } catch (err) {
-                                    setError('Erro ao fazer login. Tente novamente.');
+                                    const errorMessage = 'Erro ao fazer login. Tente novamente.';
+                                    setError(errorMessage);
+                                    showError('Erro no login', errorMessage);
                                 } finally {
                                     setSubmitting(false);
                                     setLoading(false);

@@ -5,10 +5,12 @@ import logo from '../../public/icon.png';
 import { Bell, LogOut } from 'lucide-react';
 import { useAuth } from '../lib/auth';
 import { useRouter } from 'next/navigation';
+import { useAlertContext } from './AlertProvider';
 
 const Header = () => {
     const { user, logout } = useAuth();
     const router = useRouter();
+    const { showSuccess, showError } = useAlertContext();
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
@@ -18,9 +20,11 @@ const Header = () => {
     const handleLogout = async () => {
         try {
             await logout();
+            showSuccess('Logout realizado com sucesso!', 'Você foi desconectado do sistema.');
             router.push('/Login');
         } catch (error) {
             console.error('Erro no logout:', error);
+            showError('Erro no logout', 'Ocorreu um erro ao fazer logout. Tente novamente.');
         }
     };
 

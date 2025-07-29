@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import api from '../util/api/api';
 import { useAuth } from '../lib/auth';
+import { useAlertContext } from '../components/AlertProvider';
 
 interface DriverMetrics {
     tourPackages?: {
@@ -29,6 +30,7 @@ interface DriverMetrics {
 
 export const useDriverMetrics = () => {
     const { user, userRole } = useAuth();
+    const { showError } = useAlertContext();
 
     const [metrics, setMetrics] = useState<DriverMetrics>({});
     const [loading, setLoading] = useState(true);
@@ -60,11 +62,15 @@ export const useDriverMetrics = () => {
                 setMetrics(response.data.metrics);
             } else {
                 console.error('useDriverMetrics: Resposta não foi bem-sucedida:', response.data);
-                setError('Resposta do servidor não foi bem-sucedida');
+                const errorMessage = 'Resposta do servidor não foi bem-sucedida';
+                setError(errorMessage);
+                showError('Erro ao carregar métricas', errorMessage);
             }
         } catch (err: any) {
             console.error('Erro ao buscar métricas do motorista:', err);
-            setError(err.response?.data?.message || 'Erro ao carregar métricas');
+            const errorMessage = err.response?.data?.message || 'Erro ao carregar métricas';
+            setError(errorMessage);
+            showError('Erro ao carregar métricas', errorMessage);
         } finally {
             setLoading(false);
         }
@@ -73,32 +79,57 @@ export const useDriverMetrics = () => {
     // Métodos para buscar métricas individuais (caso necessário)
     const fetchTourPackages = async () => {
         if (typeof window === 'undefined') return null;
-        const response = await api.get('driver/metrics/tour-packages');
-        return response.data;
+        try {
+            const response = await api.get('driver/metrics/tour-packages');
+            return response.data;
+        } catch (error) {
+            showError('Erro ao carregar pacotes', 'Falha ao carregar dados dos pacotes de passeio.');
+            return null;
+        }
     };
 
     const fetchReserves = async () => {
         if (typeof window === 'undefined') return null;
-        const response = await api.get('driver/metrics/reserves');
-        return response.data;
+        try {
+            const response = await api.get('driver/metrics/reserves');
+            return response.data;
+        } catch (error) {
+            showError('Erro ao carregar reservas', 'Falha ao carregar dados das reservas.');
+            return null;
+        }
     };
 
     const fetchTouristPoints = async () => {
         if (typeof window === 'undefined') return null;
-        const response = await api.get('driver/metrics/tourist-points');
-        return response.data;
+        try {
+            const response = await api.get('driver/metrics/tourist-points');
+            return response.data;
+        } catch (error) {
+            showError('Erro ao carregar pontos turísticos', 'Falha ao carregar dados dos pontos turísticos.');
+            return null;
+        }
     };
 
     const fetchWallet = async () => {
         if (typeof window === 'undefined') return null;
-        const response = await api.get('driver/metrics/wallet');
-        return response.data;
+        try {
+            const response = await api.get('driver/metrics/wallet');
+            return response.data;
+        } catch (error) {
+            showError('Erro ao carregar carteira', 'Falha ao carregar dados da carteira.');
+            return null;
+        }
     };
 
     const fetchTransactions = async () => {
         if (typeof window === 'undefined') return null;
-        const response = await api.get('driver/metrics/transactions');
-        return response.data;
+        try {
+            const response = await api.get('driver/metrics/transactions');
+            return response.data;
+        } catch (error) {
+            showError('Erro ao carregar transações', 'Falha ao carregar dados das transações.');
+            return null;
+        }
     };
 
     const formatCurrency = (value: number) => {

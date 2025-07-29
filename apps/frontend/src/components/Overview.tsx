@@ -14,6 +14,7 @@ import PackagesPizzaChart from './charts/PackagesPizzaChart';
 import { useAuth } from '../lib/auth';
 
 const Overview = () => {
+
     const [mounted, setMounted] = useState(false);
     const { user, userRole, isAuthenticated, loading: authLoading } = useAuth();
 
@@ -96,7 +97,7 @@ const Overview = () => {
                     transition={{ duration: 1.5 }}
                 >
                     {userRole === "admin" ? (
-                        // Métricas do Admin
+
                         <>
                             <StatCard
                                 name="Usuários"

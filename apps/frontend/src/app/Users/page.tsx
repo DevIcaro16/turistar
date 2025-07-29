@@ -4,10 +4,9 @@ import React, { useEffect, useState } from 'react';
 import TableGeneric from '../../components/TableGeneric';
 import Modal from '../../components/Modal';
 import api from '../../util/api/api';
-import { ToastContainer, toast } from 'react-toastify';
 import Sibebar from '../../components/Sibebar';
 import Header from '../../components/Header';
-
+import { useAlertContext } from '../../components/AlertProvider';
 
 interface User {
     id: string;
@@ -20,6 +19,7 @@ const UsersPage = () => {
     const [users, setUsers] = useState<User[]>([]);
     const [selectedItem, setSelectedItem] = useState<User | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const { showSuccess, showError } = useAlertContext();
 
     useEffect(() => {
         const fetchUsers = async () => {
@@ -27,12 +27,12 @@ const UsersPage = () => {
                 const response = await api.get('/admin/metrics/users', { withCredentials: true });
                 setUsers(response.data.users);
             } catch (error) {
-                toast.error("Falha ao buscar usuários.");
+                showError('Erro ao buscar usuários', 'Falha ao carregar a lista de usuários. Tente novamente.');
                 console.error("Failed to fetch users:", error);
             }
         };
         fetchUsers();
-    }, []);
+    }, [showError]);
 
     const handleView = (item: User) => {
         setSelectedItem(item);
@@ -44,9 +44,9 @@ const UsersPage = () => {
             try {
                 // await api.delete(`/admin/users/${item.id}`);
                 setUsers(users.filter(u => u.id !== item.id));
-                toast.success("Usuário excluído com sucesso!");
+                showSuccess('Usuário excluído', `${item.name} foi excluído com sucesso!`);
             } catch (error) {
-                toast.error("Falha ao excluir usuário.");
+                showError('Erro ao excluir usuário', 'Falha ao excluir o usuário. Tente novamente.');
                 console.error("Failed to delete user:", error);
             }
         }
@@ -65,7 +65,6 @@ const UsersPage = () => {
             <div className="flex-1">
                 <Header />
                 <main className="max-w-7xl mx-auto py-4 px-4 lg:px-8">
-                    <ToastContainer />
                     <TableGeneric
                         data={users}
                         columns={columns}

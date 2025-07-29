@@ -8,6 +8,7 @@ import { useAuth } from '../../lib/auth';
 import api from '../../util/api/api';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
+import { useAlertContext } from '../../components/AlertProvider';
 
 const taxSchema = Yup.object().shape({
     tax: Yup.number()
@@ -20,9 +21,8 @@ const Configuration = () => {
     const [mounted, setMounted] = useState(false);
     const { userRole } = useAuth();
     const [loading, setLoading] = useState(false);
-    const [success, setSuccess] = useState('');
-    const [error, setError] = useState('');
     const [currentTax, setCurrentTax] = useState<number | null>(null);
+    const { showSuccess, showError } = useAlertContext();
 
     const fetchCurrentTax = async () => {
         try {
@@ -31,6 +31,7 @@ const Configuration = () => {
                 setCurrentTax(res.data.platformRevenue);
             }
         } catch (err) {
+            showError('Erro ao carregar taxa', 'Falha ao carregar a taxa atual da plataforma.');
             setCurrentTax(null);
         }
     };
@@ -79,19 +80,18 @@ const Configuration = () => {
                             validationSchema={taxSchema}
                             onSubmit={async (values, { setSubmitting, resetForm }) => {
                                 setLoading(true);
-                                setSuccess('');
-                                setError('');
                                 try {
                                     const res = await api.put('/admin/metrics/configuration', { tax: values.tax }, { withCredentials: true });
                                     if (res.data.success) {
-                                        setSuccess('Taxa atualizada com sucesso!');
+                                        showSuccess('Taxa atualizada com sucesso!', 'A taxa da plataforma foi atualizada.');
                                         resetForm();
                                         fetchCurrentTax();
                                     } else {
-                                        setError('Erro ao atualizar taxa.');
+                                        showError('Erro ao atualizar taxa', 'Falha ao atualizar a taxa da plataforma.');
                                     }
                                 } catch (err: any) {
-                                    setError(err.response?.data?.message || 'Erro ao atualizar taxa.');
+                                    const errorMessage = err.response?.data?.message || 'Erro ao atualizar taxa.';
+                                    showError('Erro ao atualizar taxa', errorMessage);
                                 } finally {
                                     setLoading(false);
                                     setSubmitting(false);
@@ -120,8 +120,6 @@ const Configuration = () => {
                                     >
                                         {loading || isSubmitting ? 'Salvando...' : 'Salvar Taxa'}
                                     </button>
-                                    {success && <div className="text-green-400 text-center font-medium">{success}</div>}
-                                    {error && <div className="text-red-400 text-center font-medium">{error}</div>}
                                 </Form>
                             )}
                         </Formik>

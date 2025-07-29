@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { CartesianGrid, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { motion } from 'framer-motion';
+import { useAuth } from '../../lib/auth';
 
 interface ReservationsChartProps {
     reserves: any[];
@@ -11,6 +12,7 @@ interface ReservationsChartProps {
 const ReservationsChart = ({ reserves }: ReservationsChartProps) => {
 
     const [chartData, setChartData] = useState<any[]>([]);
+    const { user, userRole, isAuthenticated, loading: authLoading } = useAuth();
 
     useEffect(() => {
         if (reserves && Array.isArray(reserves)) {
@@ -45,7 +47,9 @@ const ReservationsChart = ({ reserves }: ReservationsChartProps) => {
             transition={{ duration: 1.5 }}
         >
             <h2 className="text-base md:text-lg font-medium mb-4 text-gray-100 text-center md:text-left">
-                Minhas Reservas por Pacote
+                {
+                    userRole === "admin" ? "Reservas por Pacote" : "Minhas Reservas por Pacote"
+                }
             </h2>
             <div className="h-64 md:h-80">
                 {chartData.length > 0 ? (

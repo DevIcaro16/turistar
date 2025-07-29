@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import api from '../util/api/api';
 import { useAuth } from '../lib/auth';
+import { useAlertContext } from '../components/AlertProvider';
 
 interface Metrics {
     users?: { count: number };
@@ -25,6 +26,7 @@ interface Metrics {
 
 export const useMetrics = () => {
     const { user, userRole } = useAuth();
+    const { showError } = useAlertContext();
 
     const [metrics, setMetrics] = useState<Metrics>({});
     const [loading, setLoading] = useState(true);
@@ -56,11 +58,15 @@ export const useMetrics = () => {
                 setMetrics(response.data.metrics);
             } else {
                 console.error('useMetrics: Resposta não foi bem-sucedida:', response.data);
-                setError('Resposta do servidor não foi bem-sucedida');
+                const errorMessage = 'Resposta do servidor não foi bem-sucedida';
+                setError(errorMessage);
+                showError('Erro ao carregar métricas', errorMessage);
             }
         } catch (err: any) {
             console.error('Erro ao buscar métricas:', err);
-            setError(err.response?.data?.message || 'Erro ao carregar métricas');
+            const errorMessage = err.response?.data?.message || 'Erro ao carregar métricas';
+            setError(errorMessage);
+            showError('Erro ao carregar métricas', errorMessage);
         } finally {
             setLoading(false);
         }
@@ -69,56 +75,86 @@ export const useMetrics = () => {
     // Métodos para buscar métricas individuais (caso necessário)
     const fetchUsers = async () => {
         if (typeof window === 'undefined') return null;
-        const token = localStorage.getItem('@token');
-        const response = await api.get('admin/metrics/users', {
-            headers: { Authorization: `Bearer ${token}` }
-        });
-        return response.data;
+        try {
+            const token = localStorage.getItem('@token');
+            const response = await api.get('admin/metrics/users', {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            return response.data;
+        } catch (error) {
+            showError('Erro ao carregar usuários', 'Falha ao carregar dados dos usuários.');
+            return null;
+        }
     };
 
     const fetchDrivers = async () => {
         if (typeof window === 'undefined') return null;
-        const token = localStorage.getItem('@token');
-        const response = await api.get('admin/metrics/drivers', {
-            headers: { Authorization: `Bearer ${token}` }
-        });
-        return response.data;
+        try {
+            const token = localStorage.getItem('@token');
+            const response = await api.get('admin/metrics/drivers', {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            return response.data;
+        } catch (error) {
+            showError('Erro ao carregar motoristas', 'Falha ao carregar dados dos motoristas.');
+            return null;
+        }
     };
 
     const fetchTourPackages = async () => {
         if (typeof window === 'undefined') return null;
-        const token = localStorage.getItem('@token');
-        const response = await api.get('admin/metrics/tour-packages', {
-            headers: { Authorization: `Bearer ${token}` }
-        });
-        return response.data;
+        try {
+            const token = localStorage.getItem('@token');
+            const response = await api.get('admin/metrics/tour-packages', {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            return response.data;
+        } catch (error) {
+            showError('Erro ao carregar pacotes', 'Falha ao carregar dados dos pacotes de passeio.');
+            return null;
+        }
     };
 
     const fetchReserves = async () => {
         if (typeof window === 'undefined') return null;
-        const token = localStorage.getItem('@token');
-        const response = await api.get('admin/metrics/reserves', {
-            headers: { Authorization: `Bearer ${token}` }
-        });
-        return response.data;
+        try {
+            const token = localStorage.getItem('@token');
+            const response = await api.get('admin/metrics/reserves', {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            return response.data;
+        } catch (error) {
+            showError('Erro ao carregar reservas', 'Falha ao carregar dados das reservas.');
+            return null;
+        }
     };
 
     const fetchTouristPoints = async () => {
         if (typeof window === 'undefined') return null;
-        const token = localStorage.getItem('@token');
-        const response = await api.get('admin/metrics/tourist-points', {
-            headers: { Authorization: `Bearer ${token}` }
-        });
-        return response.data;
+        try {
+            const token = localStorage.getItem('@token');
+            const response = await api.get('admin/metrics/tourist-points', {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            return response.data;
+        } catch (error) {
+            showError('Erro ao carregar pontos turísticos', 'Falha ao carregar dados dos pontos turísticos.');
+            return null;
+        }
     };
 
     const fetchPlatformRevenue = async () => {
         if (typeof window === 'undefined') return null;
-        const token = localStorage.getItem('@token');
-        const response = await api.get('admin/metrics/platform-revenue', {
-            headers: { Authorization: `Bearer ${token}` }
-        });
-        return response.data;
+        try {
+            const token = localStorage.getItem('@token');
+            const response = await api.get('admin/metrics/platform-revenue', {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            return response.data;
+        } catch (error) {
+            showError('Erro ao carregar receita', 'Falha ao carregar dados da receita da plataforma.');
+            return null;
+        }
     };
 
     const formatCurrency = (value: number) => {

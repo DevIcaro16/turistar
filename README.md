@@ -8,7 +8,7 @@ Este projeto é uma solução full-stack para gerenciamento de passeios turísti
 
 - **Backend API**: API RESTful para autenticação, reservas, pagamentos, gestão de motoristas e turistas
 - **Frontend Web**: Painel administrativo e interface web para usuários
-- **Mobile App**: Aplicativo React Native/Expo para motoristas e turistas
+- **Mobile App**: Aplicativo React Native/Expo para motoristas e turistas com arquitetura MVVM
 - **Testes Automatizados**: Testes unitários e E2E
 
 ## 🏗️ Arquitetura
@@ -20,7 +20,7 @@ app_passeios_turisticos/
 │   ├── backend-api-e2e/    # Testes E2E backend
 │   ├── frontend/           # Frontend web (Next.js + Tailwind CSS)
 │   ├── frontend-e2e/       # Testes E2E frontend
-│   └── mobile/             # App Mobile (React Native/Expo)
+│   └── mobile/             # App Mobile (React Native/Expo + MVVM)
 ├── packages/               # Bibliotecas compartilhadas
 │   ├── error-handle/       # Tratamento de erros centralizado
 │   └── libs/               # Bibliotecas compartilhadas (Prisma, Redis)
@@ -60,6 +60,7 @@ app_passeios_turisticos/
 - **Formik** - Gerenciamento de formulários
 - **Yup** - Validação de schemas
 - **Stripe** - Integração de pagamentos
+- **Arquitetura MVVM** - Model-View-ViewModel para separação de responsabilidades
 
 ### **Infraestrutura & DevOps**
 - **Docker** - Containerização
@@ -82,6 +83,40 @@ app_passeios_turisticos/
 - **bcrypt** - Hash de senhas
 - **crypto** - Geração de códigos OTP
 
+## 📱 Arquitetura MVVM - Mobile App
+
+O aplicativo mobile utiliza a arquitetura **Model-View-ViewModel (MVVM)** para garantir uma separação clara de responsabilidades:
+
+### **Estrutura MVVM**
+```
+src/pages/
+├── driver/
+│   ├── Home/
+│   │   ├── HomeModel.ts      # Model - Dados e lógica de negócio
+│   │   ├── HomeViewModel.ts  # ViewModel - Estado e lógica de apresentação
+│   │   ├── index.tsx         # View - Interface do usuário
+│   │   └── styles.tsx        # Estilos específicos
+│   ├── Car/
+│   ├── TouristPoint/
+│   └── ...
+└── user/
+    ├── Home/
+    ├── Reservations/
+    └── ...
+```
+
+### **Componentes MVVM**
+- **Model**: Gerencia dados, validações e lógica de negócio
+- **ViewModel**: Controla estado da UI, transformações de dados e comunicação com Model
+- **View**: Interface do usuário, reativa às mudanças do ViewModel
+
+### **Benefícios**
+- **Separação de responsabilidades** clara
+- **Testabilidade** melhorada
+- **Reutilização** de código
+- **Manutenibilidade** facilitada
+- **Escalabilidade** do projeto
+
 ## 🚀 Deploy & Produção
 
 ### **Ambiente de Produção**
@@ -89,7 +124,6 @@ app_passeios_turisticos/
 - **Containerização**: Docker + Docker Compose
 - **Web Server**: Nginx (proxy reverso e servidor web)
 - **SSL/TLS**: Let's Encrypt (certificados gratuitos)
-- **Domínio**: Hostinger (registro e DNS)
 - **CI/CD**: GitHub Actions
 - **Banco de Dados**: MongoDB Atlas (cloud)
 - **Cache**: Upstash/Redis (cloud)
@@ -141,10 +175,6 @@ NGINX_CONF_PATH=/etc/nginx/sites-available/turistar
 SSL_CERT_PATH=/etc/letsencrypt/live/turistar.com.br
 SSL_KEY_PATH=/etc/letsencrypt/live/turistar.com.br/privkey.pem
 SSL_CERT_PATH=/etc/letsencrypt/live/turistar.com.br/fullchain.pem
-
-# Hostinger (DNS)
-HOSTINGER_DOMAIN=turistar.com.br
-HOSTINGER_NAMESERVERS=ns1.hostinger.com,ns2.hostinger.com
 ```
 
 ## 📦 Instalação e Execução
@@ -182,20 +212,29 @@ HOSTINGER_NAMESERVERS=ns1.hostinger.com,ns2.hostinger.com
 
 5. **Comandos de desenvolvimento:**
    ```bash
-   # Backend
+   # Backend API
    npm run api
    
-   # Frontend
+   # Frontend Web
    npm run frontend
    
-   # Mobile
+   # Mobile App
    npm run mobile
    
-   # Todos os testes
-   npm run test:all
+   # Mobile App (limpar cache)
+   npm run mobile:clear
    
-   # Build de produção
+   # Build Frontend
+   npm run frontend:build
+   
+   # Build Backend
    npm run build
+   
+   # Gerar documentação API
+   npm run api-docs
+   
+   # Testes E2E
+   npm run e2e
    ```
 
 ### **Deploy em Produção**
@@ -220,7 +259,7 @@ HOSTINGER_NAMESERVERS=ns1.hostinger.com,ns2.hostinger.com
 
 ### **Swagger UI**
 - **URL**: `http://localhost:8000/api-docs` (desenvolvimento)
-- **URL**: `https://turistar.com.br/api-docs` (produção)
+- **URL**: `https://turistarturismo.shop/api-docs` (produção)
 - **Documentação**: OpenAPI 3.0
 - **Testes**: Interface interativa para testar endpoints
 
@@ -233,39 +272,12 @@ HOSTINGER_NAMESERVERS=ns1.hostinger.com,ns2.hostinger.com
 - **Reservas**: `/api/reserve/*`
 
 ### **URLs de Acesso**
-- **Frontend**: `https://turistar.com.br`
-- **API**: `https://turistar.com.br/api`
-- **Swagger**: `https://turistar.com.br/api-docs`
-- **Admin**: `https://turistar.com.br/Login`
+- **Frontend**: `https://turistarturismo.shop`
+- **API**: `https://turistarturismo.shop/api`
+- **Swagger**: `https://turistarturismo.shop/api-docs`
+- **Admin**: `https://turistarturismo.shop/Login`
 
-## 🧪 Testes
 
-### **Backend**
-```bash
-# Testes unitários
-npm run test:backend
-
-# Testes E2E
-npm run test:backend-e2e
-
-# Cobertura
-npm run test:backend:coverage
-```
-
-### **Frontend**
-```bash
-# Testes unitários
-npm run test:frontend
-
-# Testes E2E
-npm run test:frontend-e2e
-```
-
-### **Mobile**
-```bash
-# Testes unitários
-npm run test:mobile
-```
 
 ## 🔧 Scripts Úteis
 
@@ -294,7 +306,7 @@ docker logs turistar-frontend --tail 50
 ## 🌐 Configuração de Domínio e SSL
 
 ### **Hostinger (Registro de Domínio)**
-1. **Registro do domínio**: `turistar.com.br`
+1. **Registro do domínio**: `turistarturismo.shop`
 2. **Nameservers**: Configurados para Hostinger
 3. **DNS Records**:
    - **A Record**: `@` → IP da EC2
@@ -308,16 +320,16 @@ docker logs turistar-frontend --tail 50
    ```nginx
    server {
        listen 80;
-       server_name turistar.com.br www.turistar.com.br;
+       server_name turistarturismo.shop www.turistarturismo.shop;
        return 301 https://$server_name$request_uri;
    }
    
    server {
        listen 443 ssl;
-       server_name turistar.com.br www.turistar.com.br;
+       server_name turistarturismo.shop www.turistarturismo.shop;
        
-       ssl_certificate /etc/letsencrypt/live/turistar.com.br/fullchain.pem;
-       ssl_certificate_key /etc/letsencrypt/live/turistar.com.br/privkey.pem;
+       ssl_certificate /etc/letsencrypt/live/turistarturismo.shop/fullchain.pem;
+       ssl_certificate_key /etc/letsencrypt/live/turistarturismo.shop/privkey.pem;
        
        location / {
            proxy_pass http://localhost:3000;
@@ -335,7 +347,7 @@ docker logs turistar-frontend --tail 50
 
 ### **Let's Encrypt (SSL/TLS)**
 1. **Certificados gratuitos** e renovação automática
-2. **Instalação**: `certbot --nginx -d turistar.com.br -d www.turistar.com.br`
+2. **Instalação**: `certbot --nginx -d turistarturismo.shop -d www.turistarturismo.shop`
 3. **Renovação automática**: Cron job configurado
 4. **Segurança**: HTTPS forçado (HTTP → HTTPS)
 
@@ -370,7 +382,7 @@ docker logs turistar-frontend --tail 50
 
 7. **Domínio não resolvendo:**
    - Verificar DNS no Hostinger
-   - Verificar propagação DNS: `nslookup turistar.com.br`
+   - Verificar propagação DNS: `nslookup turistarturismo.shop`
    - Aguardar propagação (pode levar até 24h)
 
 ## 📄 Licença

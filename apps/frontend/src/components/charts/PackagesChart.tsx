@@ -3,13 +3,16 @@
 import React, { useEffect, useState } from 'react';
 import { CartesianGrid, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { motion } from 'framer-motion';
+import { useAuth } from '../../lib/auth';
 
 interface PackagesChartProps {
     packages: any[];
 }
 
 const PackagesChart = ({ packages }: PackagesChartProps) => {
+
     const [chartData, setChartData] = useState<any[]>([]);
+    const { user, userRole, isAuthenticated, loading: authLoading } = useAuth();
 
     useEffect(() => {
         if (packages && Array.isArray(packages)) {
@@ -37,7 +40,9 @@ const PackagesChart = ({ packages }: PackagesChartProps) => {
         >
 
             <h2 className="text-base md:text-lg font-medium mb-4 text-gray-100 text-center md:text-left">
-                Meus Pacotes
+                {
+                    userRole === "admin" ? "Pacotes de Passeio" : "Meus Pacotes"
+                }
             </h2>
 
             <div className="h-64 md:h-80">

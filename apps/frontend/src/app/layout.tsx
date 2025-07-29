@@ -1,4 +1,5 @@
 import './global.css';
+import { AlertProvider } from '../components/AlertProvider';
 
 export default async function RootLayout({
   children,
@@ -12,7 +13,9 @@ export default async function RootLayout({
         <meta name="description" content="Sistema de gerenciamento de passeios turísticos" />
       </head>
       <body>
-        {children}
+        <AlertProvider>
+          {children}
+        </AlertProvider>
       </body>
     </html>
   );
