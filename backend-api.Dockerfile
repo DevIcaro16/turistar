@@ -13,11 +13,7 @@ COPY packages ./packages/
 COPY prisma ./prisma/
 RUN npm install --legacy-peer-deps
 RUN npx prisma generate
-COPY apps/backend-api ./apps/backend-api/
-COPY apps/backend-api-e2e ./apps/backend-api-e2e/
-COPY apps/frontend ./apps/frontend/
-COPY apps/frontend-e2e ./apps/frontend-e2e/
-COPY apps/mobile ./apps/mobile/
+COPY apps ./apps/
 RUN npx nx build backend-api
 
 # Stage 2: Production
