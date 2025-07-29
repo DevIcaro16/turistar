@@ -11,7 +11,7 @@ COPY apps/frontend/package*.json ./apps/frontend/
 COPY packages ./packages
 
 # Instalar dependências com cache otimizado
-RUN npm ci --legacy-peer-deps && npm cache clean --force
+RUN npm install --legacy-peer-deps && npm cache clean --force
 
 
 COPY apps/frontend ./apps/frontend
