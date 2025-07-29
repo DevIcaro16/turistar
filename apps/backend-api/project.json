@@ -1,0 +1,71 @@
+{
+    "name": "backend-api",
+    "$schema": "../../node_modules/nx/schemas/project-schema.json",
+    "sourceRoot": "apps/backend-api/src",
+    "projectType": "application",
+    "targets": {
+        "build": {
+            "executor": "@nx/esbuild:esbuild",
+            "outputs": [
+                "{options.outputPath}"
+            ],
+            "defaultConfiguration": "production",
+            "options": {
+                "platform": "node",
+                "outputPath": "apps/backend-api/dist",
+                "format": [
+                    "cjs"
+                ],
+                "bundle": false,
+                "main": "apps/backend-api/src/main.ts",
+                "tsConfig": "apps/backend-api/tsconfig.app.json",
+                "assets": [
+                    "apps/backend-api/src/assets"
+                ],
+                "esbuildOptions": {
+                    "sourcemap": true,
+                    "outExtension": {
+                        ".js": ".js"
+                    }
+                }
+            },
+            "configurations": {
+                "development": {},
+                "production": {
+                    "esbuildOptions": {
+                        "sourcemap": false,
+                        "outExtension": {
+                            ".js": ".js"
+                        }
+                    }
+                }
+            }
+        },
+        "serve": {
+            "continuous": true,
+            "executor": "@nx/js:node",
+            "defaultConfiguration": "development",
+            "dependsOn": [
+                "^build"
+            ],
+            "options": {
+                "buildTarget": "backend-api:build",
+                "runBuildTargetDependencies": false
+            },
+            "configurations": {
+                "development": {
+                    "buildTarget": "backend-api:build:development"
+                },
+                "production": {
+                    "buildTarget": "backend-api:build:production"
+                }
+            }
+        },
+        "test": {
+            "options": {
+                "passWithNoTests": false
+            }
+        }
+    },
+    "tags": []
+}
