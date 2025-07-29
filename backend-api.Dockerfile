@@ -11,10 +11,10 @@ COPY jest.preset.js ./
 COPY apps/backend-api/package*.json ./apps/backend-api/
 COPY packages ./packages/
 COPY prisma ./prisma/
-RUN npm install --legacy-peer-deps
+RUN npm ci --legacy-peer-deps
 RUN npx prisma generate
-COPY apps ./apps/
-RUN npx nx build backend-api
+COPY apps/backend-api ./apps/backend-api/
+RUN npm run build
 
 # Stage 2: Production
 FROM node:18-alpine AS production
@@ -38,6 +38,5 @@ ENV NODE_ENV=production
 ENV HOST=0.0.0.0
 ENV PORT=8000
 EXPOSE 8000
-
 
 CMD ["node", "dist/main.js"]
