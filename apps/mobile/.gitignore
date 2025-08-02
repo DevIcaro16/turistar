@@ -15,6 +15,7 @@ expo-env.d.ts
 # Arquivos de configuração sensíveis
 config.json
 secrets.json
+app.config.ts
 
 # Logs
 *.log
