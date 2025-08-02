@@ -75,34 +75,52 @@ export function useReservationsViewModel() {
 
         if (confirmAction === 'confirm') {
             try {
+                console.log('🔄 Iniciando pagamento para reserva:', selectedReservation.id);
+                console.log('💰 Valor:', selectedReservation.amount);
 
                 const paymentIntentRes = await api.post('/stripe/create-payment-intent', {
-                    amount: selectedReservation.amount,
-                    reservationId: selectedReservation.id,
+                    amount: (selectedReservation.amount * 100), //Valor normal fica em centavos, * 100 resolve
+                    metadata: { reservationId: selectedReservation.id },
                 });
 
+                console.log('✅ PaymentIntent criado:', paymentIntentRes.data);
                 const { clientSecret } = paymentIntentRes.data;
 
+                if (!clientSecret) {
+                    console.error('❌ ClientSecret não encontrado na resposta');
+                    showAlert('Erro: ClientSecret não encontrado', 'error');
+                    return;
+                }
+
+                console.log('🔄 Inicializando PaymentSheet...');
                 const { error: initError } = await initPaymentSheet({
                     paymentIntentClientSecret: clientSecret,
                     merchantDisplayName: 'Turistar',
                 });
 
                 if (initError) {
-                    showAlert('Erro ao inicializar pagamento', 'error');
+                    console.error('❌ Erro ao inicializar PaymentSheet:', initError);
+                    showAlert(`Erro ao inicializar pagamento: ${initError.message}`, 'error');
                     return;
                 }
+
+                console.log('✅ PaymentSheet inicializado com sucesso');
+                console.log('🔄 Apresentando PaymentSheet...');
 
                 const { error: presentError } = await presentPaymentSheet();
 
                 if (presentError) {
-                    showAlert('Pagamento cancelado ou falhou', 'error');
+                    console.error('❌ Erro ao apresentar PaymentSheet:', presentError);
+                    showAlert(`Pagamento falhou: ${presentError.message}`, 'error');
                 } else {
+                    console.log('✅ Pagamento realizado com sucesso!');
                     showAlert('Pagamento confirmado com sucesso!');
                     setDetailModalVisible(false);
                     fetchReservations();
                 }
             } catch (error: any) {
+                console.error('❌ Erro geral no pagamento:', error);
+                console.error('❌ Detalhes do erro:', error.response?.data);
                 showAlert(error.response?.data?.message || 'Erro ao processar pagamento', 'error');
             }
         } else if (confirmAction === 'cancel') {

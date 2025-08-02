@@ -13,10 +13,16 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { styles } from './styles';
 import DriverWalletViewModel, { formatDate, formatDateTime } from './DriverWalletViewModel';
 import { COLORS, LABELS } from './DriverWalletModel';
+import { AuthContext } from 'apps/mobile/src/contexts/auth';
+import { useContext } from 'react';
 
 export default function DriverWallet() {
 
+    const { user } = useContext<any>(AuthContext);
     const driverWalletViewModel = DriverWalletViewModel();
+
+    // Debug
+    console.log('Wallet no componente DriverWallet:', user?.wallet);
 
     return (
         <View style={styles.container}>
@@ -91,7 +97,9 @@ export default function DriverWallet() {
                         <View style={{ flexDirection: 'row', gap: 48, marginTop: 24 }}>
                             <View style={{ flexDirection: 'column' }}>
                                 <Text style={styles.summaryTitle}>Saldo do dia</Text>
-                                <Text style={styles.summaryValue}>R$ {(driverWalletViewModel.user?.wallet ?? 0).toFixed(2)}</Text>
+                                <Text style={styles.summaryValue}>
+                                    {user?.wallet !== undefined ? `R$ ${user.wallet.toFixed(2)}` : 'Carregando...'}
+                                </Text>
                             </View>
                         </View>
                     </View>

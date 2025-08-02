@@ -13,6 +13,7 @@ interface User {
     email: string;
     image: string;
     role: string;
+    wallet?: number;
     transport_type?: string;
 }
 
@@ -30,6 +31,7 @@ interface AuthContextData {
     loading: boolean;
     sendForgotPasswordCode: (email: string, activeTab: TypeUser) => Promise<{ success: boolean; message?: string }>;
     verifyForgotPasswordCode: (email: string, otp: string, activeTab: TypeUser) => Promise<{ success: boolean; message?: string }>;
+    updateUser: (userData: Partial<User>) => void;
 }
 
 export const AuthContext = createContext<AuthContextData>({} as AuthContextData);
@@ -284,8 +286,14 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
         }
     }
 
+    function updateUser(userData: Partial<User>) {
+        if (user) {
+            setUser({ ...user, ...userData });
+        }
+    }
+
     return (
-        <AuthContext.Provider value={{ signed: !!user, user, userRole, signUp, signIn, signOut, refreshAccessToken, loadingAuth, loading, sendForgotPasswordCode, verifyForgotPasswordCode }}>
+        <AuthContext.Provider value={{ signed: !!user, user, userRole, signUp, signIn, signOut, refreshAccessToken, loadingAuth, loading, sendForgotPasswordCode, verifyForgotPasswordCode, updateUser }}>
             {children}
 
             {/* AlertComponent personalizado */}

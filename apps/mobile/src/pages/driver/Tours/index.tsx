@@ -105,7 +105,7 @@ export default function ToursManagement() {
                     <RefreshControl refreshing={toursViewModel.refreshing} onRefresh={toursViewModel.onRefresh} />
                 }
                 ListEmptyComponent={renderEmptyState}
-                showsVerticalScrollIndicator={false}
+                showsVerticalScrollIndicator={true}
             />
 
             <Modal

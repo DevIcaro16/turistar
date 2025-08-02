@@ -7,6 +7,7 @@ export interface TourPackageData {
     price: number;
     vacancies: number;
     type: string;
+    isFinalised: boolean;
     car: {
         type: string;
         model: string;

@@ -4,6 +4,7 @@ import api from '../../../util/api/api';
 import { useContext, useEffect, useState } from "react";
 import { Alert, Linking } from "react-native";
 import { TourPackage, Transaction, DriverStats } from './HomeModel';
+import { config } from '../../../util/config';
 
 
 export function formatDateTime(date: string) {
@@ -65,7 +66,7 @@ export function HomeViewModel(): {
 
     function handleOpenDashboardPanel() {
 
-        const dashboardWebLinking = process.env.EXPO_PUBLIC_BACKEND_API + 'Login';
+        const dashboardWebLinking = config.frontedApi + 'Login';
 
         Alert.alert(
             'Dashboard',

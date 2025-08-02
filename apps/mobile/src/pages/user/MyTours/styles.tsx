@@ -127,7 +127,8 @@ export default StyleSheet.create({
         borderRadius: 16,
         padding: 20,
         width: '90%',
-        maxHeight: '80%',
+        maxHeight: '70%',
+        minHeight: 340,
     },
     modalHeader: {
         flexDirection: 'row',

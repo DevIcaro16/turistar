@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import api from '../../../util/api/api';
 import { TourPackageData, CarType, PendingReservation } from './TourPackagesModel';
+import { Alert } from 'react-native';
 
 export function formatDateTime(date: string) {
     const d = new Date(date);
@@ -46,7 +47,8 @@ export function useTourPackagesViewModel() {
         try {
             const response = await api.get('/TourPackage');
             console.log(response);
-            setTourPackages(response.data.tourPackages || response.data || []);
+            const tourPackagesNotFinalised = (response.data.tourPackages).filter((tp: TourPackageData) => tp.isFinalised === false);
+            setTourPackages(tourPackagesNotFinalised || response.data || []);
         } catch (error) {
             setTourPackages([]);
         } finally {
@@ -89,11 +91,18 @@ export function useTourPackagesViewModel() {
 
         setReservingId(pendingReservation.pkg.id);
         try {
-            const response = await api.post('/reservation', {
+            const requestData = {
                 tourPackageId: pendingReservation.pkg.id,
                 vacancies_reserved: pendingReservation.quantity,
-            });
+                amount: (pendingReservation.pkg.price * pendingReservation.quantity)
+            };
 
+            console.log('Dados da reserva:', requestData);
+            console.log('Pacote selecionado:', pendingReservation.pkg);
+
+            const response = await api.post('/user/reservation', requestData);
+
+            console.log('Resposta da reserva:', response.data);
             showAlert('Reserva realizada com sucesso!');
             setConfirmModalVisible(false);
             setPendingReservation(null);
@@ -101,6 +110,8 @@ export function useTourPackagesViewModel() {
             setQuantities({});
             fetchTourPackages();
         } catch (error: any) {
+            console.error('Erro na reserva:', error);
+            console.error('Detalhes do erro:', error.response?.data);
             showAlert(error.response?.data?.message || 'Erro ao realizar reserva', 'error');
         } finally {
             setReservingId(null);

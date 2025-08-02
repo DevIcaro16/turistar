@@ -19,6 +19,7 @@ import styles from './styles';
 import { transportOptions } from '../../../util/types/transportTypes';
 import { useCarViewModel } from './CarViewModel';
 import { validationSchema, initialFormValues, CarFormData, Car } from './CarModel';
+import { secureImageUrl } from '../../../util/imageUtils';
 
 export default function CarManagement() {
     const carViewModel = useCarViewModel();
@@ -28,7 +29,7 @@ export default function CarManagement() {
             <View style={styles.carImageContainer}>
                 {item.image ? (
                     <Image
-                        source={{ uri: item.image }}
+                        source={{ uri: secureImageUrl(item.image) || '' }}
                         style={styles.carCardImage}
                         resizeMode="cover"
                     />
@@ -153,7 +154,7 @@ export default function CarManagement() {
                                             <View style={styles.currentImageContainer}>
                                                 <Text style={styles.currentImageLabel}>Imagem atual:</Text>
                                                 <Image
-                                                    source={{ uri: carViewModel.editingCar.image }}
+                                                    source={{ uri: secureImageUrl(carViewModel.editingCar.image) || '' }}
                                                     style={styles.imagePreview}
                                                     resizeMode="cover"
                                                 />

@@ -1,38 +1,87 @@
 {
   "name": "@app-passeios-turisticos/mobile",
+  "main": "expo-router/entry",
   "version": "0.0.1",
   "private": true,
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web",
+    "clear-cache": "expo start --clear",
+    "reset-cache": "npx expo start --clear && npx expo r -c",
+    "reset-project": "node ./scripts/reset-project.js",
+    "clean": "npx expo start --clear && rm -rf node_modules && npm install",
+    "build:android": "eas build -p android --profile preview",
+    "build:ios": "eas build --platform ios",
+    "build:all": "eas build --platform all",
+    "prebuild": "npx expo start --clear"
+  },
   "dependencies": {
+    "@expo/vector-icons": "^14.0.2",
     "@react-native-async-storage/async-storage": "1.23.1",
     "@react-native-community/datetimepicker": "8.2.0",
     "@react-native-community/netinfo": "11.4.1",
     "@react-native-picker/picker": "2.9.0",
-    "@react-navigation/bottom-tabs": "^7.1.1",
+    "@react-navigation/bottom-tabs": "^7.2.0",
     "@react-navigation/drawer": "^7.1.1",
-    "@react-navigation/native": "^7.1.15",
+    "@react-navigation/native": "^7.0.14",
     "@react-navigation/native-stack": "^7.1.1",
     "@react-navigation/stack": "^7.1.1",
     "@stripe/react-stripe-js": "^3.7.0",
     "@stripe/stripe-js": "^7.5.0",
     "@stripe/stripe-react-native": "0.38.6",
+    "expo": "~52.0.23",
+    "expo-blur": "~14.0.1",
+    "expo-constants": "~17.0.3",
     "expo-datepicker": "^1.0.23",
+    "expo-font": "~13.0.2",
+    "expo-haptics": "~14.0.0",
     "expo-image": "~2.0.7",
     "expo-image-manipulator": "~13.0.6",
     "expo-image-picker": "~16.0.6",
-    "expo-linking": "~7.0.5",
+    "expo-linking": "~7.0.3",
     "expo-notifications": "~0.29.14",
-    "expo-permissions": "^14.4.0",
-    "expo-router": "~4.0.21",
+    "expo-router": "~4.0.15",
+    "expo-splash-screen": "~0.29.18",
+    "expo-status-bar": "~2.0.0",
+    "expo-symbols": "~0.2.0",
+    "expo-system-ui": "~4.0.6",
+    "expo-web-browser": "~14.0.1",
     "formik": "^2.4.6",
     "module-alias": "^2.2.3",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "react-native": "0.76.9",
     "react-native-date-picker": "^5.0.13",
-    "react-native-gesture-handler": "~2.20.2",
     "react-native-masked-text": "^1.12.5",
-    "react-native-reanimated": "3.16.1",
+    "react-native-gesture-handler": "~2.20.2",
+    "react-native-reanimated": "~3.16.1",
     "react-native-safe-area-context": "4.12.0",
     "react-native-screens": "~4.4.0",
+    "react-native-web": "~0.19.13",
+    "react-native-webview": "13.12.5",
     "stripe": "^18.3.0",
-    "yup": "^1.6.1",
-    "react-native": "0.76.9"
+    "yup": "^1.6.1"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.25.2",
+    "@types/jest": "^29.5.12",
+    "@types/react": "~18.3.12",
+    "@types/react-test-renderer": "^18.3.0",
+    "jest": "^29.2.1",
+    "jest-expo": "~52.0.2",
+    "react-test-renderer": "18.3.1",
+    "typescript": "^5.3.3"
+  },
+  "expo": {
+    "doctor": {
+      "reactNativeDirectoryCheck": {
+        "exclude": [
+          "react-native-masked-text"
+        ],
+        "listUnknownPackages": false
+      }
+    }
   }
 }

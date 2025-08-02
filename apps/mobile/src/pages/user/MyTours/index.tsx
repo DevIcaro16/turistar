@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, Modal, Image } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, Modal, Image, ScrollView } from 'react-native';
 import styles from './styles';
 import AlertComponent from '../../../components/AlertComponent';
 import { useMyToursViewModel, formatDateTime, getTourStatus } from './MyToursViewModel';
@@ -115,7 +115,7 @@ export default function MyTours() {
                         </View>
 
                         {myToursViewModel.selectedTour && (
-                            <View style={styles.modalBody}>
+                            <ScrollView style={styles.modalBody} showsVerticalScrollIndicator={true}>
                                 <Text style={styles.detailTitle}>{myToursViewModel.selectedTour.tourPackage.title}</Text>
                                 <Text style={styles.detailRoute}>
                                     {myToursViewModel.selectedTour.tourPackage.origin_local} → {myToursViewModel.selectedTour.tourPackage.destiny_local}
@@ -149,7 +149,7 @@ export default function MyTours() {
                                         <Text style={styles.cancelButtonText}>Cancelar Reserva</Text>
                                     </TouchableOpacity>
                                 )}
-                            </View>
+                            </ScrollView>
                         )}
                     </View>
                 </View>

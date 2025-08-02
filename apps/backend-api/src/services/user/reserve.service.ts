@@ -48,6 +48,8 @@ export class ReserveService {
         });
 
 
+        if (!tourPackageExisting?.isFinalised) throw new NotFoundError("Pacote de passeio Já finalizado!");
+
         if (!tourPackageExisting) throw new NotFoundError("Pacote de passeio não existente!");
 
         if (tourPackageExisting.vacancies === 0) throw new NotFoundError("Sem vagas disponiveis!");
@@ -57,9 +59,9 @@ export class ReserveService {
         }
 
         //SE TEM VALOR DISPONIVEL PARA RESERVA
-        if (userExisting.wallet < amount) {
-            throw new ValidationError("Valor disponivel na Carteira Virtual inferior ao valor total das reservas!");
-        }
+        // if (userExisting.wallet < amount) {
+        //     throw new ValidationError("Valor disponivel na Carteira Virtual inferior ao valor total das reservas!");
+        // }
 
         //RESERVA
         const reservation = await prisma.reservations.create({

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, FlatList, TextInput, TouchableOpacity, ActivityIndicator, Modal, Image } from 'react-native';
+import { View, Text, FlatList, TextInput, TouchableOpacity, ActivityIndicator, Modal, Image, ScrollView } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import styles from './styles';
 import AlertComponent from '../../../components/AlertComponent';
@@ -108,7 +108,7 @@ export default function UserTourPackages() {
                         </View>
 
                         {tourPackagesViewModel.selectedPackage && (
-                            <View style={styles.modalBody}>
+                            <ScrollView style={styles.modalBody} showsVerticalScrollIndicator={false}>
                                 <Text style={styles.detailTitle}>{tourPackagesViewModel.selectedPackage.title}</Text>
                                 <Text style={styles.detailRoute}>
                                     {tourPackagesViewModel.selectedPackage.origin_local} → {tourPackagesViewModel.selectedPackage.destiny_local}
@@ -134,16 +134,58 @@ export default function UserTourPackages() {
 
                                 <View style={styles.quantityContainer}>
                                     <Text style={styles.quantityLabel}>Quantidade de vagas:</Text>
-                                    <TextInput
-                                        style={styles.quantityInput}
-                                        placeholder="1"
-                                        value={tourPackagesViewModel.quantities[tourPackagesViewModel.selectedPackage.id] || '1'}
-                                        onChangeText={(text) => tourPackagesViewModel.setQuantities({
-                                            ...tourPackagesViewModel.quantities,
-                                            [tourPackagesViewModel.selectedPackage?.id || '']: text
-                                        })}
-                                        keyboardType="numeric"
-                                    />
+                                    <View style={styles.quantityControls}>
+                                        <TouchableOpacity
+                                            style={styles.quantityButton}
+                                            onPress={() => {
+                                                const currentQty = parseInt(tourPackagesViewModel.quantities[tourPackagesViewModel.selectedPackage?.id || ''] || '1');
+                                                const newQty = Math.max(1, currentQty - 1);
+                                                tourPackagesViewModel.setQuantities({
+                                                    ...tourPackagesViewModel.quantities,
+                                                    [tourPackagesViewModel.selectedPackage?.id || '']: newQty.toString()
+                                                });
+                                            }}
+                                            disabled={parseInt(tourPackagesViewModel.quantities[tourPackagesViewModel.selectedPackage?.id || ''] || '1') <= 1}
+                                        >
+                                            <Text style={[styles.quantityButtonText,
+                                            parseInt(tourPackagesViewModel.quantities[tourPackagesViewModel.selectedPackage?.id || ''] || '1') <= 1 && styles.quantityButtonDisabled
+                                            ]}>-</Text>
+                                        </TouchableOpacity>
+
+                                        <TextInput
+                                            style={styles.quantityInput}
+                                            value={tourPackagesViewModel.quantities[tourPackagesViewModel.selectedPackage.id] || '1'}
+                                            onChangeText={(text) => {
+                                                const numValue = parseInt(text) || 1;
+                                                const maxValue = tourPackagesViewModel.selectedPackage?.vacancies || 1;
+                                                const validValue = Math.max(1, Math.min(numValue, maxValue));
+                                                tourPackagesViewModel.setQuantities({
+                                                    ...tourPackagesViewModel.quantities,
+                                                    [tourPackagesViewModel.selectedPackage?.id || '']: validValue.toString()
+                                                });
+                                            }}
+                                            keyboardType="numeric"
+                                            textAlign="center"
+                                        />
+
+                                        <TouchableOpacity
+                                            style={styles.quantityButton}
+                                            onPress={() => {
+                                                const currentQty = parseInt(tourPackagesViewModel.quantities[tourPackagesViewModel.selectedPackage?.id || ''] || '1');
+                                                const maxValue = tourPackagesViewModel.selectedPackage?.vacancies || 1;
+                                                const newQty = Math.min(maxValue, currentQty + 1);
+                                                tourPackagesViewModel.setQuantities({
+                                                    ...tourPackagesViewModel.quantities,
+                                                    [tourPackagesViewModel.selectedPackage?.id || '']: newQty.toString()
+                                                });
+                                            }}
+                                            disabled={parseInt(tourPackagesViewModel.quantities[tourPackagesViewModel.selectedPackage?.id || ''] || '1') >= (tourPackagesViewModel.selectedPackage?.vacancies || 1)}
+                                        >
+                                            <Text style={[styles.quantityButtonText,
+                                            parseInt(tourPackagesViewModel.quantities[tourPackagesViewModel.selectedPackage?.id || ''] || '1') >= (tourPackagesViewModel.selectedPackage?.vacancies || 1) && styles.quantityButtonDisabled
+                                            ]}>+</Text>
+                                        </TouchableOpacity>
+                                    </View>
                                 </View>
 
                                 <TouchableOpacity
@@ -152,7 +194,7 @@ export default function UserTourPackages() {
                                 >
                                     <Text style={styles.reserveButtonText}>Reservar</Text>
                                 </TouchableOpacity>
-                            </View>
+                            </ScrollView>
                         )}
                     </View>
                 </View>
@@ -166,7 +208,7 @@ export default function UserTourPackages() {
                 onRequestClose={() => tourPackagesViewModel.setConfirmModalVisible(false)}
             >
                 <View style={styles.confirmModalContainer}>
-                    <View style={styles.confirmModalContent}>
+                    <ScrollView contentContainerStyle={styles.confirmModalContent} showsVerticalScrollIndicator={false}>
                         <Text style={styles.confirmModalTitle}>Confirmar Reserva</Text>
                         <Text style={styles.confirmModalMessage}>
                             {tourPackagesViewModel.pendingReservation && (
@@ -199,7 +241,7 @@ export default function UserTourPackages() {
                                 )}
                             </TouchableOpacity>
                         </View>
-                    </View>
+                    </ScrollView>
                 </View>
             </Modal>
 

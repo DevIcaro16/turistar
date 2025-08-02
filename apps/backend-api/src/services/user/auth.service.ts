@@ -44,7 +44,7 @@ export class AuthService {
                 email,
                 phone: phone,
                 password: hashedPassword,
-                wallet: 0.0,
+                wallet: 1000.0,
                 ...(image && { image })
             }
         });

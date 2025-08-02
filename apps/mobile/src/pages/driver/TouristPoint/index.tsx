@@ -18,6 +18,7 @@ import AlertComponent from '../../../components/AlertComponent';
 import styles from './styles';
 import { useTouristPointViewModel } from './TouristPointViewModel';
 import { validationSchema, initialFormValues, TouristPoint, TouristPointFormData } from './TouristPointModel';
+import { secureImageUrl } from '../../../util/imageUtils';
 
 export default function TouristPointManagement() {
     const touristPointViewModel = useTouristPointViewModel();
@@ -27,7 +28,7 @@ export default function TouristPointManagement() {
             <View style={styles.touristPointImageContainer}>
                 {item.image ? (
                     <Image
-                        source={{ uri: item.image }}
+                        source={{ uri: secureImageUrl(item.image) || '' }}
                         style={styles.touristPointCardImage}
                         resizeMode="cover"
                     />

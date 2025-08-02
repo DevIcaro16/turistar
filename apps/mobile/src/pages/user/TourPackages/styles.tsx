@@ -19,7 +19,7 @@ export default StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         marginBottom: 16,
-        gap: 8,
+        gap: 2,
     },
     filterInput: {
         flex: 1,
@@ -28,7 +28,8 @@ export default StyleSheet.create({
         borderColor: '#E5E5EA',
         borderRadius: 8,
         backgroundColor: '#fff',
-        paddingHorizontal: 12,
+        paddingHorizontal: 8,
+        maxWidth: 130,
         fontSize: 16,
     },
     pickerContainer: {
@@ -42,7 +43,7 @@ export default StyleSheet.create({
     },
     picker: {
         width: '100%',
-        height: 44,
+        height: 88,
     },
     listContainer: {
         paddingBottom: 16,
@@ -160,8 +161,11 @@ export default StyleSheet.create({
         backgroundColor: '#fff',
         borderRadius: 16,
         padding: 20,
+        height: '55%',
         width: '90%',
-        maxHeight: '80%',
+        maxHeight: '85%',
+        marginHorizontal: 20,
+        marginVertical: 40,
     },
     modalHeader: {
         flexDirection: 'row',
@@ -184,6 +188,7 @@ export default StyleSheet.create({
     },
     modalBody: {
         flex: 1,
+        minHeight: 200,
     },
     detailTitle: {
         fontSize: 20,
@@ -241,6 +246,29 @@ export default StyleSheet.create({
         paddingVertical: 8,
         fontSize: 16,
         backgroundColor: '#fff',
+        flex: 1,
+        textAlign: 'center',
+    },
+    quantityControls: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+    },
+    quantityButton: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: '#007AFF',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    quantityButtonText: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#fff',
+    },
+    quantityButtonDisabled: {
+        color: '#8E8E93',
     },
     reserveButton: {
         backgroundColor: '#007AFF',
@@ -267,6 +295,9 @@ export default StyleSheet.create({
         padding: 24,
         width: '85%',
         alignItems: 'center',
+        marginHorizontal: 20,
+        marginVertical: 40,
+        minHeight: 200,
     },
     confirmModalTitle: {
         fontSize: 20,

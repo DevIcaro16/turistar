@@ -25,7 +25,7 @@ export function formatDateTime(date: string | Date) {
 
 export default function DriverWalletViewModel() {
 
-    const { user } = useContext<any>(AuthContext);
+    const { user, updateUser } = useContext<any>(AuthContext);
     const [transactions, setTransactions] = useState<any[]>([]);
     const [totals, setTotals] = useState<any>({});
     const [loading, setLoading] = useState(true);
@@ -36,11 +36,24 @@ export default function DriverWalletViewModel() {
 
     useEffect(() => {
         fetchTransactions();
+        fetchWallet(); // Buscar wallet separadamente
         const interval = setInterval(() => {
             fetchTransactions();
         }, 20000);
         return () => clearInterval(interval);
     }, []);
+
+    const fetchWallet = async () => {
+        try {
+            const driverRes = await api.get('/driver/me');
+            if (driverRes.data.driver && driverRes.data.driver.wallet !== undefined) {
+                updateUser({ wallet: driverRes.data.driver.wallet });
+                console.log('Wallet inicial carregado:', driverRes.data.driver.wallet);
+            }
+        } catch (error) {
+            console.log('Erro ao buscar wallet inicial:', error);
+        }
+    };
 
     const fetchTransactions = async () => {
         setLoading(true);
@@ -108,6 +121,7 @@ export default function DriverWalletViewModel() {
         filterText,
         setFilterText,
         fetchTransactions,
+        fetchWallet,
         loading,
         totalsCredit,
         totalsPendant,

@@ -176,7 +176,7 @@ export default StyleSheet.create({
         backgroundColor: '#fff',
         borderRadius: 12,
         width: '90%',
-        maxHeight: '80%',
+        height: '80%',
     },
     modalHeader: {
         flexDirection: 'row',

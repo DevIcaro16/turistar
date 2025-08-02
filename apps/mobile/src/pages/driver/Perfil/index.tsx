@@ -9,6 +9,7 @@ import { Picker } from '@react-native-picker/picker';
 import { transportTypesPicker } from '../../../util/types/transportTypes';
 import { PerfilViewModel } from './PerfilViewModel';
 import { validationSchema, initialFormValues, ProfileFormData } from './PerfilModel';
+import { secureImageUrl, getDefaultAvatarUrl } from '../../../util/imageUtils';
 
 export default function Perfil() {
     const perfilViewModel = PerfilViewModel();
@@ -28,10 +29,8 @@ export default function Perfil() {
                     <TouchableOpacity onPress={perfilViewModel.editFields ? perfilViewModel.pickImage : undefined} style={styles.avatarCircle}>
                         {perfilViewModel.selectedImage ? (
                             <Image source={{ uri: perfilViewModel.selectedImage.uri }} style={{ width: 90, height: 90, borderRadius: 45 }} />
-                        ) : perfilViewModel.user.image ? (
-                            <Image source={{ uri: perfilViewModel.user.image }} style={{ width: 90, height: 90, borderRadius: 45 }} />
                         ) : (
-                            <MaterialIcons name="person" size={64} color="#fff" />
+                            <Image source={{ uri: secureImageUrl(perfilViewModel.user.image) || getDefaultAvatarUrl(perfilViewModel.user.name) }} style={{ width: 90, height: 90, borderRadius: 45 }} />
                         )}
                         {perfilViewModel.editFields && (
                             <View style={{ position: 'absolute', bottom: 0, right: 0, backgroundColor: '#007AFF', borderRadius: 12, padding: 4 }}>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, Modal, Image } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, Modal, Image, ScrollView } from 'react-native';
 import styles from './styles';
 import AlertComponent from '../../../components/AlertComponent';
 import { useReservationsViewModel, formatDateTime } from './ReservationsViewModel';
@@ -81,7 +81,7 @@ export default function UserReservations() {
                         </View>
 
                         {reservationsViewModel.selectedReservation && (
-                            <View style={styles.modalBody}>
+                            <ScrollView style={styles.modalBody} showsVerticalScrollIndicator={true}>
                                 <Text style={styles.detailTitle}>{reservationsViewModel.selectedReservation.tourPackage.title}</Text>
                                 <Text style={styles.detailRoute}>
                                     {reservationsViewModel.selectedReservation.tourPackage.origin_local} → {reservationsViewModel.selectedReservation.tourPackage.destiny_local}
@@ -126,7 +126,7 @@ export default function UserReservations() {
                                         </>
                                     )}
                                 </View>
-                            </View>
+                            </ScrollView>
                         )}
                     </View>
                 </View>
@@ -140,7 +140,7 @@ export default function UserReservations() {
                 onRequestClose={() => reservationsViewModel.setConfirmModalVisible(false)}
             >
                 <View style={styles.confirmModalContainer}>
-                    <View style={styles.confirmModalContent}>
+                    <ScrollView contentContainerStyle={styles.confirmModalContent} showsVerticalScrollIndicator={true}>
                         <Text style={styles.confirmModalTitle}>
                             {reservationsViewModel.confirmAction === 'confirm' ? 'Confirmar Pagamento' : 'Cancelar Reserva'}
                         </Text>
@@ -171,7 +171,7 @@ export default function UserReservations() {
                                 )}
                             </TouchableOpacity>
                         </View>
-                    </View>
+                    </ScrollView>
                 </View>
             </Modal>
 
