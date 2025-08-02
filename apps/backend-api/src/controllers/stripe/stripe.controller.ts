@@ -3,9 +3,6 @@ import { Request, Response, NextFunction } from 'express';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2025-06-30.basil' });
 
-// Log temporário para verificar a chave (remover depois)
-console.log('🔑 Stripe Secret Key:', process.env.STRIPE_SECRET_KEY?.substring(0, 20) + '...');
-
 export const createPaymentIntent = async (req: Request, res: Response, next: NextFunction) => {
     try {
 

@@ -16,6 +16,7 @@ expo-env.d.ts
 config.json
 secrets.json
 app.config.ts
+app.config.example.ts
 
 # Logs
 *.log
