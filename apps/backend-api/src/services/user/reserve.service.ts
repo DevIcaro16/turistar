@@ -138,9 +138,9 @@ export class ReserveService {
             throw new ValidationError("Não é possível confirmar uma reserva para uma viagem que já passou!");
         }
 
-        if (userExisting.wallet < reserveIdExisting.amount) {
-            throw new ValidationError("Saldo insuficiente na carteira virtual para confirmar esta reserva!");
-        }
+        // if (userExisting.wallet < reserveIdExisting.amount) {
+        //     throw new ValidationError("Saldo insuficiente na carteira virtual para confirmar esta reserva!");
+        // }
 
         //UPDATES
 
