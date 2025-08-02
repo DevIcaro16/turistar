@@ -21,6 +21,8 @@ export const secureImageUrl = (imageUrl: string | null | undefined): string | nu
         return imageUrl.replace('http://', 'https://');
     }
 
+
+
     // Se não tem protocolo, adiciona HTTPS
     if (!imageUrl.startsWith('http')) {
         return `https://${imageUrl}`;
