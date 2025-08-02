@@ -9,6 +9,7 @@ export const secureImageUrl = (imageUrl: string | null | undefined): string | nu
 
     if (!imageUrl.startsWith('http://') && !imageUrl.startsWith('https://')) {
         return null;
+
     }
 
     // Se já é HTTPS, retorna como está
