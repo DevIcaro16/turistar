@@ -21,6 +21,7 @@ export const getConfig = (): AppConfig => {
         frontedApi: extra.frontedApi || 'https://www.turistarturismo.shop/',
         stripePublishableKey: extra.stripePublishableKey || '',
         stripeSecretKey: extra.stripeSecretKey || ''
+
     };
 };
 
